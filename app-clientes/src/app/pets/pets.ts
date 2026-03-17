@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import {
-    PoAvatarModule,
-    PoButtonModule,
-    PoDividerModule,
-    PoPageModule,
-    PoTagModule,
-    PoTagType,
-    PoWidgetModule,
+  PoAvatarModule,
+  PoButtonModule,
+  PoDividerModule,
+  PoPageModule,
+  PoTagModule,
+  PoTagType,
+  PoWidgetModule,
 } from '@po-ui/ng-components';
 
 interface PetPost {
@@ -50,11 +50,8 @@ export class Pets {
 
   readonly stories: PetStory[] = [
     { nome: 'Thor', src: 'https://placedog.net/96/96?id=1', novo: true },
-    { nome: 'Luna', src: 'https://placekitten.com/96/96', novo: true },
     { nome: 'Bolt', src: 'https://placedog.net/96/96?id=10', novo: true },
-    { nome: 'Mia', src: 'https://placekitten.com/97/97', novo: false },
     { nome: 'Rex', src: 'https://placedog.net/96/96?id=20', novo: false },
-    { nome: 'Bela', src: 'https://placekitten.com/95/95', novo: true },
     { nome: 'Max', src: 'https://placedog.net/96/96?id=30', novo: false },
   ];
 
@@ -74,20 +71,6 @@ export class Pets {
       curtido: false,
     },
     {
-      id: 2,
-      petName: 'Luna',
-      ownerName: 'Carlos Mendes',
-      avatarSrc: 'https://placekitten.com/64/64',
-      photoSrc: 'https://placekitten.com/600/400',
-      descricao: 'Luna encontrou um raio de sol e resolveu tirar uma soneca 😸',
-      especie: 'gato',
-      raca: 'Siamês',
-      curtidas: 98,
-      comentarios: 15,
-      hashtags: ['#luna', '#gatosiames', '#sono'],
-      curtido: true,
-    },
-    {
       id: 3,
       petName: 'Bolt',
       ownerName: 'Fernanda Costa',
@@ -99,20 +82,6 @@ export class Pets {
       curtidas: 215,
       comentarios: 42,
       hashtags: ['#bolt', '#bordercollie', '#praia'],
-      curtido: false,
-    },
-    {
-      id: 4,
-      petName: 'Mia',
-      ownerName: 'Roberto Lima',
-      avatarSrc: 'https://placekitten.com/66/66',
-      photoSrc: 'https://placekitten.com/601/401',
-      descricao: 'Mia aprendeu um truque novo hoje! Tão inteligente 🎉',
-      especie: 'gato',
-      raca: 'Maine Coon',
-      curtidas: 77,
-      comentarios: 9,
-      hashtags: ['#mia', '#mainecoon', '#truque'],
       curtido: false,
     },
     {
@@ -155,20 +124,6 @@ export class Pets {
       curtidas: 134,
       comentarios: 28,
       hashtags: ['#kiwi', '#calopsita', '#talentos'],
-      curtido: false,
-    },
-    {
-      id: 8,
-      petName: 'Bela',
-      ownerName: 'Luana Ferreira',
-      avatarSrc: 'https://placekitten.com/65/65',
-      photoSrc: 'https://placekitten.com/602/402',
-      descricao: 'Bela na janela novamente, eternamente curiosa sobre o mundo lá fora 🌍',
-      especie: 'gato',
-      raca: 'Ragdoll',
-      curtidas: 112,
-      comentarios: 18,
-      hashtags: ['#bela', '#ragdoll', '#janela'],
       curtido: false,
     },
     {
