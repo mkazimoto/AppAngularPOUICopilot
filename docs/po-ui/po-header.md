@@ -102,6 +102,8 @@ Passando os itens diretamente para o `po-header` pela propriedade `p-menus`:
 
 ---
 
+**`p-amount-more`**
+
 @optional
 
 @description
@@ -113,6 +115,8 @@ Essa propriedade possibilita a escolha de quantos itens estarão dentro do botã
 
 ---
 
+**`p-hide-button-menu`**
+
 @optional
 
 @description
@@ -121,6 +125,8 @@ Esconde o botão de menu colapsado.
 
 ---
 
+**`p-filter-menu`**
+
 @optional
 
 @description
@@ -128,6 +134,8 @@ Esconde o botão de menu colapsado.
 Habilita campo para filtrar itens no menu
 
 ---
+
+**`p-brand`**
 
 @optional
 
@@ -139,6 +147,8 @@ Caso seja enviada uma string, apenas o logo sera mostrado com o valor da string 
 
 ---
 
+**`p-actions-tools`**
+
 @optional
 
 @description
@@ -149,6 +159,8 @@ Propriedade para configurar a seção de tools do `po-header`
 
 ---
 
+**`p-header-user`**
+
 @optional
 
 @description
@@ -156,6 +168,8 @@ Propriedade para configurar a seção de tools do `po-header`
 Propriedade para configurar a seção de headerUser do `po-header`
 
 ---
+
+**`p-menu-items`**
 
 @optional
 
@@ -168,6 +182,8 @@ Cada item pode receber uma label e uma ação
 
 ---
 
+**`p-menus`**
+
 @optional
 
 @description
@@ -178,6 +194,8 @@ Lista dos itens do menu. Se o valor estiver indefinido ou inválido, será inici
 
 ---
 
+**`p-header-template`**
+
 @optional
 
 @description
@@ -185,6 +203,8 @@ Lista dos itens do menu. Se o valor estiver indefinido ou inválido, será inici
 Template customiado que será renderizado após os itens definidos na propriedade `p-menu-items`
 
 ---
+
+**`p-literals`**
 
 @optional
 
@@ -213,6 +233,8 @@ E para carregar as literais customizadas, basta apenas passar o objeto para o co
 [`PoI18nService`](/documentation/po-i18n) ou do browser.
 
 ---
+
+**`p-colapsed-menu`**
 
 @optional
 

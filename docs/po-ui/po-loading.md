@@ -9,6 +9,14 @@ ou aguardando a resposta de alguma requisição.
 
 ---
 
+**`p-text`**
+
+Texto a ser exibido no componente.
+
+---
+
+**`p-size`**
+
 Define o tamanho do ícone.
 Valores válidos:
  - `xs`: 16px

@@ -46,6 +46,18 @@ Algumas diretrizes de acessibilidade já são tratadas no componente, internamen
 
 ---
 
+**`p-action`**
+
+@optional
+
+@description
+
+Ação para a notificação.
+
+---
+
+**`p-action-label`**
+
 @optional
 
 @description
@@ -54,6 +66,8 @@ Label do botão quando houver uma ação definida.
 
 ---
 
+**`p-message`**
+
 @optional
 
 @description
@@ -61,6 +75,8 @@ Label do botão quando houver uma ação definida.
 Mensagem a ser exibida na notificação.
 
 ---
+
+**`p-hide`**
 
 @optional
 
@@ -72,6 +88,8 @@ Define se o Toaster esta invisivel.
 
 ---
 
+**`p-hide-change`**
+
 @optional
 
 @description
@@ -79,6 +97,8 @@ Define se o Toaster esta invisivel.
 Evento emitido quando o valor de `isHide` é alterado.
 
 ---
+
+**`p-show-close`**
 
 @optional
 
@@ -89,6 +109,8 @@ Exibe botão de fechar no toaster modo inline.
 @default `true`
 
 ---
+
+**`p-size-actions`**
 
 @optional
 
@@ -105,6 +127,8 @@ Para mais detalhes, consulte a documentação do [po-theme](https://po-ui.io/doc
 
 ---
 
+**`p-support-message`**
+
 @optional
 
 @description
@@ -112,6 +136,8 @@ Para mais detalhes, consulte a documentação do [po-theme](https://po-ui.io/doc
 Mensagem de suporte a ser exibida na notificação.
 
 ---
+
+**`p-type`**
 
 @optional
 

@@ -37,15 +37,33 @@ o componente [`PoModalFooter`](/documentation/po-modal-footer).
 
 ---
 
+**`p-title`**
+
+Título da modal.
+
+---
+
+**`p-close`**
+
+Evento disparado ao fechar o modal.
+
+---
+
+**`p-primary-action`**
+
 Deve ser definido um objeto que implementa a interface `PoModalAction` contendo a label e a função da primeira ação.
 Caso esta propriedade não seja definida ou esteja incompleta, automaticamente será adicionado um botão de ação com
 a função de fechar a modal.
 
 ---
 
+**`p-secondary-action`**
+
 Deve ser definido um objeto que implementa a interface `PoModalAction` contendo a label e a função da segunda ação.
 
 ---
+
+**`p-size`**
 
 Define o tamanho da modal.
 
@@ -61,10 +79,14 @@ Caso não seja informado um valor, a modal terá o tamanho definido como `md`.
 
 ---
 
+**`p-click-out`**
+
 Define o fechamento da modal ao clicar fora da mesma.
 Informe o valor `true` para ativar o fechamento ao clicar fora da modal.
 
 ---
+
+**`p-components-size`**
 
 @optional
 
@@ -81,6 +103,8 @@ Para mais detalhes, consulte a documentação do [po-theme](https://po-ui.io/doc
 
 ---
 
+**`p-hide-close`**
+
 @optional
 
 @description
@@ -92,6 +116,8 @@ Oculta o ícone de fechar do cabeçalho da modal.
 @default `false`
 
 ---
+
+**`p-icon`**
 
 @optional
 

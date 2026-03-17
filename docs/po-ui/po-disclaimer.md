@@ -10,14 +10,26 @@ como por exemplo, no po-multi-select.
 
 ---
 
+**`p-label`**
+
 Label que aparecerá dentro do po-disclaimer.
 Quando não for definido um label será apresentada a propriedade p-value.
 
 ---
 
+**`p-value`**
+
+Valor do po-disclaimer.
+
+---
+
+**`p-property`**
+
 Nome da propriedade vinculada à este po-disclaimer.
 
 ---
+
+**`p-close-action`**
 
 @optional
 
@@ -28,6 +40,8 @@ Para este evento será passado como parâmetro um objeto com value, label e prop
 
 ---
 
+**`p-hide-close`**
+
 @description
 
 Esta propriedade esconde o botão para fechamento do po-disclaimer, ao utilizar esta propriedade
@@ -36,6 +50,8 @@ sem passar valor a mesma é setada como false, onde o botão de fechamento está
 @default false
 
 ---
+
+**`p-type`**
 
 @description
 

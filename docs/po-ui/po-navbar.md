@@ -12,6 +12,8 @@ Ao utilizar Navbar com Menu e ambos tiverem logo, será mantido o logo do Navbar
 
 ---
 
+**`p-icon-actions`**
+
 @deprecated v23.x.x
 
 @optional
@@ -22,6 +24,8 @@ Define uma lista de ações apresentadas em ícones no lado direito do `po-navba
 
 ---
 
+**`p-items`**
+
 @deprecated v23.x.x
 
 @optional
@@ -31,6 +35,8 @@ Define uma lista de ações apresentadas em ícones no lado direito do `po-navba
 Define uma lista de items do `po-navbar`.
 
 ---
+
+**`p-literals`**
 
 @deprecated v23.x.x
 
@@ -61,6 +67,8 @@ E para carregar as literais customizadas, basta apenas passar o objeto para o co
 
 ---
 
+**`p-logo`**
+
 @deprecated v23.x.x
 
 @optional
@@ -70,6 +78,8 @@ E para carregar as literais customizadas, basta apenas passar o objeto para o co
 Define a logo apresentada `po-navbar`.
 
 ---
+
+**`p-logo-alt`**
 
 @deprecated v23.x.x
 
@@ -85,6 +95,8 @@ Define o texto alternativo para a logomarca.
 @default `Logomarca início`
 
 ---
+
+**`p-shadow`**
 
 @deprecated v23.x.x
 

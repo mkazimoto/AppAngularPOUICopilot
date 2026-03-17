@@ -14,6 +14,8 @@ O componente também possui eventos disparados ao marcar/desmarcar e expandir/co
 
 ---
 
+**`p-collapsed`**
+
 @optional
 
 @description
@@ -23,6 +25,8 @@ Ação que será disparada ao colapsar um item.
 > Como parâmetro o componente envia o item colapsado.
 
 ---
+
+**`p-expanded`**
 
 @optional
 
@@ -34,6 +38,8 @@ Ação que será disparada ao expandir um item.
 
 ---
 
+**`p-selected`**
+
 @optional
 
 @description
@@ -44,6 +50,8 @@ Ação que será disparada ao selecionar um item.
 
 ---
 
+**`p-unselected`**
+
 @optional
 
 @description
@@ -53,6 +61,8 @@ Ação que será disparada ao desfazer a seleção de um item.
 > Como parâmetro o componente envia o item que foi desmarcado.
 
 ---
+
+**`p-components-size`**
 
 @optional
 
@@ -69,9 +79,13 @@ Para mais detalhes, consulte a documentação do [po-theme](https://po-ui.io/doc
 
 ---
 
+**`p-items`**
+
 Lista de itens do tipo `PoTreeViewItem` que será renderizada pelo componente.
 
 ---
+
+**`p-selectable`**
 
 @optional
 
@@ -83,6 +97,8 @@ Habilita uma caixa de seleção para selecionar e/ou desmarcar um item da lista.
 
 ---
 
+**`p-single-select`**
+
 @optional
 
 @description
@@ -92,6 +108,8 @@ Habilita a seleção para item único atráves de po-radio.
 @default false
 
 ---
+
+**`p-max-level`**
 
 @optional
 

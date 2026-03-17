@@ -10,6 +10,8 @@ Permite a exibição de ícones.
 
 ---
 
+**`p-icon`**
+
 Define o ícone a ser exibido.
 
 É possível usar qualquer um dos ícones da [Biblioteca de ícones](https://po-ui.io/icons). conforme exemplo abaixo:

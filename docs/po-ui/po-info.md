@@ -1,11 +1,27 @@
 # po-info
 
+**`p-label`**
+
+Valor do rótulo a ser exibido.
+
+---
+
+**`p-url`**
+
 Ao informar uma URL, o conteúdo será exibido na forma de um *link* e ao ser clicado será redirecionado para a URL informada.
 
 > Caso informar `http://` será aberto uma nova aba.
 Caso informar um caminho relativo, exemplo: `/customers`, será aberto na aba atual.
 
 ---
+
+**`p-value`**
+
+Valor do conteúdo a ser exibido.
+
+---
+
+**`p-label-size`**
 
 @optional
 
@@ -21,6 +37,8 @@ Valores válidos:
 
 ---
 
+**`p-orientation`**
+
 @optional
 
 @description
@@ -32,6 +50,8 @@ Define o layout de exibição.
 @default `vertical`
 
 ---
+
+**`p-size`**
 
 @optional
 

@@ -39,6 +39,8 @@
 
 ---
 
+**`p-size`**
+
 @optional
 
 @description

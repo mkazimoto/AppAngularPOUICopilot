@@ -1,5 +1,7 @@
 # po-chart
 
+**`t-id`**
+
 @description
 
 O `po-chart` é um componente para renderização de dados através de gráficos, com isso facilitando a compreensão e tornando a
@@ -60,17 +62,29 @@ informando em qual caso utilizar, o que devemos evitar e boas práticas relacion
 
 ---
 
+**`p-title`**
+
+Define o título do gráfico.
+
+---
+
+**`p-series`**
+
 @description
 
 Define os elementos do gráfico que serão criados dinamicamente.
 
 ---
 
+**`p-value-gauge-multiple`**
+
 @description
 
 Define o valor do gráfico do tipo `Gauge` quando utliza as propriedades `From` `To`.
 
 ---
+
+**`p-categories`**
 
 @optional
 
@@ -91,6 +105,8 @@ e demais opções específicas do gráfico `Radar`.
 
 ---
 
+**`p-custom-actions`**
+
 @optional
 
 @description
@@ -98,6 +114,8 @@ e demais opções específicas do gráfico `Radar`.
 Essa propriedade permite que o desenvolvedor adicione ações customizadas no popup do header, oferecendo mais flexibilidade e controle sobre as interações do componente.
 
 ---
+
+**`p-options`**
 
 @optional
 
@@ -120,6 +138,8 @@ configurar os eixos(*axis*) para os gráficos dos tipos `area`, `line`, `column`
 ```
 
 ---
+
+**`p-data-label`**
 
 @optional
 
@@ -144,6 +164,8 @@ dataLabel: PoChartDataLabel = {
 
 ---
 
+**`p-height`**
+
 @optional
 
 @description
@@ -155,6 +177,8 @@ Define a altura do gráfico em px.
 @default `400`
 
 ---
+
+**`p-type`**
 
 @optional
 
@@ -173,6 +197,8 @@ Se não passado valor, o padrão será relativo à primeira série passada em `p
 > Veja os valores válidos no *enum* `PoChartType`.
 
 ---
+
+**`p-literals`**
 
 @optional
 
@@ -201,6 +227,8 @@ E para carregar a literal customizada, basta apenas passar o objeto para o compo
 
 ---
 
+**`p-series-click`**
+
 @optional
 
 @description
@@ -213,6 +241,8 @@ O evento emitirá o seguinte parâmetro:
 - *area*, *line*, *column* e *bar*: um objeto contendo o nome da série, valor e categoria do eixo do gráfico.
 
 ---
+
+**`p-series-hover`**
 
 @optional
 
@@ -263,3 +293,114 @@ O evento emitirá o seguinte parâmetro de acordo com o tipo de gráfico:
  <file name="sample-po-chart-technology-skill/sample-po-chart-technology-skill.component.html"> </file>
  <file name="sample-po-chart-technology-skill/sample-po-chart-technology-skill.component.ts"> </file>
 </example>
+
+---
+
+### Enum `PoChartLabelFormat`
+
+/**
+@usedBy PoChartComponent
+
+@description
+
+*Enum* `PoChartLabelFormat` para especificação dos tipos de formatação do eixo de valor no gráfico.
+/
+
+### Enum `PoChartType`
+
+/**
+@usedBy PoChartComponent
+
+@description
+
+*Enum* `PoChartType` para especificação dos tipos de gráficos.
+/
+
+
+
+---
+
+### Interface `PoChartAxisOptions`
+
+/**
+@usedBy PoChartComponent
+
+@description
+
+*Interface* que define os eixos do grid.
+/
+
+### Interface `PoChartHeaderOptions`
+
+/**
+@usedBy PoChartComponent
+
+@description
+
+*Interface* para configuração das ações disponíveis no cabeçalho.
+/
+
+### Interface `PoChartIndicatorOptions`
+
+/**
+@usedBy PoChartComponent
+
+@description
+
+Interface para configurações dos indicadores do gráfico `radar`.
+/
+
+
+
+### Interface `PoChartLiterals`
+
+/**
+@usedBy PoChartComponent
+
+@description
+
+Interface para definição dos literais usadas no `po-chart`.
+/
+
+### Interface `PoChartOptions`
+
+/**
+@usedBy PoChartComponent
+
+@description
+
+*Interface* para configurações dos elementos do gráfico.
+/
+
+### Interface `PoChartRadarOptions`
+
+/**
+@usedBy PoChartComponent
+
+@description
+
+*Interface* para configurações do gráfico `radar`.
+/
+
+### Interface `PoChartDataLabel`
+
+/**
+@usedBy PoChartComponent
+
+@description
+
+Interface que define as propriedades de exibição dos rótulos das séries no `po-chart`.
+
+/
+
+### Interface `PoChartSerie`
+
+/**
+@usedBy PoChartComponent
+
+@description
+
+Interface das series dinâmicas do `po-chart` que possibilita desenhar gráficos dos tipos `area`, `bar`, `column`, `line`, `donut`, `pie` e `radar`
+/
+
+- `label: string` — Rótulo referência da série.

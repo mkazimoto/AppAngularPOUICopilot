@@ -55,6 +55,8 @@ Seu uso é recomendado para informações que necessitem de destaque em forma de
 
 ---
 
+**`p-label`**
+
 @optional
 
 @description
@@ -62,6 +64,8 @@ Seu uso é recomendado para informações que necessitem de destaque em forma de
 Define uma legenda que será exibida acima ou ao lado da *tag*, de acordo com a `p-orientation`.
 
 ---
+
+**`p-removable`**
 
 @optional
 
@@ -72,6 +76,8 @@ Habilita a opção de remover a tag
 @default `false`
 
 ---
+
+**`p-disabled`**
 
 @optional
 
@@ -84,6 +90,14 @@ Desabilita o `po-tag` e não permite que o usuário interaja com o mesmo.
 
 ---
 
+**`p-value`**
+
+Texto da tag.
+
+---
+
+**`p-click`**
+
 @optional
 
 @description
@@ -94,6 +108,8 @@ O evento de click só funciona se a tag não for removível.
 
 ---
 
+**`p-close`**
+
 @optional
 
 @description
@@ -101,6 +117,8 @@ O evento de click só funciona se a tag não for removível.
 Ação que sera executada quando clicar sobre o ícone de remover no `po-tag`
 
 ---
+
+**`p-color`**
 
 @optional
 
@@ -132,6 +150,8 @@ Valores válidos:
 
 ---
 
+**`p-text-color`**
+
 @optional
 
 @description
@@ -160,6 +180,8 @@ Valores válidos:
 > **Atenção:** A propriedade `p-type` sobrepõe esta definição.
 
 ---
+
+**`p-icon`**
 
 @optional
 
@@ -195,6 +217,8 @@ Outra opção seria a customização do ícone através do `TemplateRef`, confor
 
 ---
 
+**`p-orientation`**
+
 @optional
 
 @description
@@ -204,6 +228,8 @@ Define o *layout* de exibição.
 @default `vertical`
 
 ---
+
+**`p-type`**
 
 @optional
 
@@ -223,6 +249,8 @@ Valores válidos:
 @default `info`
 
 ---
+
+**`p-literals`**
 
 @optional
 

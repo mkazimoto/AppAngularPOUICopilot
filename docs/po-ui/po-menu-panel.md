@@ -10,9 +10,13 @@ itens de menu como textos, links para redirecionamento, ações e ícones.
 
 ---
 
+**`p-menus`**
+
 Lista dos itens do `po-menu-panel`. Se o valor estiver indefinido ou inválido, será inicializado como um array vazio.
 
 ---
+
+**`p-logo`**
 
 @optional
 
@@ -24,6 +28,8 @@ Caminho para a logomarca localizada na parte superior do menu.
 > Caso seja indefinida será aplicada a imagem default do PO UI.
 
 ---
+
+**`p-logo-alt`**
 
 Define o texto alternativo para a logomarca.
 

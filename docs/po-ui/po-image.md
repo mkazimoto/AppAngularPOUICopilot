@@ -28,6 +28,8 @@ As boas práticas de acessibilidade variam de acordo com tipo da imagem, que pod
 
 ---
 
+**`p-height`**
+
 @optional
 
 @description
@@ -37,6 +39,8 @@ atribui o tamanho da imagem
 
 ---
 
+**`p-alt`**
+
 @optional
 
 @description
@@ -44,6 +48,8 @@ atribui o tamanho da imagem
 Defini o texto alternativo descrevendo a imagem.
 
 ---
+
+**`p-src`**
 
 @optional
 
@@ -53,6 +59,8 @@ Fonte da imagem que pode ser um caminho local (`./assets/images/logo-black-small
 ou um servidor externo (`https://po-ui.io/assets/images/logo-black-small.png`).
 
 ---
+
+**`p-priority`**
 
 @optional
 
@@ -69,6 +77,8 @@ Defini a prioridade de carregamento da imagem.
 @default `false`
 
 ---
+
+**`p-loading`**
 
 @optional
 

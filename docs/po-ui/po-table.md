@@ -51,6 +51,8 @@ completa visualização dos dados.
 
 ---
 
+**`p-hide-columns-manager`**
+
 @optional
 
 @description
@@ -61,6 +63,8 @@ Permite que o gerenciador de colunas, responsável pela definição de quais col
 
 ---
 
+**`p-hide-batch-actions`**
+
 @optional
 
 @description
@@ -70,6 +74,8 @@ Permite que as ações em lote, responsável por excluir e exibir a quantidade d
 @default `true`
 
 ---
+
+**`p-text-wrap`**
 
 @optional
 
@@ -85,6 +91,8 @@ leitura clara.
 
 ---
 
+**`p-hide-action-fixed-columns`**
+
 @optional
 
 @description
@@ -94,6 +102,8 @@ Permite que as ações para fixar uma coluna da tabela sejam escondidas.
 @default `false`
 
 ---
+
+**`p-hide-table-search`**
 
 @optional
 
@@ -105,6 +115,8 @@ Permite que o campo de pesquisa seja escondido.
 
 ---
 
+**`p-auto-collapse`**
+
 @optional
 
 @description
@@ -115,6 +127,8 @@ Permite fechar um detalhe ou row template automaticamente, ao abrir outro item.
 
 ---
 
+**`p-loading-show-more`**
+
 @optional
 
 @description
@@ -124,6 +138,8 @@ Permite que seja adicionado o estado de carregamento no botão "Carregar mais re
 @default `false`
 
 ---
+
+**`p-sort`**
 
 @optional
 
@@ -136,6 +152,8 @@ mesma deve respeitar os tipos de entrada definidos para que sejam ordenadas.
 
 ---
 
+**`p-show-more-disabled`**
+
 @description
 
 Se verdadeiro, torna habilitado o botão "Carregar mais resultados".
@@ -143,6 +161,8 @@ Se verdadeiro, torna habilitado o botão "Carregar mais resultados".
 @default `false`
 
 ---
+
+**`p-striped`**
 
 @description
 
@@ -152,6 +172,8 @@ Habilita ou desabilita o estilo listrado da tabela (`striped`).
 @default `false`
 
 ---
+
+**`p-hide-select-all`**
 
 @description
 
@@ -163,6 +185,8 @@ Esconde o *checkbox* para seleção de todas as linhas.
 
 ---
 
+**`p-single-select`**
+
 @description
 
 Define que somente uma linha da tabela pode ser selecionada.
@@ -170,6 +194,8 @@ Define que somente uma linha da tabela pode ser selecionada.
 > Esta definição não se aplica aos itens filhos, os mesmos possuem comportamento independente do item pai.
 
 ---
+
+**`p-selectable-entire-line`**
 
 @description
 
@@ -181,6 +207,8 @@ Permite selecionar um item da tabela clicando na linha.
 
 ---
 
+**`p-actions-right`**
+
 @optional
 
 @description
@@ -190,6 +218,8 @@ Define que a coluna de ações ficará no lado direito da tabela.
 @default `false`
 
 ---
+
+**`p-max-columns`**
 
 @optional
 
@@ -202,6 +232,8 @@ desabilitadas e caso houver mais colunas visíveis do que o permitido, as excede
 serão ignoradas por ordem de posição.
 
 ---
+
+**`p-filter-type`**
 
 @optional
 
@@ -216,6 +248,8 @@ Valores definidos no enum: PoSearchFilterMode
 
 ---
 
+**`p-all-selected`**
+
 @optional
 
 @description
@@ -223,12 +257,16 @@ Evento executado quando todas as linhas são selecionadas por meio do *checkbox*
 
 ---
 
+**`p-all-unselected`**
+
 @optional
 
 @description
 Evento executado quando a seleção das linhas é desmarcada por meio do *checkbox* que seleciona todas as linhas.
 
 ---
+
+**`p-collapsed`**
 
 @optional
 
@@ -240,6 +278,8 @@ Evento executado ao colapsar uma linha do `po-table`.
 
 ---
 
+**`p-expanded`**
+
 @optional
 
 @description
@@ -249,6 +289,8 @@ Evento executado ao expandir uma linha do `po-table`.
 > Como parâmetro o componente envia o item expandido.
 
 ---
+
+**`p-delete-items`**
 
 @optional
 
@@ -268,6 +310,8 @@ Evento executado após o método de exclusão ser finalizado.
 
 ---
 
+**`p-selected`**
+
 @optional
 
 @description
@@ -275,6 +319,8 @@ Evento executado após o método de exclusão ser finalizado.
 Evento executado ao selecionar uma linha do `po-table`.
 
 ---
+
+**`p-show-more`**
 
 @optional
 
@@ -290,6 +336,8 @@ Recebe um objeto `{ column, type }` onde:
 
 ---
 
+**`p-sort-by`**
+
 @optional
 
 @description
@@ -303,12 +351,16 @@ Recebe um objeto `{ column, type }` onde:
 
 ---
 
+**`p-unselected`**
+
 @optional
 
 @description
 Evento executado ao desmarcar a seleção de uma linha do `po-table`.
 
 ---
+
+**`p-change-visible-columns`**
 
 @optional
 
@@ -320,6 +372,8 @@ Por exemplo: ["idCard", "name", "hireStatus", "age"].
 
 ---
 
+**`p-restore-column-manager`**
+
 @optional
 
 @description
@@ -329,6 +383,8 @@ O componente envia como parâmetro um array de string com as colunas configurada
 Por exemplo: ["idCard", "name", "hireStatus", "age"].
 
 ---
+
+**`p-components-size`**
 
 @optional
 
@@ -345,12 +401,16 @@ Para mais detalhes, consulte a documentação do [po-theme](https://po-ui.io/doc
 
 ---
 
+**`p-items`**
+
 @description
 
 Lista de itens da tabela.
 > Se falso, será inicializado como um *array* vazio.
 
 ---
+
+**`p-columns`**
 
 @optional
 
@@ -361,6 +421,8 @@ Por padrão receberá como valor a primeira coluna da lista de itens da tabela.
 > Caso não encontre valor, a mensagem 'Nenhuma definição de colunas' será exibida.
 
 ---
+
+**`p-container`**
 
 @optional
 
@@ -374,6 +436,8 @@ Adiciona um contorno arredondado ao `po-table`, as opções são:
 
 ---
 
+**`p-param-delete-api`**
+
 @optional
 
 @description
@@ -386,6 +450,8 @@ Adiciona o parâmetro a ser enviado para a requisição de DELETE.
 
 ---
 
+**`p-height`**
+
 @optional
 
 @description
@@ -396,6 +462,8 @@ Ao utilizar essa propriedade será inserido o `virtual-scroll` na tabela melhora
 
 ---
 
+**`p-hide-detail`**
+
 @optional
 
 @description
@@ -405,6 +473,8 @@ Habilita a visualização da lista de detalhes de cada linha da coluna.
 @default `false`
 
 ---
+
+**`p-literals`**
 
 @optional
 
@@ -456,6 +526,8 @@ E para carregar as literais customizadas, basta apenas passar o objeto para o co
 
 ---
 
+**`p-loading`**
+
 @optional
 
 @description
@@ -465,6 +537,8 @@ Bloqueia a interação do usuário com os dados da _table_.
 @default `false`
 
 ---
+
+**`p-actions`**
 
 @optional
 
@@ -480,6 +554,8 @@ se encarrega de agrupá-las exibindo o ícone [**an an-dots-three**](https://po-
  - tenha uma única ação e a mesma não for visível.
 
 ---
+
+**`p-selectable`**
 
 @optional
 
@@ -497,6 +573,8 @@ está selecionada, por exemplo: `item.$selected` ou `item['$selected']`.
 
 ---
 
+**`p-infinite-scroll`**
+
 @optional
 
 @description
@@ -511,6 +589,8 @@ executará a função `p-show-more`.
 
 ---
 
+**`p-infinite-scroll-distance`**
+
 @optional
 
 @description
@@ -522,6 +602,8 @@ que 0, o valor padrão será 100%
  - p-infinite-scroll-distance = 80: Quando atingir 80%  do scroll da tabela, o `p-show-more` será disparado.
 
 ---
+
+**`p-service-api`**
 
 @optional
 
@@ -550,6 +632,8 @@ Caso utilizar ordenação, a coluna ordenada será enviada através do parâmetr
 
 ---
 
+**`p-service-delete`**
+
 @optional
 
 @description
@@ -562,6 +646,8 @@ Caso ela não seja utilizada, o parâmetro padrão a ser enviado será `id`.
 > Esta URL deve retornar e receber os dados no padrão de [API do PO UI](https://po-ui.io/guides/api).
 
 ---
+
+**`p-spacing`**
 
 @optional
 
@@ -580,6 +666,8 @@ permitidos são definidos pelo enum **PoTableColumnSpacing**.
 
 ---
 
+**`p-filtered-columns`**
+
 @optional
 
 @description
@@ -588,6 +676,8 @@ Define as colunas que serão filtradas no campo de pesquisa.
 Aceita um array de strings, representando as colunas específicas que serão consideradas na filtragem.
 
 ---
+
+**`p-draggable`**
 
 @optional
 
@@ -598,6 +688,8 @@ Habilita o modo drag and drop para as colunas da tabela.
 @default `false`
 
 ---
+
+**`p-virtual-scroll`**
 
 @optional
 

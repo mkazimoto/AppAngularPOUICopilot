@@ -61,6 +61,14 @@ Para funcionar corretamente é preciso adicionar a propriedade `p-popup-header-t
 
 ---
 
+**`p-actions`**
+
+Lista de ações que serão exibidas no componente.
+
+---
+
+**`p-hide-arrow`**
+
 @optional
 
 @description
@@ -70,6 +78,8 @@ Oculta a seta do componente *popup*.
 @default `false`
 
 ---
+
+**`p-position`**
 
 @optional
 
@@ -100,6 +110,8 @@ Posições válidas:
 
 ---
 
+**`p-custom-positions`**
+
 @optional
 
 @description
@@ -126,6 +138,8 @@ Posições válidas:
 
 ---
 
+**`p-size`**
+
 @optional
 
 @description
@@ -140,6 +154,8 @@ Para mais detalhes, consulte a documentação do [po-theme](https://po-ui.io/doc
 @default `medium`
 
 ---
+
+**`p-target`**
 
 @description
 

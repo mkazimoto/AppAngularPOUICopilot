@@ -59,6 +59,20 @@ export class AppModule { }
 
 ---
 
+**`p-label`**
+
+Adiciona um rótulo ao `dropdown`.
+
+---
+
+**`p-actions`**
+
+Lista de ações que serão exibidas no componente.
+
+---
+
+**`p-disabled`**
+
 @optional
 
 @description
@@ -68,6 +82,8 @@ Desabilita o campo.
 @default `false`
 
 ---
+
+**`p-size`**
 
 @optional
 

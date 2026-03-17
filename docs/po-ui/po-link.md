@@ -47,9 +47,25 @@ Algumas diretrizes de acessibilidade já são tratadas no componente, internamen
 
 ---
 
+**`p-label`**
+
+Valor do rótulo a ser exibido.
+
+---
+
+**`p-open-new-tab`**
+
 Indica se o link deverá ser aberto em uma nova aba. Sempre que utilizar essa propriedade, é importante informar isso ao usuário através da label.
 
 ---
+
+**`p-url`**
+
+Url que será aberta ao clicar no link.
+
+---
+
+**`p-action`**
 
 Ação que será executada quando o usuário clicar sobre o `po-link`.
 > Ao utilizar junto da propriedade `p-url` a ação será ignorada.

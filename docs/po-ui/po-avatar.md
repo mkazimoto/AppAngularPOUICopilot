@@ -10,10 +10,14 @@ layouts ricos e bem interessantes para os usuários, como por exemplo, uma lista
 
 ---
 
+**`p-src`**
+
 Fonte da imagem que pode ser um caminho local (`./assets/images/logo-black-small.png`)
 ou um servidor externo (`https://po-ui.io/assets/images/logo-black-small.png`).
 
 ---
+
+**`p-loading`**
 
 @optional
 
@@ -28,6 +32,14 @@ Valores válidos:
 @default `eager`
 
 ---
+
+**`p-click`**
+
+Evento disparado ao clicar na imagem do *avatar*.
+
+---
+
+**`p-size`**
 
 @optional
 

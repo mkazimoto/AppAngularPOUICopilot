@@ -14,6 +14,14 @@ basta pressionar a tecla *enter*. Esta funcionalidade não se aplica caso a prop
 
 ---
 
+**`p-title`**
+
+Título do grupo de *disclaimers*.
+
+---
+
+**`p-change`**
+
 @optional
 
 @description
@@ -21,6 +29,8 @@ basta pressionar a tecla *enter*. Esta funcionalidade não se aplica caso a prop
 Função que será disparada quando a lista de *disclaimers* for modificada.
 
 ---
+
+**`p-remove`**
 
 @optional
 
@@ -32,6 +42,8 @@ Recebe como parâmetro um objeto conforme a interface `PoDisclaimerGroupRemoveAc
 
 ---
 
+**`p-remove-all`**
+
 @optional
 
 @description
@@ -42,6 +54,8 @@ utilizando o botão "remover todos".
 Recebe como parâmetro uma lista contendo todos os `disclaimers` removidos.
 
 ---
+
+**`p-disclaimers`**
 
 @description
 
@@ -62,6 +76,8 @@ this.disclaimers = this.disclaimers.concat(disclaimer);
 ```
 
 ---
+
+**`p-hide-remove-all`**
 
 @optional
 

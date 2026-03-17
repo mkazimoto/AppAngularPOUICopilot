@@ -12,13 +12,19 @@ através da diretiva **[p-list-view-detail-template](/documentation/po-list-view
 
 ---
 
+**`p-property-link`**
+
 Recebe uma propriedade que será utilizada para recuperar o valor do objeto que será usado como link para o título.
 
 ---
 
+**`p-property-title`**
+
 Recebe uma propriedade que será utilizada para recuperar o valor do objeto que será exibido como o título de cada item.
 
 ---
+
+**`p-show-more`**
 
 @optional
 
@@ -30,6 +36,8 @@ Recebe uma ação, que será executada quando clicar no botão "Carregar mais re
 
 ---
 
+**`p-title-action`**
+
 @optional
 
 @description
@@ -39,6 +47,8 @@ Ação que será executada ao clicar no título.
 Ao ser disparado, o método inserido na ação irá receber como parâmetro o item da lista clicado.
 
 ---
+
+**`p-show-detail`**
 
 @optional
 
@@ -50,6 +60,8 @@ Ao ser disparado, o método passa como parâmetros os detalhes que serão exibid
 
 ---
 
+**`p-actions`**
+
 @optional
 
 @description
@@ -57,6 +69,8 @@ Ao ser disparado, o método passa como parâmetros os detalhes que serão exibid
 Lista de ações que serão exibidas no componente.
 
 ---
+
+**`p-components-size`**
 
 @optional
 
@@ -73,6 +87,8 @@ Para mais detalhes, consulte a documentação do [po-theme](https://po-ui.io/doc
 
 ---
 
+**`p-height`**
+
 @optional
 
 @description
@@ -81,6 +97,8 @@ Define a altura do `po-list-view` em *pixels*.
 
 ---
 
+**`p-hide-select-all`**
+
 @description
 
 Esconde o *checkbox* para seleção de todos os itens.
@@ -88,6 +106,14 @@ Esconde o *checkbox* para seleção de todos os itens.
 @default `false`
 
 ---
+
+**`p-items`**
+
+Lista de itens que serão exibidos no componente.
+
+---
+
+**`p-literals`**
 
 @optional
 
@@ -127,6 +153,8 @@ E para carregar as literais customizadas, basta apenas passar o objeto para o co
 
 ---
 
+**`p-select`**
+
 @optional
 
 @description
@@ -145,6 +173,8 @@ item está selecionado, por exemplo:
 @default `false`
 
 ---
+
+**`p-show-more-disabled`**
 
 @optional
 

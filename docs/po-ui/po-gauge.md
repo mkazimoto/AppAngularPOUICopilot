@@ -16,6 +16,8 @@ informando em qual caso utilizar, o que devemos evitar e boas práticas relacion
 
 ---
 
+**`p-show-from-to-legend`**
+
 @optional
 
 @description
@@ -26,6 +28,8 @@ Define a exibição dos valores de `from` - `to` entre parênteses caso haja def
 
 ---
 
+**`p-show-pointer`**
+
 @optional
 
 @description
@@ -35,6 +39,8 @@ Define a exibição do ponteiro caso haja definição de `p-ranges`.
 @default `true`
 
 ---
+
+**`p-options`**
 
 @optional
 
@@ -56,6 +62,8 @@ ou habilitar uma legenda com `From` `To` da seguinte forma:
 
 ---
 
+**`p-description`**
+
 @optional
 
 @description
@@ -70,6 +78,8 @@ Há dois posicionamentos para ele:
 
 ---
 
+**`p-height`**
+
 @optional
 
 @description
@@ -82,6 +92,8 @@ O valor mínimo aceito é 300px.
 
 ---
 
+**`p-ranges`**
+
 @optional
 
 @description
@@ -92,6 +104,18 @@ Se o valor de `p-value` for inferior ao mínimo valor definido em `PoGaugeRanges
 A mesma regra prevalece para valores máximos.
 
 ---
+
+**`p-title`**
+
+@optional
+
+@description
+
+Define o título do gauge.
+
+---
+
+**`p-value`**
 
 @optional
 

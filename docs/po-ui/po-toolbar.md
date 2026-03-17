@@ -6,6 +6,8 @@ O componente `po-toolbar` é um cabeçalho para o título da aplicação e infor
 
 ---
 
+**`p-actions`**
+
 @optional
 
 @description
@@ -13,6 +15,8 @@ O componente `po-toolbar` é um cabeçalho para o título da aplicação e infor
 Define uma lista de ações que serão exibidas ao clicar no ícone declarado em `p-actions-icon`.
 
 ---
+
+**`p-actions-icon`**
 
 @optional
 
@@ -44,19 +48,47 @@ Outra opção seria a customização do ícone através do `TemplateRef`, confor
 
 ---
 
+**`p-profile`**
+
 Define o objeto que será o cabeçalho da lista de ações com as informações do perfil.
 
 ---
 
+**`p-profile-actions`**
+
 Define uma lista de ações que serão exibidas ao clicar no ícone do perfil.
 
 ---
+
+**`p-show-notification`**
+
+Se falso, oculta o ícone de notificações.
+
+---
+
+**`p-title`**
+
+Título do *toolbar* e aplicação.
+
+---
+
+**`p-notification-actions`**
 
 @optional
 
 @description
 
 Lista de ações da notificação.
+
+---
+
+**`p-notification-number`**
+
+@optional
+
+@description
+
+Número de notificações.
 
 @docsExtends PoToolbarBaseComponent
 

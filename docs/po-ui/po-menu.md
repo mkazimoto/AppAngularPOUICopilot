@@ -50,6 +50,8 @@ textos, links para redirecionamento, ações, até 4 níveis de menu e ícones p
 
 ---
 
+**`p-automatic-toggle`**
+
 @optional
 
 @description
@@ -59,6 +61,8 @@ Expande e Colapsa (retrai) o menu automaticamente.
 @default `false`
 
 ---
+
+**`p-collapsed`**
 
 @optional
 
@@ -79,6 +83,8 @@ Colapsa (retrai) o menu e caso receba o valor `false` expande o menu.
 
 ---
 
+**`p-components-size`**
+
 @optional
 
 @description
@@ -94,9 +100,13 @@ Para mais detalhes, consulte a documentação do [po-theme](https://po-ui.io/doc
 
 ---
 
+**`p-menus`**
+
 Lista dos itens do menu. Se o valor estiver indefinido ou inválido, será inicializado como um array vazio.
 
 ---
+
+**`p-filter`**
 
 @optional
 
@@ -112,6 +122,8 @@ ou também, pode ser realizada através de um serviço definido na propriedade `
 
 ---
 
+**`p-search-tree-items`**
+
 @optional
 
 @description
@@ -124,6 +136,8 @@ Isso pode ser útil quando se deseja encontrar rapidamente categorias ou seçõe
 @default `false`
 
 ---
+
+**`p-service`**
 
 @optional
 
@@ -152,6 +166,8 @@ Requisição: GET /api/v1/fnd/menu?search=contas
 
 ---
 
+**`p-params`**
+
 @optional
 
 @description
@@ -173,6 +189,8 @@ Requisição: GET /api/v1/fnd/menu?search=contas&company=1&user=297767512
 
 ---
 
+**`p-logo`**
+
 @optional
 
 @description
@@ -186,6 +204,8 @@ caso ultrapassar esses valores a imagem será readequada no espaço disponível.
 
 ---
 
+**`p-logo-alt`**
+
 @optional
 
 @description
@@ -198,6 +218,8 @@ Define o texto alternativo para a logomarca.
 @default `Logomarca início`
 
 ---
+
+**`p-short-logo`**
 
 @optional
 
@@ -213,6 +235,8 @@ caso ultrapassar esses valores a imagem será readequada no espaço disponível.
 - Caso não informar um valor, esta propriedade passa a assumir o valor informado na propriedade `p-logo`.
 
 ---
+
+**`p-logo-link`**
 
 @optional
 

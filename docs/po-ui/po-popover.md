@@ -19,6 +19,8 @@ Os eventos permitidos são: `click` e `hover`.
 
 ---
 
+**`p-append-in-body`**
+
 @optional
 
 @description
@@ -30,6 +32,8 @@ correto do conteúdo próximo ao elemento.
 @default `false`
 
 ---
+
+**`p-target`**
 
 @description
 
@@ -72,6 +76,26 @@ de abertura, exemplo:
 
 ---
 
+**`p-title`**
+
+Título do popover.
+
+---
+
+**`p-close`**
+
+Evento disparado ao fechar o popover.
+
+---
+
+**`p-open`**
+
+Evento disparado ao abrir o popover.
+
+---
+
+**`p-hide-arrow`**
+
 @optional
 
 @description
@@ -81,6 +105,8 @@ Desabilita a seta do componente *popover*.
 @default `false`
 
 ---
+
+**`p-position`**
 
 @optional
 
@@ -109,6 +135,8 @@ Posições válidas:
 
 ---
 
+**`p-trigger`**
+
 @description
 
 Define o evento que abrirá o po-popover.
@@ -122,6 +150,8 @@ Valores válidos:
 @optional
 
 ---
+
+**`p-custom-classes`**
 
 @Input
 

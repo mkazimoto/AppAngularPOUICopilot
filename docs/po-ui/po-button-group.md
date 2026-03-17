@@ -53,6 +53,18 @@ parte de um mesmo contexto.
 
 ---
 
+**`p-buttons`**
+
+@Input
+
+@description
+
+Lista de botões.
+
+---
+
+**`p-toggle`**
+
 @optional
 
 @description
@@ -65,6 +77,8 @@ Define o modo de seleção dos botões no componente conforme valores especifica
 @default `none`
 
 ---
+
+**`p-size`**
 
 @optional
 
@@ -103,3 +117,19 @@ Para mais detalhes, consulte a documentação do [po-theme](https://po-ui.io/doc
  <file name="sample-po-button-group-post/sample-po-button-group-post.component.html"> </file>
  <file name="sample-po-button-group-post/sample-po-button-group-post.component.ts"> </file>
 </example>
+
+---
+
+### Enum `PoButtonGroupToggle`
+
+/**
+@usedBy PoButtonGroupComponent
+
+@description
+
+Tipos de seleção (`p-toggle`) disponíveis para o componente.
+/
+
+- `Multiple = 'multiple'` — Seleção múltipla.
+- `None = 'none'` — Seleção desabilitada.
+- `Single = 'single'` — Seleção única.

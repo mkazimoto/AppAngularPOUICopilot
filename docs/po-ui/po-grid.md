@@ -30,6 +30,20 @@ Ações / atalhos:
 
 ---
 
+**`p-row-actions`**
+
 @description
 
 Ações disparadas quando uma linha do grid é manipulada.
+
+---
+
+**`p-data`**
+
+Lista com os dados que serão exibidos no grid.
+
+---
+
+**`p-columns`**
+
+Colunas exibidas no grid.

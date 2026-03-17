@@ -65,6 +65,20 @@ Algumas diretrizes de acessibilidade já são tratadas no componente, internamen
 
 ---
 
+**`p-label`**
+
+@Input
+
+@optional
+
+@description
+
+Label do botão.
+
+---
+
+**`p-icon`**
+
 @Input
 
 @optional
@@ -93,6 +107,8 @@ Outra opção seria a customização do ícone através do `TemplateRef`, confor
 
 ---
 
+**`p-type`**
+
 @Input
 
 @optional
@@ -104,9 +120,19 @@ Define o tipo do botão.
 
 ---
 
+**`p-blur`**
+
+Evento disparado ao sair do campo.
+
+---
+
+**`p-click`**
+
 Ação que será executada quando o usuário clicar sobre o `po-button`.
 
 ---
+
+**`p-loading`**
 
 @optional
 
@@ -120,6 +146,8 @@ Exibe um ícone de carregamento à esquerda do _label_ do botão.
 
 ---
 
+**`p-danger`**
+
 @optional
 
 @description
@@ -129,6 +157,8 @@ Deve ser usado em ações irreversíveis que o usuário precisa ter cuidado ao e
 > A propriedade `p-kind="tertiary"` será inativada ao utilizar esta propriedade.
 
 ---
+
+**`p-kind`**
 
 @optional
 
@@ -143,6 +173,8 @@ Define o estilo visual do componente conforme valores especificados no enum `PoB
 
 ---
 
+**`p-disabled`**
+
 @optional
 
 @description
@@ -152,6 +184,8 @@ Desabilita o `po-button` e não permite que o usuário interaja com o mesmo.
 @default `false`
 
 ---
+
+**`p-aria-label`**
 
 @Input
 
@@ -166,6 +200,8 @@ Caso esta propriedade não seja informada será considerada a label do botão.
 > Em caso de botões com apenas ícone a atribuição de valor à esta propriedade é muito importante para acessibilidade.
 
 ---
+
+**`p-size`**
 
 @optional
 
@@ -217,3 +253,51 @@ focusButton() {
   this.button.focus();
 }
 ```
+
+---
+
+### Enum `PoButtonKind`
+
+/**
+@usedBy PoButtonComponent, PoWidgetComponent
+
+@description
+
+Estilos disponíveis do button.
+/
+
+- `primary = 'primary'` — Estilo primário, usado para ações principais que requerem maior destaque.
+- `secondary = 'secondary'` — Estilo secundário, usado como padrão, para ações comuns.
+- `tertiary = 'tertiary'` — Estilo terciário, ideal para ações menos importantes, sem fundo preenchido.
+
+### Enum `PoButtonSize`
+
+/**
+@description
+
+Tamanhos da propriedade `p-size`. A medida `small` está disponível apenas para acessibilidade AA.
+/
+
+- `Small = 'small'` — Define a altura do button como 32px.
+- `Medium = 'medium'` — Define a altura do button como 44px.
+- `Large = 'large'` — Define a altura do button como 56px.
+
+### Enum `PoButtonType`
+
+/**
+@usedBy PoButtonComponent
+
+@description
+
+Enumeração que define os tipos possíveis para o `PoButtonComponent`. Estes tipos estão relacionados ao comportamento
+do botão quando utilizado dentro de um formulário HTML.
+
+@example
+No uso com o `PoButtonComponent`, a propriedade `p-type` pode ser utilizada para configurar o comportamento:
+
+```
+<po-button p-label="Enviar" p-type="submit"></po-button>
+<po-button p-label="Cancelar" p-type="button"></po-button>
+<po-button p-label="Redefinir" p-type="reset"></po-button>
+```
+/

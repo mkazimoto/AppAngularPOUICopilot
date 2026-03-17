@@ -1,5 +1,7 @@
 # po-label
 
+**`p-disabled`**
+
 @optional
 
 @description
@@ -10,6 +12,8 @@ Indica se o label está desativado.
 
 ---
 
+**`p-field`**
+
 @optional
 
 @description
@@ -19,6 +23,26 @@ Indica se o label será de um field.
 @default `false`
 
 ---
+
+**`p-for`**
+
+Indica o campo vinculado ao label
+
+---
+
+**`p-label`**
+
+Label do campo.
+
+---
+
+**`p-requirement`**
+
+Indica o tipo do campo vinculado ao label
+
+---
+
+**`p-text-wrap`**
 
 @optional
 

@@ -19,6 +19,14 @@ e organização de informações em uma tela e sua característica é semelhante
 
 ---
 
+**`p-label`**
+
+Valor do rótulo a ser exibido.
+
+---
+
+**`p-border-width`**
+
 @optional
 
 @description

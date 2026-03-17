@@ -52,6 +52,8 @@ interface PoHelperOptions {
 
 ---
 
+**`p-helper`**
+
 @Input
 
 @optional
@@ -75,6 +77,8 @@ Exemplo de uso:
 
 ---
 
+**`p-size`**
+
 @Input
 
 @optional
@@ -92,6 +96,8 @@ Para mais detalhes, consulte a documentação do [po-theme](https://po-ui.io/doc
 
 ---
 
+**`p-disabled`**
+
 @Input
 
 @optional
@@ -103,6 +109,8 @@ Indica se o helper deve ser exibido no estado desativado, desabilitando interaç
 @default `false`
 
 ---
+
+**`p-append-in-body`**
 
 @Input
 

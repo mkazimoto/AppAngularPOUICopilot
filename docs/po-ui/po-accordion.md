@@ -71,6 +71,8 @@ acesse a [documentação do PoAccordionItem](/documentation/po-accordion-item).
 
 ---
 
+**`p-literals`**
+
 @optional
 
 @description
@@ -107,6 +109,8 @@ E para carregar as literais customizadas, basta apenas passar o objeto para o co
 
 ---
 
+**`p-show-manager-accordion`**
+
 @optional
 
 @description
@@ -116,6 +120,8 @@ Exibe o Gerenciador de Accordion.
 @default `false`
 
 ---
+
+**`p-allow-expand-all-items`**
 
 @optional
 
@@ -127,6 +133,8 @@ Sempre habilitada caso a propriedade `p-show-manager-accordion` esteja como `tru
 @default `false`
 
 ---
+
+**`p-size`**
 
 @optional
 
@@ -143,6 +151,8 @@ Para mais detalhes, consulte a documentação do [po-theme](https://po-ui.io/doc
 
 ---
 
+**`p-expand-all`**
+
 @optional
 
 @description
@@ -150,6 +160,8 @@ Para mais detalhes, consulte a documentação do [po-theme](https://po-ui.io/doc
 Evento disparado ao expandir o gerenciador de accordion, seja manualmente ou programaticamente.
 
 ---
+
+**`p-collapse-all`**
 
 @optional
 
@@ -185,3 +197,18 @@ Só pode ser utilizado quando a propriedade `p-show-manager-accordion` estiver c
 
 Método para expandir todos os itens.
 Só pode ser utilizado quando a propriedade `p-show-manager-accordion` estiver como `true`.
+
+---
+
+### Interface `PoAccordionLiterals`
+
+/**
+@usedBy PoAccordionComponent
+
+@description
+
+Interface para definição das literais usadas no `po-accordion`.
+/
+
+- `expandAllItems: string` — Label do gerenciador de Accordion para expandir todos os itens.
+- `closeAllItems: string` — Label do gerenciador de Accordion para colapsar todos os itens

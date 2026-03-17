@@ -90,6 +90,8 @@ garantindo visibilidade para usuários que utilizam teclado. [WCAG 2.4.12: Focus
 
 ---
 
+**`p-change`**
+
 @optional
 
 @description
@@ -100,6 +102,8 @@ Em modo *range*, retorna um objeto contendo as datas de início (`start`) e fim 
 
 ---
 
+**`p-change-month-year`**
+
 @description
 
 Evento disparado ao alterar o mês ou o ano no cabeçalho do calendário.
@@ -108,6 +112,14 @@ Retorna um objeto contendo os valores numéricos:
 - `year`: Ano selecionado.
 
 ---
+
+**`p-close`**
+
+Evento disparado ao fechar o calendário, seja por seleção de data ou por clique fora do componente.
+
+---
+
+**`p-locale`**
 
 @optional
 
@@ -118,6 +130,8 @@ Idioma do componente.
 > O locale padrão será recuperado com base no [`PoI18nService`](/documentation/po-i18n) ou *browser*.
 
 ---
+
+**`p-max-date`**
 
 @optional
 
@@ -145,6 +159,8 @@ Aceita os seguintes formatos:
 
 ---
 
+**`p-min-date`**
+
 @optional
 
 @description
@@ -170,6 +186,8 @@ Aceita os seguintes formatos:
 
 ---
 
+**`p-mode`**
+
 @optional
 
 @description
@@ -179,6 +197,8 @@ Caso não seja informado, o componente operará no modo padrão de seleção ún
 Para permitir a seleção de um intervalo de datas, deve ser utilizado o valor `PoCalendarMode.Range`.
 
 ---
+
+**`p-size`**
 
 @optional
 

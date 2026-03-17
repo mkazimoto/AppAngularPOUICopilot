@@ -1,11 +1,15 @@
 # po-logo
 
+**`p-class`**
+
 Define uma classe para o elemento `img` do componente.
 
 > **Importante**
 > A classe deve ser definida apenas quando houver necessidade de ajustar o componente dentro de outro componente.
 
 ---
+
+**`p-link`**
 
 Define se o componente terá o elemento âncora para uma rota específica.
 
@@ -17,9 +21,13 @@ Define se o componente terá o elemento âncora para uma rota específica.
 
 ---
 
+**`p-logo`**
+
 Definie o caminho para a imagem, que será exibida como logomarca.
 
 ---
+
+**`p-logo-alt`**
 
 Define o texto alternativo para a logomarca.
 

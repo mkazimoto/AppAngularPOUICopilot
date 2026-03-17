@@ -54,6 +54,8 @@ Algumas diretrizes de acessibilidade já são tratadas no componente, internamen
 
 ---
 
+**`p-secondary-label`**
+
 @optional
 
 @description
@@ -62,6 +64,8 @@ Define o label e exibe a ação secundária no footer do componente.
 > Exibida apenas quando `p-primary-label` estiver definida.
 
 ---
+
+**`p-danger-primary-action`**
 
 @optional
 
@@ -75,6 +79,8 @@ Caso verdadeiro o botão da ação `p-primary-label` ativará o modo `danger`.
 
 ---
 
+**`p-danger-secondary-action`**
+
 @optional
 
 @description
@@ -87,6 +93,8 @@ Caso verdadeiro o botão da ação `p-secondary-label` ativará o modo `danger`.
 
 ---
 
+**`p-kind-primary-action`**
+
 @optional
 
 @description
@@ -96,6 +104,8 @@ Define o estilo do botão da ação `p-primary-label`, conforme o enum `PoButton
 @default `tertiary`
 
 ---
+
+**`p-kind-secondary-action`**
 
 @optional
 
@@ -107,6 +117,8 @@ Define o estilo do botão da ação `p-secondary-label`, conforme o enum `PoButt
 
 ---
 
+**`p-tag`**
+
 @optional
 
 @description
@@ -117,6 +129,8 @@ Label da tag exibida no header.
 O conteúdo completo poderá ser visualizado ao passar o mouse sobre a tag, por meio do tooltip.
 
 ---
+
+**`p-tag-type`**
 
 @optional
 
@@ -134,6 +148,8 @@ Valores válidos:
 @default `success`
 
 ---
+
+**`p-tag-icon`**
 
 @optional
 
@@ -163,6 +179,8 @@ Outra opção seria a customização do ícone através do `TemplateRef`, confor
 
 ---
 
+**`p-tag-position`**
+
 @Input p-tag-position
 
 @optional
@@ -177,6 +195,8 @@ Define o posicionamento da `po-tag` no cabeçalho do Widget:
 
 ---
 
+**`p-actions`**
+
 @optional
 
 @description
@@ -185,6 +205,8 @@ Lista de ações exibidas no header do componente.
 As propriedades das ações seguem a interface `PoPopupAction`.
 
 ---
+
+**`p-size`**
 
 @optional
 
@@ -201,6 +223,8 @@ Para mais detalhes, consulte a documentação do [po-theme](https://po-ui.io/doc
 
 ---
 
+**`p-avatar`**
+
 @Input p-avatar
 
 @optional
@@ -211,6 +235,8 @@ Define o avatar a ser exibido à esquerda no Widget.
 
 ---
 
+**`p-click`**
+
 @optional
 
 @description
@@ -220,6 +246,8 @@ Evento disparado quando o usuário clicar no componente.
 
 ---
 
+**`p-on-disabled`**
+
 @optional
 
 @description
@@ -227,6 +255,8 @@ Evento disparado quando o usuário clicar no componente.
 Evento disparado quando a propriedade `p-disabled` for alterada.
 
 ---
+
+**`p-primary-action`**
 
 @optional
 
@@ -236,6 +266,8 @@ Evento disparado ao clicar na ação `p-primary-label`.
 
 ---
 
+**`p-secondary-action`**
+
 @optional
 
 @description
@@ -244,6 +276,8 @@ Evento disparado ao clicar na ação `p-secondary-label`.
 
 ---
 
+**`p-setting`**
+
 @optional
 
 @description
@@ -251,12 +285,16 @@ Evento disparado ao clicar em **Configurações** incluído no menu de ações d
 
 ---
 
+**`p-title-action`**
+
 @optional
 
 @description
 Evento disparado ao clicar no título definido em `p-title`.
 
 ---
+
+**`p-background`**
 
 @optional
 
@@ -268,6 +306,8 @@ pode-se utilizar a propriedade `p-primary` em conjunto para que os textos fiquem
 
 ---
 
+**`p-disabled`**
+
 @optional
 
 @description
@@ -278,6 +318,8 @@ Desabilita o componente.
 
 ---
 
+**`p-height`**
+
 @optional
 
 @description
@@ -287,6 +329,8 @@ Define a altura do componente.
 
 ---
 
+**`p-help`**
+
 @optional
 
 @description
@@ -294,6 +338,8 @@ Define a altura do componente.
 Link de ajuda incluído no menu de ações do header.
 
 ---
+
+**`p-no-shadow`**
 
 @optional
 
@@ -306,6 +352,8 @@ Desabilita a sombra do componente quando o mesmo for clicável.
 
 ---
 
+**`p-primary`**
+
 @optional
 
 @description
@@ -316,6 +364,8 @@ Opção para que o `po-widget` fique em destaque.
 
 ---
 
+**`p-primary-label`**
+
 @optional
 
 @description
@@ -323,6 +373,8 @@ Opção para que o `po-widget` fique em destaque.
 Define o label e exibe a ação primária no footer do componente.
 
 ---
+
+**`p-title`**
 
 @optional
 

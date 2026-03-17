@@ -12,6 +12,8 @@ customizar sua visualização utilizando a diretiva **[p-slide-content-template]
 
 ---
 
+**`p-hide-arrows`**
+
 @optional
 
 @description
@@ -22,6 +24,8 @@ Define a exibição das setas de navegação.
 
 ---
 
+**`p-height`**
+
 @optional
 
 @description
@@ -30,6 +34,8 @@ Altura do po-slide, caso seja slide com template customizado, não assume o valo
 @default `336`
 
 ---
+
+**`p-interval`**
 
 @optional
 
@@ -40,6 +46,8 @@ Valor em milissegundos que define o tempo de troca dos slides, caso o valor seja
 @default `4000`
 
 ---
+
+**`p-slides`**
 
 @description
 

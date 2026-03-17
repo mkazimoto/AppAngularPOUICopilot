@@ -69,6 +69,8 @@ proprietário do conteúdo. São elas:
 
 ---
 
+**`p-aria-label`**
+
 @optional
 
 @description
@@ -80,6 +82,8 @@ acessibilidade.
 
 ---
 
+**`p-disabled`**
+
 @optional
 
 @description
@@ -89,6 +93,8 @@ Desabilita o po-search e não permite que o usuário interaja com o mesmo.
 @default `false`
 
 ---
+
+**`p-loading`**
 
 @optional
 
@@ -100,6 +106,8 @@ Exibe um ícone de carregamento no lado direito do campo para sinalizar que uma 
 @default `false`
 
 ---
+
+**`p-filter-keys`**
 
 @description
 
@@ -114,6 +122,8 @@ const filterKeys: Array<string> = ['name', 'gender', 'planet', 'father'];
 `p-search-type` do tipo `locate`.
 
 ---
+
+**`p-filter-select`**
 
 @description
 
@@ -134,6 +144,8 @@ const filterSelect = [
 
 ---
 
+**`p-filter-type`**
+
 @optional
 
 @description
@@ -146,6 +158,8 @@ Define o modo de pesquisa utilizado no campo de busca. Os valores permitidos sã
 @default `startsWith`
 
 ---
+
+**`p-icon`**
 
 @optional
 
@@ -174,6 +188,8 @@ Outra opção seria a customização do ícone através do `TemplateRef`, confor
 
 ---
 
+**`p-items`**
+
 @optional
 
 @description
@@ -183,6 +199,8 @@ Lista de itens que serão utilizados para pesquisa.
 > Incompatível com a propriedade `p-search-type` do tipo `locate`.
 
 ---
+
+**`p-literals`**
 
 @optional
 
@@ -212,6 +230,8 @@ do browser.
 
 ---
 
+**`p-locate-summary`**
+
 @optional
 
 @description
@@ -227,12 +247,16 @@ locateSummary: PoSearchLocateSummary = { currentIndex: 0, total: 5 };
 
 ---
 
+**`name`**
+
 @optional
 
 @description
 Nome e identificador do campo.
 
 ---
+
+**`p-no-autocomplete`**
 
 @optional
 
@@ -243,6 +267,8 @@ Define a propriedade nativa `autocomplete` do campo como `off`.
 @default `false`
 
 ---
+
+**`p-search-type`**
 
 @optional
 
@@ -259,6 +285,8 @@ Determina a forma de realizar a pesquisa no componente. Valores aceitos:
 
 ---
 
+**`p-show-listbox`**
+
 @optional
 
 @description
@@ -271,6 +299,8 @@ uma busca, respeitando o `p-filter-type` como modo de pesquisa.
 @default `false`
 
 ---
+
+**`p-size`**
 
 @optional
 
@@ -286,6 +316,8 @@ Para mais detalhes, consulte a documentação do [po-theme](https://po-ui.io/doc
 @default `medium`
 
 ---
+
+**`p-keys-label`**
 
 @optional
 
@@ -303,6 +335,8 @@ keysLabel: Array<string> = ['nome', 'email', 'country'];
 
 ---
 
+**`p-blur`**
+
 @optional
 
 @description
@@ -311,6 +345,8 @@ Evento disparado ao sair do campo.
 
 ---
 
+**`p-change-model`**
+
 @optional
 
 @description
@@ -318,6 +354,8 @@ Evento disparado ao sair do campo.
 Evento disparado ao alterar valor do model.
 
 ---
+
+**`p-filter`**
 
 @optional
 
@@ -329,6 +367,8 @@ Pode ser informada uma função que será disparada quando houver alterações n
 
 ---
 
+**`p-filtered-items-change`**
+
 @optional
 
 @description
@@ -339,6 +379,8 @@ Pode ser informada uma função que será disparada quando houver alterações n
 
 ---
 
+**`p-focus`**
+
 @optional
 
 @description
@@ -347,6 +389,8 @@ Evento emitido quando o campo de entrada (input) recebe foco.
 
 ---
 
+**`p-keydown`**
+
 @optional
 
 @description
@@ -354,6 +398,8 @@ Evento disparado quando uma tecla é pressionada enquanto o foco está no compon
 Retorna um objeto `KeyboardEvent` com informações sobre a tecla.
 
 ---
+
+**`p-listbox-onclick`**
 
 @optional
 
@@ -365,6 +411,8 @@ Pode ser informada uma função que será disparada quando houver click no listb
 
 ---
 
+**`p-locate-next`**
+
 @optional
 
 @description
@@ -375,6 +423,8 @@ Evento disparado ao clicar no controle "Próximo resultado".
 
 ---
 
+**`p-locate-previous`**
+
 @optional
 
 @description
@@ -384,6 +434,8 @@ Evento disparado ao clicar no controle "Resultado anterior".
 > Compatível com a propriedade `p-search-type` do tipo `locate`.
 
 ---
+
+**`p-footer-action-listbox`**
 
 @optional
 

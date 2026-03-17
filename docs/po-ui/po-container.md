@@ -33,6 +33,8 @@ assim possibilitando o tratamento para diferentes resoluções.
 
 ---
 
+**`p-height`**
+
 @optional
 
 @description
@@ -42,6 +44,8 @@ Define a altura do `po-container`.
 > Caso não seja definido um valor, a altura se ajustará de acordo com o conteúdo.
 
 ---
+
+**`p-no-border`**
 
 @optional
 
@@ -53,6 +57,8 @@ Desabilita a borda e a sombra em torno do `po-container`.
 
 ---
 
+**`p-no-padding`**
+
 @optional
 
 @description
@@ -60,6 +66,16 @@ Desabilita a borda e a sombra em torno do `po-container`.
 Desabilita o espaçamento interno do `po-container`.
 
 @default `false`
+
+---
+
+**`p-title`**
+
+@optional
+
+@description
+
+Título do Container.
 
 @docsExtends PoContainerBaseComponent
 

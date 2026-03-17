@@ -26,6 +26,8 @@ Este componente pode ser utilizado no *upload* de arquivos, uma atualização no
 
 ---
 
+**`p-disabled-cancel`**
+
 @optional
 
 @description
@@ -39,6 +41,8 @@ o ícone de cancelamento não será exibido.
 
 ---
 
+**`p-info`**
+
 @optional
 
 @description
@@ -46,6 +50,8 @@ o ícone de cancelamento não será exibido.
 Informação adicional que aparecerá abaixo da barra de progresso ao lado direito.
 
 ---
+
+**`p-info-icon`**
 
 @optional
 
@@ -56,6 +62,8 @@ Informação adicional que aparecerá abaixo da barra de progresso ao lado direi
 Exemplo: `an an-check`.
 
 ---
+
+**`p-status`**
 
 @optional
 
@@ -68,6 +76,8 @@ o andamento, por exemplo, se a mesma foi concluída com sucesso.
 
 ---
 
+**`p-text`**
+
 @optional
 
 @description
@@ -75,6 +85,8 @@ o andamento, por exemplo, se a mesma foi concluída com sucesso.
 Texto principal que aparecerá abaixo da barra de progresso no lado esquerdo.
 
 ---
+
+**`p-custom-action`**
 
 @optional
 
@@ -118,6 +130,8 @@ onCustomActionClick() {
 
 ---
 
+**`p-custom-action-click`**
+
 @optional
 
 @description
@@ -155,6 +169,8 @@ onCustomActionClick() {
 
 ---
 
+**`p-cancel`**
+
 @optional
 
 @description
@@ -168,6 +184,8 @@ o ícone de cancelamento não será exibido.
 
 ---
 
+**`p-retry`**
+
 @optional
 
 @description
@@ -178,6 +196,8 @@ Evento que será disparado ao clicar no ícone de tentar novamente na parte infe
 `PoProgressStatus.Error`.
 
 ---
+
+**`p-indeterminate`**
 
 @optional
 
@@ -193,6 +213,8 @@ Esta opção pode ser utilizada quando não souber quanto tempo levará para que
 
 ---
 
+**`p-value`**
+
 @optional
 
 @description
@@ -204,6 +226,8 @@ Valor que representará o progresso.
 @default `0`
 
 ---
+
+**`p-size`**
 
 @optional
 
@@ -219,6 +243,8 @@ Valores válidos:
 
 ---
 
+**`p-size-actions`**
+
 @optional
 
 @description
@@ -233,6 +259,8 @@ Para mais detalhes, consulte a documentação do [po-theme](https://po-ui.io/doc
 @default `medium`
 
 ---
+
+**`p-show-percentage`**
 
 @optional
 

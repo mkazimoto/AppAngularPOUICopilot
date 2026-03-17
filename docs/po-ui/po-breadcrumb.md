@@ -30,6 +30,8 @@ o componente dispõe da propriedade `p-params-service` que recebe um objeto cont
 
 ---
 
+**`p-favorite-service`**
+
 @optional
 
 @description
@@ -92,6 +94,8 @@ Exemplos de retorno:
 
 ---
 
+**`p-params-service`**
+
 @optional
 
 @description
@@ -99,6 +103,8 @@ Exemplos de retorno:
 Objeto que possibilita o envio de parâmetros adicionais à requisição.
 
 ---
+
+**`p-items`**
 
 @description
 
@@ -110,6 +116,8 @@ Lista de itens do _breadcrumb_.
 ```
 
 ---
+
+**`p-size`**
 
 @optional
 
