@@ -1,0 +1,87 @@
+<po-page-default
+  p-title="PetSocial 🐾"
+  p-subtitle="Compartilhe os momentos mais fofinhos dos seus pets">
+
+  <!-- Stories -->
+  <po-divider p-label="Stories"></po-divider>
+  <div class="stories-container">
+    @for (story of stories; track story.nome) {
+      <div class="story-item">
+        <div class="story-avatar-wrapper" [class.story-novo]="story.novo">
+          <po-avatar [p-src]="story.src" p-size="lg"></po-avatar>
+        </div>
+        <span class="story-nome">{{ story.nome }}</span>
+      </div>
+    }
+  </div>
+
+  <!-- Filtros por espécie -->
+  <po-divider p-label="Filtrar por espécie"></po-divider>
+  <div class="filtros-container">
+    @for (filtro of filtros; track filtro.value) {
+      <po-tag
+        [p-label]="filtro.label"
+        [p-type]="filtroAtivo === filtro.value ? PoTagType.Info : PoTagType.Neutral"
+        (p-click)="filtrar(filtro.value)">
+      </po-tag>
+    }
+  </div>
+
+  <!-- Feed de posts -->
+  <po-divider p-label="Feed"></po-divider>
+  <div class="po-row">
+    @for (post of postsFiltrados; track post.id) {
+      <div class="po-col-sm-12 po-col-md-6 po-col-lg-4">
+        <po-widget>
+
+          <!-- Cabeçalho: avatar + nome do pet + raça -->
+          <div class="post-header">
+            <po-avatar [p-src]="post.avatarSrc" p-size="sm"></po-avatar>
+            <div class="post-header-info">
+              <strong class="post-pet-name">{{ post.petName }}</strong>
+              <small class="post-owner">por {{ post.ownerName }}</small>
+            </div>
+            <po-tag [p-label]="post.raca" [p-type]="PoTagType.Info"></po-tag>
+          </div>
+
+          <!-- Foto do pet -->
+          <div class="post-photo-container">
+            <img [src]="post.photoSrc" [alt]="post.petName" class="post-photo" />
+          </div>
+
+          <!-- Descrição -->
+          <p class="post-descricao">{{ post.descricao }}</p>
+
+          <!-- Hashtags -->
+          <div class="post-hashtags">
+            @for (tag of post.hashtags; track tag) {
+              <po-tag [p-label]="tag"></po-tag>
+            }
+          </div>
+
+          <!-- Ações: curtir, comentar, compartilhar -->
+          <div class="post-actions">
+            <po-button
+              [p-icon]="post.curtido ? 'an an-heart-fill' : 'an an-heart'"
+              [p-label]="post.curtidas.toString()"
+              p-kind="tertiary"
+              (p-click)="curtir(post)">
+            </po-button>
+            <po-button
+              p-icon="an an-chat-circle"
+              [p-label]="post.comentarios.toString()"
+              p-kind="tertiary">
+            </po-button>
+            <po-button
+              p-icon="an an-share-network"
+              p-label="Compartilhar"
+              p-kind="tertiary">
+            </po-button>
+          </div>
+
+        </po-widget>
+      </div>
+    }
+  </div>
+
+</po-page-default>

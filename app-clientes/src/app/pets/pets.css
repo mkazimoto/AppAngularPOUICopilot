@@ -1,0 +1,127 @@
+/* ── Stories ───────────────────────────────────────────── */
+.stories-container {
+  display: flex;
+  gap: 1.25rem;
+  overflow-x: auto;
+  padding: 0.5rem 0 1.25rem;
+  scrollbar-width: thin;
+}
+
+.story-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.story-avatar-wrapper {
+  padding: 3px;
+  border-radius: 50%;
+  background: var(--color-neutral-light-20);
+  transition: transform 0.15s ease;
+}
+
+.story-avatar-wrapper:hover {
+  transform: scale(1.07);
+}
+
+.story-novo {
+  background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+}
+
+.story-nome {
+  font-size: 0.72rem;
+  text-align: center;
+  max-width: 72px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-neutral-dark-80);
+}
+
+/* ── Filtros ────────────────────────────────────────────── */
+.filtros-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.filtros-container po-tag {
+  cursor: pointer;
+}
+
+/* ── Post Card ──────────────────────────────────────────── */
+.post-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--color-neutral-light-20);
+}
+
+.post-header-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.post-pet-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-neutral-dark-95);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.post-owner {
+  font-size: 0.75rem;
+  color: var(--color-neutral-mid-60);
+}
+
+.post-photo-container {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.post-photo {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.post-photo:hover {
+  transform: scale(1.03);
+}
+
+.post-descricao {
+  font-size: 0.875rem;
+  color: var(--color-neutral-dark-80);
+  margin: 0 0 0.6rem;
+  line-height: 1.5;
+}
+
+.post-hashtags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-top: 1px solid var(--color-neutral-light-20);
+  padding-top: 0.5rem;
+}

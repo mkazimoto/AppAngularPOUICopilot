@@ -15,5 +15,6 @@ export class App {
     { label: 'Dashboard', link: '/dashboard', icon: 'an an-chart-bar' },
     { label: 'Clientes', link: '/clientes', icon: 'an an-users' },
     { label: 'Produtos', link: '/produtos', icon: 'an an-shopping-bag' },
+    { label: 'PetSocial', link: '/petsocial', icon: 'an an-paw-print' },
   ];
 }
