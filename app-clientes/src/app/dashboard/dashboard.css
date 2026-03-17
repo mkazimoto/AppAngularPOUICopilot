@@ -1,0 +1,100 @@
+/* ── Row spacing ── */
+.dashboard-row-gap {
+  margin-top: 16px;
+}
+
+/* ── KPI Cards ── */
+.kpi-card {
+  padding: 4px 0 4px 12px;
+  border-left: 4px solid transparent;
+}
+
+.kpi-azul    { border-left-color: var(--color-brand-01-base, #0079c2); }
+.kpi-verde   { border-left-color: var(--color-feedback-positive-base, #1daa5e); }
+.kpi-indigo  { border-left-color: var(--color-brand-02-base, #6236ff); }
+.kpi-laranja { border-left-color: var(--color-feedback-warning-base, #f67b28); }
+
+.kpi-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.kpi-icon {
+  font-size: 1.25rem;
+  color: var(--color-neutral-mid-60);
+}
+
+.kpi-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-dark-70);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kpi-value {
+  font-size: 2.25rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-dark-95);
+  line-height: 1.1;
+  margin-bottom: 10px;
+}
+
+.kpi-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.kpi-trend {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  padding: 2px 8px;
+  border-radius: var(--border-radius-pill);
+}
+
+.kpi-trend--up {
+  color: var(--color-feedback-positive-dark);
+  background-color: var(--color-feedback-positive-lightest);
+}
+
+.kpi-trend--down {
+  color: var(--color-feedback-negative-dark);
+  background-color: var(--color-feedback-negative-lightest);
+}
+
+.kpi-detalhe {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-mid-60);
+}
+
+/* ── Destaque Cards ── */
+.destaque-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0 4px;
+}
+
+.destaque-icone {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  color: var(--color-action-default);
+}
+
+.destaque-valor {
+  font-size: 1.875rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-dark-95);
+  line-height: 1.2;
+}
+
+.destaque-descricao {
+  margin-top: 6px;
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-mid-60);
+  text-align: center;
+}

@@ -1,0 +1,81 @@
+<po-page-edit
+  [p-title]="titulo"
+  [p-breadcrumb]="breadcrumb"
+  (p-save)="salvar()"
+  (p-cancel)="cancelar()">
+
+  <form #editForm="ngForm">
+    <div class="po-row">
+      <div class="po-col-sm-12 po-col-md-2">
+        <po-input
+          name="codigo"
+          p-name="codigo"
+          p-label="Código"
+          [ngModel]="cliente.codigo"
+          (ngModelChange)="cliente.codigo = $event"
+          p-disabled>
+        </po-input>
+      </div>
+      <div class="po-col-sm-12 po-col-md-10">
+        <po-input
+          name="nome"
+          p-name="nome"
+          p-label="Nome"
+          [ngModel]="cliente.nome"
+          (ngModelChange)="cliente.nome = $event"
+          p-required
+          p-max-length="100">
+        </po-input>
+      </div>
+    </div>
+
+    <div class="po-row">
+      <div class="po-col-sm-12 po-col-md-6">
+        <po-input
+          name="email"
+          p-name="email"
+          p-label="E-mail"
+          [ngModel]="cliente.email"
+          (ngModelChange)="cliente.email = $event"
+          p-required
+          p-max-length="100">
+        </po-input>
+      </div>
+      <div class="po-col-sm-12 po-col-md-6">
+        <po-input
+          name="telefone"
+          p-name="telefone"
+          p-label="Telefone"
+          [ngModel]="cliente.telefone"
+          (ngModelChange)="cliente.telefone = $event"
+          p-mask="(99) 99999-9999">
+        </po-input>
+      </div>
+    </div>
+
+    <div class="po-row">
+      <div class="po-col-sm-12 po-col-md-6">
+        <po-input
+          name="cidade"
+          p-name="cidade"
+          p-label="Cidade"
+          [ngModel]="cliente.cidade"
+          (ngModelChange)="cliente.cidade = $event"
+          p-max-length="100">
+        </po-input>
+      </div>
+      <div class="po-col-sm-12 po-col-md-6">
+        <po-select
+          name="status"
+          p-name="status"
+          p-label="Status"
+          [ngModel]="cliente.status"
+          (ngModelChange)="cliente.status = $event"
+          [p-options]="statusOptions"
+          p-required>
+        </po-select>
+      </div>
+    </div>
+  </form>
+
+</po-page-edit>

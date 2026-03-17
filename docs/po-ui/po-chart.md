@@ -1,0 +1,265 @@
+# po-chart
+
+@description
+
+O `po-chart` é um componente para renderização de dados através de gráficos, com isso facilitando a compreensão e tornando a
+visualização destes dados mais agradável.
+
+Através de suas principais propriedades é possível definir atributos, tais como tipo de gráfico, altura, título, cores customizadas, opções para os eixos, entre outros.
+
+O componente permite utilizar em conjunto séries do tipo linha e coluna.
+
+Além disso, também é possível definir uma ação que será executada ao clicar em determinado elemento do gráfico
+e outra que será executada ao passar o *mouse* sobre o elemento.
+
+#### Guia de uso para Gráficos
+
+> Veja nosso [guia de uso para gráficos](/guides/guide-charts) para auxiliar na construção do seu gráfico,
+informando em qual caso utilizar, o que devemos evitar e boas práticas relacionada a cores.
+
+#### Tokens customizáveis
+
+É possível alterar o estilo do componente usando os seguintes tokens (CSS):
+
+> Para maiores informações, acesse o guia [Personalizando o Tema Padrão com Tokens CSS](https://po-ui.io/guides/theme-customization).
+
+| Propriedade                              | Descrição                                                               | Valor Padrão                                      |
+|------------------------------------------|-------------------------------------------------------------------------|---------------------------------------------------|
+| **Chart (po-chart)**                     |                                                                         |                                                   |
+| `--background-color-grid`                | Cor de background dos gráficos                                          | `var(--color-neutral-light-00)`                   |
+| `--color-description-chart`              | Cor da descrição dos gráficos                                           | `var(--color-neutral-dark-70)`                    |
+| `--font-family-description-chart`        | Fonte da descrição dos gráficos                                         | `var(--font-family-theme)`                        |
+| `--font-size-description-chart`          | Tamanho da fonte da descrição dos gráficos                              | `var(--font-size-sm)`                             |
+| `--font-weight-description-chart`        | Peso da fonte da descrição dos gráficos                                 | `var(--font-weight-normal)`                       |
+| **Header (po-chart .po-chart-header )**  |                                                                         |                                                   |
+| `--background-color`                     | Cor de background do cabeçalho                                          | `var(--color-neutral-light-00)`                   |
+| `--color`                                | Cor da fonte do cabeçalho                                               | `var(--color-neutral-dark-70)`                    |
+| `--font-family`                          | Família tipográfica usada                                               | `var(--font-family-theme)`                        |
+| `--font-size-title`                      | Tamanho da fonte                                                        | `var(--font-size-default)`                        |
+| `--font-size-icons`                      | Tamanho dos ícones                                                      | `var(--font-size-md)`                             |
+| `--font-weight`                          | Peso da fonte                                                           | `var(--font-weight-bold)`                         |
+| **Chart (po-chart .po-chart)**           |                                                                         |                                                   |
+| `--color-grid`                           | Cor da linha dos gráficos que possuem eixo                              | `var(--color-neutral-light-20)`                   |
+| `--font-family-grid`                     | Família tipográfica usada nos valores dos eixos                         | `var(--font-family-theme)`                        |
+| `--font-size-grid`                       | Tamanho da fonte usada nos valores dos eixos                            | `var(--font-size-xs)`                             |
+| `--font-weight-grid`                     | Peso da fonte usada nos valores dos eixos                               | `var(--font-weight-normal)`                       |
+| `--color-legend`                         | Cor da fonte da legenda                                                 | `var(--color-neutral-dark-70)`                    |
+| `--border-radius-bar`                    | Tamanho da borda nos graficos `Bar` e `Column`                          | `var(--border-radius-none)`                       |
+| `--border-color`                         | Cor da borda do gráfico nos Gráficos `Donut` e `Pie`                    | `var(--color-neutral-light-00)`                   |
+| `--color-hightlight-value`               | Cor do valor de destaque nos Gráficos `Donut` e `Gauge`                 | `var(--color-neutral-dark-70)`                    |
+| `--font-family-hightlight-value`         | Família tipográfica do valor de destaque nos Gráficos `Donut` e `Gauge` | `var(--font-family-theme)`                        |
+| `--font-weight-hightlight-value`         | Peso da fonte do valor de destaque nos Gráficos `Donut` e `Gauge`       | `var(--font-weight-bold)`                         |
+| `--color-base-gauge`                     | Cor da base do gráfico `Gauge`                                          | `var(--color-neutral-light-20)`                   |
+| `--color-gauge-pointer-color`            | Cor do ponteiro do gráfico `Gauge`                                      | `var(--color-neutral-dark-70)`                    |
+| `--color-chart-line-point-fill`          | Cor de dentro do círculo dos gráficos `Line` e `Area`                   | `var(--color-neutral-light-00)`                   |
+| `--border-color-radar`                   | Cor do eixo da grid do gráfico `Radar`                                  | `var(--color-neutral-light-30)`                   |
+| `--color-background-zebra`               | Cor das áreas alternadas (efeito zebrado) da grid do gráfico `Radar`    | `var(--color-neutral-light-10)`                   |
+| `--color-background-line`                | Cor das áreas entre as faixas zebradas da grade do `Radar`              | `none`                                            |
+| **Wrapper (.po-chart-container-gauge)**  |                                                                         |                                                   |
+| `--background-color-container-gauge`     | Cor de background do container do gauge                                 | `var(--color-neutral-light-00)`                   |
+
+---
+
+@description
+
+Define os elementos do gráfico que serão criados dinamicamente.
+
+---
+
+@description
+
+Define o valor do gráfico do tipo `Gauge` quando utliza as propriedades `From` `To`.
+
+---
+
+@optional
+
+@description
+
+Define os valores utilizados na construção das categorias do gráfico.
+
+Para gráficos dos tipos *bar*, *area*, *column* e *line*, representa os nomes das categorias exibidas no eixo.
+
+Para gráficos do tipo *radar*, representa a configuração dos indicadores, formato (shape), áreas de divisão (splitArea)
+e demais opções específicas do gráfico `Radar`.
+
+> Caso nenhum valor seja informado, será utilizado um hífen como categoria
+  correspondente para cada série.
+
+> Gráficos do tipo bar dimensionam sua área considerando a largura do maior texto
+  da categoria, sendo recomendável utilizar rótulos curtos para facilitar a leitura.
+
+---
+
+@optional
+
+@description
+
+Essa propriedade permite que o desenvolvedor adicione ações customizadas no popup do header, oferecendo mais flexibilidade e controle sobre as interações do componente.
+
+---
+
+@optional
+
+@description
+
+Objeto com as configurações usadas no `po-chart`.
+
+É possível, por exemplo, definir as configurações de exibição das legendas,
+configurar os eixos(*axis*) para os gráficos dos tipos `area`, `line`, `column`, `bar` e `radar` da seguinte forma:
+
+```
+ chartOptions: PoChartOptions = {
+   legend: true,
+   axis: {
+     minRange: 0,
+     maxRange: 100,
+     gridLines: 5,
+   },
+ };
+```
+
+---
+
+@optional
+
+@description
+
+Permite configurar as propriedades de exibição dos rótulos das séries no gráfico.
+
+Essa configuração possibilita fixar os valores das séries diretamente no gráfico, alterando o comportamento visual:
+- Os valores das séries permanecem visíveis, sem a necessidade de hover.
+- O *tooltip* não será exibido.
+- Os marcadores (*bullets*) terão seu estilo ajustado.
+- As outras séries ficarão com opacidade reduzida ao passar o mouse sobre a série ativa.
+
+> Disponível para gráficos do tipo `line` e `radar`.
+
+#### Exemplo de utilização:
+```typescript
+dataLabel: PoChartDataLabel = {
+  fixed: true,
+};
+```
+
+---
+
+@optional
+
+@description
+
+Define a altura do gráfico em px.
+
+> No caso do tipo `Gauge`, o valor padrão é `300` e esse é seu valor minimo aceito. Nos outros tipos, o valor mínimo aceito nesta propriedade é 200.
+
+@default `400`
+
+---
+
+@optional
+
+@description
+
+Define o tipo de gráfico.
+
+É possível também combinar gráficos dos tipos linha e coluna. Para isso, opte pela declaração de `type` conforme a interface `PoChartSerie`.
+
+> Note que, se houver declaração de tipo de gráfico tanto em `p-type` quanto em `PochartSerie.type`, o valor `{ type }` da primeira série anulará o valor definido em `p-type`.
+
+Se não passado valor, o padrão será relativo à primeira série passada em `p-series`:
+- Se `p-series = [{ data: [1,2,3] }]`: será `PoChartType.Column`.
+- Se `p-series = [{ data: 1 }]`: será `PoChartType.Pie`.
+
+> Veja os valores válidos no *enum* `PoChartType`.
+
+---
+
+@optional
+
+@description
+
+Objeto com as literais usadas no `po-chart`.
+
+Para utilizar basta passar a literal que deseja customizar:
+
+```
+ const customLiterals: PoChartLiterals = {
+   downloadCSV: 'Obter CSV',
+ };
+```
+
+E para carregar a literal customizada, basta apenas passar o objeto para o componente.
+
+```
+<po-chart
+  [p-literals]="customLiterals">
+</po-chart>
+```
+
+> O objeto padrão de literais será traduzido de acordo com o idioma do
+[`PoI18nService`](/documentation/po-i18n) ou do browser.
+
+---
+
+@optional
+
+@description
+
+Evento executado quando o usuário clicar sobre um elemento do gráfico.
+
+O evento emitirá o seguinte parâmetro:
+- *donut* e *pie*: um objeto contendo a categoria e valor da série.
+- *radar*: um objeto contendo o nome da série e os valores.
+- *area*, *line*, *column* e *bar*: um objeto contendo o nome da série, valor e categoria do eixo do gráfico.
+
+---
+
+@optional
+
+@description
+
+Evento executado quando o usuário passar o *mouse* sobre um elemento do gráfico.
+
+O evento emitirá o seguinte parâmetro de acordo com o tipo de gráfico:
+- *donut* e *pie*: um objeto contendo a categoria e valor da série.
+- *radar*: um objeto contendo o nome da série e os valores.
+- *area*, *line*, *column* e *bar*: um objeto contendo a categoria, valor da série e categoria do eixo do gráfico.
+
+@docsExtends PoChartBaseComponent
+
+@example
+
+<example name="po-chart-basic" title="PO Chart Basic">
+ <file name="sample-po-chart-basic/sample-po-chart-basic.component.html"> </file>
+ <file name="sample-po-chart-basic/sample-po-chart-basic.component.ts"> </file>
+</example>
+
+<example name="po-chart-labs" title="PO Chart Labs">
+ <file name="sample-po-chart-labs/sample-po-chart-labs.component.html"> </file>
+ <file name="sample-po-chart-labs/sample-po-chart-labs.component.ts"> </file>
+</example>
+
+<example name="po-chart-coffee-ranking" title="PO Chart - Coffee Ranking">
+ <file name="sample-po-chart-coffee-ranking/sample-po-chart-coffee-ranking.component.html"> </file>
+ <file name="sample-po-chart-coffee-ranking/sample-po-chart-coffee-ranking.component.ts"> </file>
+</example>
+
+<example name="po-chart-stacked" title="PO Chart - Stacked">
+ <file name="sample-po-chart-stacked/sample-po-chart-stacked.component.html"> </file>
+ <file name="sample-po-chart-stacked/sample-po-chart-stacked.component.ts"> </file>
+</example>
+
+<example name="po-chart-summary" title="PO Chart - Summary">
+ <file name="sample-po-chart-summary/sample-po-chart-summary.component.html"> </file>
+ <file name="sample-po-chart-summary/sample-po-chart-summary.component.ts"> </file>
+</example>
+
+<example name="po-chart-world-exports" title="PO Chart - World Exports">
+ <file name="sample-po-chart-world-exports/sample-po-chart-world-exports.component.html"> </file>
+ <file name="sample-po-chart-world-exports/sample-po-chart-world-exports.component.ts"> </file>
+</example>
+
+<example name="po-chart-technology-skill" title="PO Chart - Radar">
+ <file name="sample-po-chart-technology-skill/sample-po-chart-technology-skill.component.html"> </file>
+ <file name="sample-po-chart-technology-skill/sample-po-chart-technology-skill.component.ts"> </file>
+</example>

@@ -1,0 +1,99 @@
+<po-page-default p-title="Dashboard">
+
+  <!-- ── Indicadores-Chave (KPIs) ── -->
+  <po-divider p-label="Indicadores-Chave"></po-divider>
+  <div class="po-row">
+    @for (kpi of kpis; track kpi.label) {
+      <div class="po-col-sm-12 po-col-md-6 po-col-lg-3">
+        <po-container>
+          <div class="kpi-card {{ kpi.corClasse }}">
+            <div class="kpi-header">
+              <span class="kpi-icon {{ kpi.icone }}"></span>
+              <span class="kpi-label">{{ kpi.label }}</span>
+            </div>
+            <div class="kpi-value">{{ kpi.valor }}</div>
+            <div class="kpi-footer">
+              <span [class]="kpi.tendenciaNegativa ? 'kpi-trend kpi-trend--down' : 'kpi-trend kpi-trend--up'">
+                {{ kpi.tendencia }}
+              </span>
+              <span class="kpi-detalhe">{{ kpi.detalhe }}</span>
+            </div>
+          </div>
+        </po-container>
+      </div>
+    }
+  </div>
+
+  <!-- ── Vendas e Receita ── -->
+  <po-divider p-label="Vendas e Receita"></po-divider>
+  <div class="po-row">
+    <div class="po-col-12">
+      <po-container p-title="Vendas Mensais por Região (R$)">
+        <po-chart
+          [p-type]="chartTypeColumn"
+          [p-series]="seriesVendas"
+          [p-categories]="categoriesVendas"
+          [p-height]="300">
+        </po-chart>
+      </po-container>
+    </div>
+  </div>
+
+  <div class="po-row dashboard-row-gap">
+    <div class="po-col-sm-12 po-col-md-8">
+      <po-container p-title="Tendência de Receita Anual (R$ mil)">
+        <po-chart
+          [p-type]="chartTypeLine"
+          [p-series]="seriesReceita"
+          [p-categories]="categoriesReceita"
+          [p-height]="300">
+        </po-chart>
+      </po-container>
+    </div>
+    <div class="po-col-sm-12 po-col-md-4">
+      <po-container p-title="Distribuição de Clientes">
+        <po-chart
+          [p-type]="chartTypeDonut"
+          [p-series]="seriesStatus"
+          [p-height]="300">
+        </po-chart>
+      </po-container>
+    </div>
+  </div>
+
+  <!-- ── Destaques do Mês ── -->
+  <po-divider p-label="Destaques do Mês"></po-divider>
+  <div class="po-row">
+    @for (card of cards; track card.titulo) {
+      <div class="po-col-sm-12 po-col-md-6 po-col-lg-3">
+        <po-widget
+          [p-title]="card.titulo"
+          [p-primary-label]="card.acaoPrimaria"
+          [p-tag]="card.tag"
+          [p-tag-type]="card.tagTipo">
+          <div class="destaque-card">
+            <span class="destaque-icone {{ card.icone }}"></span>
+            <span class="destaque-valor">{{ card.valor }}</span>
+            <p class="destaque-descricao">{{ card.descricao }}</p>
+          </div>
+        </po-widget>
+      </div>
+    }
+  </div>
+
+  <!-- ── Produtos ── -->
+  <po-divider p-label="Produtos"></po-divider>
+  <div class="po-row">
+    <div class="po-col-12">
+      <po-container p-title="Top 5 Produtos Mais Vendidos (Unidades)">
+        <po-chart
+          [p-type]="chartTypeBar"
+          [p-series]="seriesProdutos"
+          [p-categories]="categoriesProdutos"
+          [p-height]="280">
+        </po-chart>
+      </po-container>
+    </div>
+  </div>
+
+</po-page-default>
