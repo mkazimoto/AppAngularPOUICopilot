@@ -19,6 +19,7 @@ import { ClienteService, Cliente } from '../cliente.service';
 })
 export class ClienteEdit implements OnInit {
   titulo = 'Editar Cliente';
+  isNovo = false;
 
   cliente: Cliente = {
     codigo: 0,
@@ -42,6 +43,7 @@ export class ClienteEdit implements OnInit {
     ],
   };
 
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -50,8 +52,19 @@ export class ClienteEdit implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    const found = this.clienteService.getById(id);
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      this.isNovo = true;
+      this.titulo = 'Novo Cliente';
+      this.breadcrumb = {
+        items: [
+          { label: 'Clientes', link: '/clientes' },
+          { label: 'Novo Cliente' },
+        ],
+      };
+      return;
+    }
+    const found = this.clienteService.getById(Number(id));
     if (found) {
       this.cliente = { ...found };
       this.titulo = `Editar: ${found.nome}`;
@@ -62,8 +75,14 @@ export class ClienteEdit implements OnInit {
   }
 
   salvar(): void {
-    this.clienteService.update(this.cliente);
-    this.poNotification.success('Cliente atualizado com sucesso!');
+    if (this.isNovo) {
+      const { codigo, ...dados } = this.cliente;
+      this.clienteService.add(dados);
+      this.poNotification.success('Cliente cadastrado com sucesso!');
+    } else {
+      this.clienteService.update(this.cliente);
+      this.poNotification.success('Cliente atualizado com sucesso!');
+    }
     this.router.navigate(['/clientes']);
   }
 

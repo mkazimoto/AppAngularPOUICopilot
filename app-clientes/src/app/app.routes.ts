@@ -6,6 +6,7 @@ import { Dashboard } from './dashboard/dashboard';
 export const routes: Routes = [
   { path: 'dashboard', component: Dashboard },
   { path: 'clientes', component: Clientes },
+  { path: 'clientes/novo', component: ClienteEdit },
   { path: 'clientes/editar/:id', component: ClienteEdit },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 ];

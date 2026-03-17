@@ -62,7 +62,7 @@ export class Clientes {
   ];
 
   novo() {
-    alert('Novo cliente');
+    this.router.navigate(['/clientes/novo']);
   }
 
   editar(item: any) {

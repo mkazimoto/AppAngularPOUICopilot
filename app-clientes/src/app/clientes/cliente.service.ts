@@ -65,6 +65,13 @@ export class ClienteService {
     }
   }
 
+  add(cliente: Omit<Cliente, 'codigo'>): void {
+    const nextCodigo = this.clientes.length > 0
+      ? Math.max(...this.clientes.map(c => c.codigo)) + 1
+      : 1;
+    this.clientes.push({ ...cliente, codigo: nextCodigo });
+  }
+
   remove(codigo: number): void {
     this.clientes = this.clientes.filter(c => c.codigo !== codigo);
   }
