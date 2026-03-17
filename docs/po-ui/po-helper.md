@@ -139,3 +139,24 @@ correto do conteúdo próximo ao elemento.
  <file name="sample-po-helper-sales-performance/sample-po-helper-sales-performance.component.html"> </file>
  <file name="sample-po-helper-sales-performance/sample-po-helper-sales-performance.component.ts"> </file>
 </example>
+
+---
+
+### Interface `PoHelperOptions`
+
+/**
+@usedBy PoHelperComponent
+
+@description
+
+*Interface* que define as opções de configuração do componente po-helper.
+
+Permite customizar o conteúdo, título, tipo do ícone, modo de abertura do popover, ações customizadas e eventos.
+
+/
+
+- `title: string` — Título do helper exibido no popover.
+- `content: string` — Texto explicativo exibido no popover.
+- `type: 'info' | 'help'` — Tipo do ícone exibido: `info` ou `help`.  Quando o valor é `info`, o popover exibe apenas informações e não permite ações customizadas.  Quando o valor é `help`, o popover pode exibir ações customizadas no rodapé.
+- `footerAction: { label: string` — Ação customizada exibida no rodapé do popover. Compatível apenas com a propriedade type com o valor `help` e desconsiderada quando o type for `info`.  Deve ser um objeto com as propriedades: - `label`: Texto do botão. - `action`: Função executada ao clicar no botão.  Exemplo: ```typescript { label: 'Saiba mais', action: this.footerAction.bind(this)) } ```
+- `eventOnClick: Function` — Evento disparado ao clicar no ícone do helper.  O conteúdo do popover não é exibido quando esta propriedade é definida, para controle total do evento pelo desenvolvedor.  Pode ser uma função ou um `EventEmitter`.  Exemplo: ``` eventOnClick: (event) => {  alert('Clicou no helper');  console.log(event); } ```

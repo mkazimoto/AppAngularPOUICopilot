@@ -301,3 +301,7 @@ No uso com o `PoButtonComponent`, a propriedade `p-type` pode ser utilizada para
 <po-button p-label="Redefinir" p-type="reset"></po-button>
 ```
 /
+
+- `Submit = 'submit'` — Define o botão como do tipo `submit`. Quando clicado, o formulário é enviado automaticamente, disparando o evento `submit`.
+- `Button = 'button'` — Define o botão como do tipo `button`. Este tipo de botão não possui comportamento padrão associado e é utilizado principalmente para ações programáticas como cliques e disparos de eventos customizados.
+- `Reset = 'reset'` — Define o botão como do tipo `reset`. Quando clicado, redefine os campos do formulário ao qual pertence para seus valores iniciais.

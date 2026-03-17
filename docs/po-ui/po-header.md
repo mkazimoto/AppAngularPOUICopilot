@@ -260,3 +260,221 @@ Evento emitido ao clicar no botão para colapsar ou expandir menu.
  <file name="sample-po-header-apps/sample-po-header-apps.component.html"> </file>
  <file name="sample-po-header-apps/sample-po-header-apps.component.ts"> </file>
 </example>
+
+---
+
+### Interface `PoHeaderActionTool`
+
+/**
+@usedBy PoHeaderComponent
+
+@description
+
+*Interface* que define a seção de Actions do header.
+
+Indicação de uso:
+- Primeira ação destinada à app launcher.
+- Segunda ação (terceiro ícone) destinada à notificações.
+- Terceira ação (segundo ícone) destinada para agrupamento de ações.
+
+> Caso seja passado items e popover, o componente irá renderizar o popover e os itens serão ignorados.
+
+/
+
+- `label: string` — Título da ação
+- `tooltip: string` — Texto que será apresentado na tooltip
+- `icon: string` — Ícone do botão de ação
+- `popover: PoHeaderActionPopoverAction` — Template que será utilizado na ação
+- `action: Function` — Evento emitido ao clicar em uma ação  Exemplo: `action: this.myFunction.bind(this)`
+- `items: Array<PoHeaderActionToolItem>` — Itens de ações
+- `badge: number` — Valor númerico com a repsentação de notificações
+- `link: string` — link utilizado no redirecionamento das páginas.
+
+---
+
+### Interface `PoHeaderActionPopoverAction`
+
+/**
+
+@optional
+
+@description
+
+Título da ação
+/
+  label?: string;
+  /**
+
+@optional
+
+@description
+
+Texto que será apresentado na tooltip
+/
+  tooltip?: string;
+  /**
+
+@optional
+
+@description
+
+Ícone do botão de ação
+/
+  icon?: string;
+  /**
+
+@optional
+
+@description
+
+Template que será utilizado na ação
+/
+  popover?: PoHeaderActionPopoverAction;
+  /**
+
+@optional
+
+@description
+
+Evento emitido ao clicar em uma ação
+
+Exemplo: `action: this.myFunction.bind(this)`
+/
+
+  action?: Function;
+
+  /**
+
+@optional
+
+@description
+
+Itens de ações
+
+/
+  items?: Array<PoHeaderActionToolItem>;
+
+  /**
+
+@optional
+
+@description
+
+Valor númerico com a repsentação de notificações
+
+/
+  badge?: number;
+
+  /**
+
+
+@description
+
+link utilizado no redirecionamento das páginas.
+
+/
+  link?: string;
+
+  //interno
+  $selected?;
+}
+
+/**
+@usedBy PoHeaderComponent
+
+@description
+
+*Interface* que define um template para uma ação.
+
+/
+
+- `content: TemplateRef<any>` — Template que será renderizado dentro do popover
+
+---
+
+### Interface `PoHeaderActionToolItem`
+
+/**
+
+@description
+
+Template que será renderizado dentro do popover
+/
+  content: TemplateRef<any>;
+}
+
+/**
+@usedBy PoHeaderComponent
+
+@description
+
+*Interface* que define uma lista de ações.
+
+/
+
+- `label: string` — Label da ação
+- `action: Function` — Evento emitido ao clicar em uma ação  Exemplo: `action: this.myFunction.bind(this)`
+
+### Interface `PoHeaderActions`
+
+/**
+@usedBy PoHeaderComponent
+
+@description
+
+*Interface* que define uma lista de ações no sub-menu.
+
+/
+
+- `label: string` — Label da ação
+- `action: Function` — Evento da ação   Exemplo: `action: this.myFunction.bind(this)`
+- `link: string` — link utilizado no redirecionamento das páginas.
+- `id: string` — Identificador da ação
+
+### Interface `PoHeaderBrand`
+
+/**
+@usedBy PoHeaderComponent
+
+@description
+
+*Interface* que define a seção de brand.
+
+/
+
+- `title: string` — Título da marca
+- `logo: string` — Imagem da marca
+- `smallLogo: string` — Imagem da marca quando a tela é menor que 960px
+- `action: Function` — Evento da ação   Exemplo: `action: this.myFunction.bind(this)`
+- `link: string` — link utilizado no redirecionamento das páginas.
+
+### Interface `PoHeaderLiterals`
+
+/**
+@usedBy PoHeaderComponent
+
+@description
+
+Interface para definição das literais usadas no `po-header`.
+/
+
+- `headerLinks: string` — Texto exibido no item de menu no qual os itens do header são agrupados quando está no modo responsivo.
+- `notifications: string` — Texto para indicação de notificação, caso seja passado um valor válido na propriedade `badge`
+
+### Interface `PoHeaderUser`
+
+/**
+@usedBy PoHeaderComponent
+
+@description
+
+*Interface* que define a seção de Customer do header.
+
+/
+
+- `avatar: string` — Logo representando o perfil
+- `customerBrand: string` — Imagem da marca
+- `action: Function` — Evento emitido ao clicar na seção  Exemplo: `action: this.myFunction.bind(this)`
+- `status: 'positive' | 'negative' | 'warning' | 'disabled'` — Indicação representando o estado do usuário Valores válidos: - `positive`: Define a cor do `status` com a cor de feedback positivo. - `negative`: Define a cor do `status` com a cor de feedback negative. - `warning`: Define a cor do `status` com a cor de feedback warning. - `disabled`: Define a cor do `status` com a cor de feedback disabled
+- `popover: PoHeaderActionPopoverAction` — Template que será utilizado na ação
+- `items: Array<PoHeaderActionToolItem>` — Itens de ações   > Caso seja passado items e popover, o componente irá renderizar o popover e os itens serão ignorados

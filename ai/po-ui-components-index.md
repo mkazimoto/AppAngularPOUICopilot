@@ -39,6 +39,7 @@
 - po-popup
 - po-progress
 - po-search
+- po-skeleton
 - po-slide
 - po-stepper
 - po-table

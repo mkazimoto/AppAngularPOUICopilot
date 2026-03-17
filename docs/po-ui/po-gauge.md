@@ -151,3 +151,69 @@ A mesma regra prevalece para valores máximos.
 
 @deprecated v22.x.x
 Utilize o `po-chart` com `type="gauge"` como alternativa recomendada.
+
+---
+
+### Interface `PoGaugeCoordinates`
+
+/**
+@docsPrivate
+
+@usedBy PoGaugeComponent
+
+@description
+
+Interface que define o objeto com as coordenadas do gauge.
+/
+
+- `color: string` — A cor do alcance. Aceita hexadecimais, string com nome da cor, RGB ou então uma das classes de cor do PO.
+- `coordinates: string` — Definição de coordenadas.
+- `radius: number` — O raio do circulo. Utilizado para posicionar o ponteiro no centro do gauge.
+- `pointerDegrees: number` — O grau de angulação do ponteiro.
+
+### Interface `PoGaugeOptions`
+
+/**
+@usedBy PoGaugeComponent
+
+@description
+
+*Interface* para configurações dos elementos do gráfico.
+/
+
+- `descriptionChart: string` — Define a descrição do gráfico exibido acima do gráfico.
+- `header: PoChartHeaderOptions` — Define um objeto do tipo `PoChartHeaderOptions` para configurar a exibição de botões no cabeçalho do gráfico.
+- `showContainerGauge: boolean` — Esconde a estilização do container em volta do gráfico.
+- `showFromToLegend: boolean` — Exibe os valores das propriedades `from` e `to` no gráfico do  no texto da legenda entre parênteses.  > Válido para gráfico do tipo `Gauge`.
+- `subtitleGauge: string` — Define um subtítulo para o Gauge. Indicamos um subtítulo pequeno, com uma quantidade máxima de 32 caracteres na altura padrão.
+- `pointer: boolean` — Define a exibição do ponteiro.  > Válido para gráfico do tipo `Gauge`.
+
+### Interface `PoGaugeRanges`
+
+/**
+@usedBy PoGaugeComponent
+
+@description
+
+Interface que define os alcances das cores do gauge.
+/
+
+- `from: number` — Alcance inicial da cor. O valor padrão é 0.
+- `to: number` — Alcance final da cor. O valor padrão é 100.
+- `label: string` — O texto para a legenda do alcance.  > Se desejar ocultar a legenda basta ignorar esta propriedade.
+- `color: string` — Determina a cor do alcance. As maneiras de customizar o *preset* padrão de cores são: - Hexadeximal, por exemplo `#c64840`; - RGB, como `rgb(0, 0, 165)` - O nome da cor, por exemplo *blue*); - Usando uma das cores do tema do PO:    Valores válidos:    - <span class="dot po-color-01"></span> `color-01`    - <span class="dot po-color-02"></span> `color-02`    - <span class="dot po-color-03"></span> `color-03`    - <span class="dot po-color-04"></span> `color-04`    - <span class="dot po-color-05"></span> `color-05`    - <span class="dot po-color-06"></span> `color-06`    - <span class="dot po-color-07"></span> `color-07`    - <span class="dot po-color-08"></span> `color-08`    - <span class="dot po-color-09"></span> `color-09`    - <span class="dot po-color-10"></span> `color-10`    - <span class="dot po-color-11"></span> `color-11`    - <span class="dot po-color-12"></span> `color-12`
+
+### Interface `PoGaugeSvgContainer`
+
+/**
+@docsPrivate
+
+@usedBy PoGaugeComponent
+
+@description
+
+Interface que implementa as dimensões do container do SVG.
+/
+
+- `height: number` — Altura do container.
+- `width: number` — Largura do container.
