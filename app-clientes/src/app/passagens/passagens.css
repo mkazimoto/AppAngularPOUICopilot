@@ -1,0 +1,80 @@
+.voo-foto {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 4px;
+  display: block;
+}
+
+.voo-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.voo-rota {
+  margin-top: 10px;
+}
+
+.rota-linha {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.rota-codigo {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-neutral-dark-95);
+}
+
+.rota-seta {
+  color: var(--color-brand-01-base);
+  font-size: 1rem;
+  flex: 1;
+  text-align: center;
+}
+
+.rota-horarios {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--color-neutral-mid-60);
+  margin-top: 2px;
+}
+
+.rota-duracao {
+  font-size: 0.75rem;
+  color: var(--color-neutral-mid-40);
+  text-align: center;
+}
+
+.voo-preco {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: var(--color-brand-01-dark);
+  margin: 8px 0 0;
+}
+
+.preco-label {
+  font-size: 0.8rem;
+  font-weight: normal;
+  color: var(--color-neutral-mid-60);
+  margin-left: 2px;
+}
+
+.sem-resultados {
+  font-size: 1rem;
+  color: var(--color-neutral-mid-60);
+}
+
+.modal-foto {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 4px;
+  display: block;
+  margin-bottom: 8px;
+}

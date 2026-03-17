@@ -17,5 +17,6 @@ export class App {
     { label: 'Produtos', link: '/produtos', icon: 'an an-shopping-bag' },
     { label: 'PetSocial', link: '/petsocial', icon: 'an an-paw-print' },
     { label: 'Aluguel de Carros', link: '/carros', icon: 'an an-car' },
+    { label: 'Passagens Aéreas', link: '/passagens', icon: 'an an-airplane' },
   ];
 }

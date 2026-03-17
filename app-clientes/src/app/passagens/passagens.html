@@ -1,0 +1,166 @@
+<po-page-list
+  p-title="Reserva de Passagens Aéreas"
+  p-subtitle="Encontre o voo ideal e reserve com facilidade">
+
+  <div class="po-row po-mb-2">
+    <po-select
+      class="po-md-3 po-sm-12"
+      p-label="Origem"
+      [p-options]="origemOpcoes"
+      (p-change)="filtroOrigem = $event">
+    </po-select>
+    <po-select
+      class="po-md-3 po-sm-12"
+      p-label="Destino"
+      [p-options]="destinoOpcoes"
+      (p-change)="filtroDestino = $event">
+    </po-select>
+  </div>
+
+  <po-divider p-label="Voos Disponíveis"></po-divider>
+
+  <div class="po-row">
+    @for (voo of voosFiltrados; track voo.id) {
+      <div class="po-md-4 po-sm-12 po-lg-3 po-mb-3">
+        <po-widget
+          [p-title]="voo.companhia"
+          p-primary-label="Reservar"
+          (p-primary-action)="abrirModal(voo)">
+
+          <img
+            [src]="voo.foto"
+            [alt]="'Destino ' + voo.destino"
+            class="voo-foto">
+
+          <div class="voo-tags po-mt-1">
+            <po-tag [p-value]="voo.classe" [p-type]="PoTagType.Info"></po-tag>
+            @if (voo.escalas === 0) {
+              <po-tag [p-value]="getEscalasLabel(voo.escalas)" [p-type]="PoTagType.Success"></po-tag>
+            } @else {
+              <po-tag [p-value]="getEscalasLabel(voo.escalas)" [p-type]="PoTagType.Warning"></po-tag>
+            }
+          </div>
+
+          <div class="voo-rota po-mt-1">
+            <div class="rota-linha">
+              <span class="rota-codigo">{{ voo.origem }}</span>
+              <span class="rota-seta">✈</span>
+              <span class="rota-codigo">{{ voo.destino }}</span>
+            </div>
+            <div class="rota-horarios">
+              <span>{{ voo.partida }}</span>
+              <span class="rota-duracao">{{ voo.duracao }}</span>
+              <span>{{ voo.chegada }}</span>
+            </div>
+          </div>
+
+          <p class="voo-preco">
+            R$ {{ voo.preco | number:'1.2-2' }}<span class="preco-label">/pax</span>
+          </p>
+
+        </po-widget>
+      </div>
+    }
+
+    @if (voosFiltrados.length === 0) {
+      <div class="po-md-12 po-text-center po-mt-4">
+        <p class="sem-resultados">Nenhum voo encontrado para os filtros selecionados.</p>
+      </div>
+    }
+  </div>
+
+</po-page-list>
+
+<!-- Modal de Reserva -->
+<po-modal
+  #modalReserva
+  p-title="Confirmar Reserva"
+  p-size="lg"
+  [p-primary-action]="confirmarReservaAcao"
+  [p-secondary-action]="cancelarAcao">
+
+  @if (vooSelecionado) {
+    <img
+      [src]="vooSelecionado.foto"
+      [alt]="'Destino ' + vooSelecionado.destino"
+      class="modal-foto">
+
+    <po-divider p-label="Detalhes do Voo"></po-divider>
+
+    <div class="po-row">
+      <po-info
+        class="po-md-6 po-sm-12"
+        p-label="Companhia Aérea"
+        [p-value]="vooSelecionado.companhia">
+      </po-info>
+      <po-info
+        class="po-md-6 po-sm-12"
+        p-label="Classe"
+        [p-value]="vooSelecionado.classe">
+      </po-info>
+      <po-info
+        class="po-md-6 po-sm-12"
+        p-label="Origem"
+        [p-value]="getOrigemLabel(vooSelecionado.origem)">
+      </po-info>
+      <po-info
+        class="po-md-6 po-sm-12"
+        p-label="Destino"
+        [p-value]="getDestinoLabel(vooSelecionado.destino)">
+      </po-info>
+      <po-info
+        class="po-md-4 po-sm-12"
+        p-label="Partida"
+        [p-value]="vooSelecionado.partida">
+      </po-info>
+      <po-info
+        class="po-md-4 po-sm-12"
+        p-label="Chegada"
+        [p-value]="vooSelecionado.chegada">
+      </po-info>
+      <po-info
+        class="po-md-4 po-sm-12"
+        p-label="Duração"
+        [p-value]="vooSelecionado.duracao">
+      </po-info>
+      <po-info
+        class="po-md-6 po-sm-12"
+        p-label="Escalas"
+        [p-value]="getEscalasLabel(vooSelecionado.escalas)">
+      </po-info>
+      <po-info
+        class="po-md-6 po-sm-12"
+        p-label="Valor por Passageiro"
+        [p-value]="'R$ ' + (vooSelecionado.preco | number:'1.2-2')">
+      </po-info>
+    </div>
+
+    <po-divider p-label="Dados do Passageiro"></po-divider>
+
+    <div class="po-row">
+      <po-input
+        class="po-md-12 po-sm-12"
+        p-label="Nome Completo"
+        p-placeholder="Informe o nome completo"
+        p-required
+        [(ngModel)]="nomePassageiro">
+      </po-input>
+      <po-input
+        class="po-md-6 po-sm-12"
+        p-label="CPF"
+        p-placeholder="000.000.000-00"
+        p-mask="999.999.999-99"
+        p-required
+        [(ngModel)]="cpfPassageiro">
+      </po-input>
+      <po-email
+        class="po-md-6 po-sm-12"
+        p-label="E-mail"
+        p-placeholder="seu@email.com"
+        p-required
+        [(ngModel)]="emailPassageiro">
+      </po-email>
+    </div>
+  }
+
+</po-modal>
