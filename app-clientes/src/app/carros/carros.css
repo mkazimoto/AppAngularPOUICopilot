@@ -1,0 +1,43 @@
+.carro-foto {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 4px;
+  display: block;
+}
+
+.carro-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.carro-detalhes {
+  margin-top: 8px;
+}
+
+.detalhe-texto {
+  font-size: 0.8rem;
+  color: var(--color-neutral-mid-60);
+}
+
+.carro-preco {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: var(--color-brand-01-dark);
+  margin: 6px 0 0;
+}
+
+.preco-periodo {
+  font-size: 0.85rem;
+  font-weight: normal;
+  color: var(--color-neutral-mid-60);
+}
+
+.modal-foto {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 4px;
+  display: block;
+}
