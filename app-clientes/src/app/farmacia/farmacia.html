@@ -1,0 +1,396 @@
+<po-page-default
+  p-title="Farmácia Online"
+  [p-breadcrumb]="breadcrumb">
+
+  <!-- ── Barra de Ações ── -->
+  <div class="farm-topbar">
+    <div class="farm-topbar__busca">
+      <po-input
+        name="busca"
+        [ngModel]="termoBusca"
+        (ngModelChange)="termoBusca = $event"
+        p-label="Buscar medicamento"
+        p-placeholder="Nome, princípio ativo ou laboratório..."
+        p-icon="an an-magnifying-glass"
+        p-clean>
+      </po-input>
+    </div>
+    <div class="farm-topbar__filtro">
+      <po-select
+        name="categoria"
+        [ngModel]="filtroCategoria"
+        (ngModelChange)="filtroCategoria = $event"
+        p-label="Categoria"
+        [p-options]="categorias">
+      </po-select>
+    </div>
+    <div class="farm-topbar__carrinho">
+      <po-button
+        p-label="Carrinho"
+        p-icon="an an-shopping-cart"
+        p-kind="primary"
+        (p-click)="abrirCarrinho()">
+      </po-button>
+      @if (totalCarrinho > 0) {
+        <span class="farm-badge">{{ totalCarrinho }}</span>
+      }
+    </div>
+  </div>
+
+  <!-- ── Banner Destaque ── -->
+  <div class="farm-banner">
+    <div class="farm-banner__content">
+      <h2 class="farm-banner__titulo">Sua saúde em primeiro lugar</h2>
+      <p class="farm-banner__subtitulo">
+        Medicamentos originais, genéricos e dermocosméticos com entrega rápida.<br>
+        Economize até <strong>30%</strong> nas melhores marcas.
+      </p>
+      <po-button
+        p-label="Ver Promoções"
+        p-kind="secondary"
+        p-icon="an an-tag">
+      </po-button>
+    </div>
+    <div class="farm-banner__icons">
+      <span class="an an-first-aid-kit farm-banner__icon"></span>
+    </div>
+  </div>
+
+  <!-- ── KPIs ── -->
+  <div class="po-row farm-kpi-row">
+    <div class="po-col-sm-12 po-col-md-6 po-col-lg-3">
+      <po-container>
+        <div class="farm-kpi farm-kpi--azul">
+          <span class="an an-package farm-kpi__icone"></span>
+          <div class="farm-kpi__dados">
+            <span class="farm-kpi__valor">{{ medicamentos.length }}</span>
+            <span class="farm-kpi__label">Medicamentos Disponíveis</span>
+          </div>
+        </div>
+      </po-container>
+    </div>
+    <div class="po-col-sm-12 po-col-md-6 po-col-lg-3">
+      <po-container>
+        <div class="farm-kpi farm-kpi--verde">
+          <span class="an an-seal-percent farm-kpi__icone"></span>
+          <div class="farm-kpi__dados">
+            <span class="farm-kpi__valor">Até 30%</span>
+            <span class="farm-kpi__label">Desconto em Genéricos</span>
+          </div>
+        </div>
+      </po-container>
+    </div>
+    <div class="po-col-sm-12 po-col-md-6 po-col-lg-3">
+      <po-container>
+        <div class="farm-kpi farm-kpi--laranja">
+          <span class="an an-truck farm-kpi__icone"></span>
+          <div class="farm-kpi__dados">
+            <span class="farm-kpi__valor">Grátis</span>
+            <span class="farm-kpi__label">Entrega acima de R$ 80</span>
+          </div>
+        </div>
+      </po-container>
+    </div>
+    <div class="po-col-sm-12 po-col-md-6 po-col-lg-3">
+      <po-container>
+        <div class="farm-kpi farm-kpi--indigo">
+          <span class="an an-shield-check farm-kpi__icone"></span>
+          <div class="farm-kpi__dados">
+            <span class="farm-kpi__valor">100%</span>
+            <span class="farm-kpi__label">Produtos Regulamentados ANVISA</span>
+          </div>
+        </div>
+      </po-container>
+    </div>
+  </div>
+
+  <!-- ── Destaques e Em Promoção ── -->
+  @if (!termoBusca && !filtroCategoria) {
+    <po-divider p-label="Em Promoção 🔥"></po-divider>
+    <div class="po-row">
+      @for (med of medicamentosDestaque; track med.id) {
+        <div class="po-col-sm-12 po-col-md-6 po-col-lg-4">
+          <po-widget
+            [p-title]="med.nome"
+            p-primary-label="Ver Detalhes"
+            p-secondary-label="Adicionar"
+            [p-tag]="med.desconto ? med.desconto + '% OFF' : ''"
+            [p-tag-type]="tagTypeDanger"
+            (p-primary-action)="abrirDetalhe(med)"
+            (p-secondary-action)="adicionarAoCarrinho(med)">
+            <div class="farm-card-destaque">
+              <div class="farm-card-destaque__info">
+                <po-tag [p-value]="med.categoria" [p-type]="tagTypeInfo" p-inverse></po-tag>
+                @if (med.generico) {
+                  <po-tag p-value="Genérico" [p-type]="tagTypeSuccess" p-inverse></po-tag>
+                }
+              </div>
+              <p class="farm-card__lab">{{ med.laboratorio }}</p>
+              <p class="farm-card__principio">{{ med.principioAtivo }}</p>
+              <div class="farm-card__preco">
+                @if (med.precoOriginal) {
+                  <span class="farm-card__preco--original">{{ formatarMoeda(med.precoOriginal) }}</span>
+                }
+                <span class="farm-card__preco--atual">{{ formatarMoeda(med.preco) }}</span>
+              </div>
+              @if (med.receita) {
+                <div class="farm-card__receita">
+                  <span class="an an-warning farm-card__receita-icone"></span>
+                  <span>Exige receita médica</span>
+                </div>
+              }
+            </div>
+          </po-widget>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── Catálogo de Medicamentos ── -->
+  <po-divider [p-label]="termoBusca || filtroCategoria ? 'Resultados da Busca' : 'Todos os Medicamentos'"></po-divider>
+
+  @if (medicamentosFiltrados.length === 0) {
+    <po-container>
+      <div class="farm-vazio">
+        <span class="an an-magnifying-glass farm-vazio__icone"></span>
+        <p class="farm-vazio__texto">Nenhum medicamento encontrado para os filtros selecionados.</p>
+        <po-button p-label="Limpar Filtros" (p-click)="termoBusca = ''; filtroCategoria = ''"></po-button>
+      </div>
+    </po-container>
+  } @else {
+    <div class="po-row">
+      @for (med of medicamentosFiltrados; track med.id) {
+        <div class="po-col-sm-12 po-col-md-6 po-col-lg-4 po-col-xl-3">
+          <div class="farm-card" [class.farm-card--indisponivel]="!med.disponivel">
+
+            <div class="farm-card__header">
+              <div class="farm-card__tags">
+                <po-tag [p-value]="med.categoria" [p-type]="tagTypeInfo"></po-tag>
+                @if (med.generico) {
+                  <po-tag p-value="Genérico" [p-type]="tagTypeSuccess"></po-tag>
+                }
+                @if (med.receita) {
+                  <po-tag p-value="Receita" [p-type]="tagTypeWarning"></po-tag>
+                }
+                @if (!med.disponivel) {
+                  <po-tag p-value="Indisponível" [p-type]="tagTypeDanger"></po-tag>
+                }
+                @if (med.desconto) {
+                  <po-tag [p-value]="med.desconto + '% OFF'" [p-type]="tagTypeDanger" p-inverse></po-tag>
+                }
+              </div>
+            </div>
+
+            <div class="farm-card__body">
+              <h3 class="farm-card__nome">{{ med.nome }}</h3>
+              <p class="farm-card__principio">{{ med.principioAtivo }}</p>
+              <p class="farm-card__lab">
+                <span class="an an-factory"></span> {{ med.laboratorio }}
+              </p>
+              <p class="farm-card__descricao">{{ med.descricao }}</p>
+              <div class="farm-card__preco">
+                @if (med.precoOriginal) {
+                  <span class="farm-card__preco--original">{{ formatarMoeda(med.precoOriginal) }}</span>
+                }
+                <span class="farm-card__preco--atual" [class.farm-card__preco--promo]="!!med.desconto">
+                  {{ formatarMoeda(med.preco) }}
+                </span>
+              </div>
+            </div>
+
+            <div class="farm-card__footer">
+              <po-button
+                p-label="Detalhes"
+                p-icon="an an-info"
+                p-kind="tertiary"
+                (p-click)="abrirDetalhe(med)">
+              </po-button>
+              <po-button
+                [p-label]="med.disponivel ? 'Adicionar' : 'Indisponível'"
+                p-icon="an an-shopping-cart"
+                p-kind="primary"
+                [p-disabled]="!med.disponivel"
+                (p-click)="adicionarAoCarrinho(med)">
+              </po-button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── Análises ── -->
+  @if (!termoBusca && !filtroCategoria) {
+    <po-divider p-label="Análises do Estoque"></po-divider>
+    <div class="po-row">
+      <div class="po-col-sm-12 po-col-md-5">
+        <po-container p-title="Categorias Mais Vendidas (%)">
+          <po-chart
+            [p-type]="chartTypeDonut"
+            [p-series]="seriesCategorias"
+            [p-height]="280">
+          </po-chart>
+        </po-container>
+      </div>
+      <div class="po-col-sm-12 po-col-md-7">
+        <po-container p-title="Vendas Mensais — Genéricos vs. Referência (unidades)">
+          <po-chart
+            [p-type]="chartTypeColumn"
+            [p-series]="seriesVendas"
+            [p-categories]="categoriesVendas"
+            [p-height]="280">
+          </po-chart>
+        </po-container>
+      </div>
+    </div>
+
+    <!-- ── Informações de Segurança ── -->
+    <po-divider p-label="Informações Importantes"></po-divider>
+    <div class="po-row">
+      <div class="po-col-sm-12 po-col-md-4">
+        <po-container>
+          <div class="farm-info">
+            <span class="an an-warning farm-info__icone farm-info__icone--warning"></span>
+            <h4 class="farm-info__titulo">Medicamentos com Receita</h4>
+            <p class="farm-info__texto">
+              Medicamentos marcados com "Receita" exigem prescrição médica válida para dispensação. A receita deve ser apresentada no ato da retirada ou enviada digitalmente.
+            </p>
+          </div>
+        </po-container>
+      </div>
+      <div class="po-col-sm-12 po-col-md-4">
+        <po-container>
+          <div class="farm-info">
+            <span class="an an-shield-check farm-info__icone farm-info__icone--success"></span>
+            <h4 class="farm-info__titulo">Regulamentação ANVISA</h4>
+            <p class="farm-info__texto">
+              Todos os produtos comercializados são registrados e aprovados pela ANVISA. Verifique sempre o prazo de validade e as condições de armazenamento.
+            </p>
+          </div>
+        </po-container>
+      </div>
+      <div class="po-col-sm-12 po-col-md-4">
+        <po-container>
+          <div class="farm-info">
+            <span class="an an-first-aid-kit farm-info__icone farm-info__icone--info"></span>
+            <h4 class="farm-info__titulo">Farmacêutico de Plantão</h4>
+            <p class="farm-info__texto">
+              Dúvidas sobre medicamentos? Nosso farmacêutico está disponível 24h por dia pelo chat ou pelo telefone 0800 000 0000 para orientações.
+            </p>
+          </div>
+        </po-container>
+      </div>
+    </div>
+  }
+
+</po-page-default>
+
+<!-- ── Modal Detalhes ── -->
+<po-modal
+  #modalDetalhe
+  [p-title]="medicamentoSelecionado?.nome || ''"
+  [p-primary-action]="acaoAdicionarDetalhe"
+  [p-secondary-action]="acaoFecharDetalhe"
+  p-size="lg">
+
+  @if (medicamentoSelecionado) {
+    <div class="farm-modal-detalhe">
+      <div class="farm-modal-detalhe__tags">
+        <po-tag [p-value]="medicamentoSelecionado.categoria" [p-type]="tagTypeInfo" p-inverse></po-tag>
+        @if (medicamentoSelecionado.generico) {
+          <po-tag p-value="Medicamento Genérico" [p-type]="tagTypeSuccess" p-inverse></po-tag>
+        }
+        @if (medicamentoSelecionado.receita) {
+          <po-tag p-value="Exige Receita Médica" [p-type]="tagTypeWarning" p-inverse></po-tag>
+        }
+        @if (!medicamentoSelecionado.disponivel) {
+          <po-tag p-value="Produto Indisponível" [p-type]="tagTypeDanger" p-inverse></po-tag>
+        }
+      </div>
+
+      <div class="farm-modal-detalhe__grid">
+        <po-info
+          p-label="Princípio Ativo"
+          [p-value]="medicamentoSelecionado.principioAtivo"
+          [p-orientation]="infoOrientationVertical">
+        </po-info>
+        <po-info
+          p-label="Laboratório"
+          [p-value]="medicamentoSelecionado.laboratorio"
+          [p-orientation]="infoOrientationVertical">
+        </po-info>
+      </div>
+
+      <div class="farm-modal-detalhe__descricao">
+        <h4>Descrição</h4>
+        <p>{{ medicamentoSelecionado.descricao }}</p>
+      </div>
+
+      <div class="farm-modal-detalhe__uso">
+        <h4>Modo de Uso</h4>
+        <p>{{ medicamentoSelecionado.uso }}</p>
+      </div>
+
+      <div class="farm-modal-detalhe__preco">
+        @if (medicamentoSelecionado.precoOriginal) {
+          <span class="farm-card__preco--original">{{ formatarMoeda(medicamentoSelecionado.precoOriginal) }}</span>
+        }
+        <span class="farm-modal-detalhe__preco-atual">{{ formatarMoeda(medicamentoSelecionado.preco) }}</span>
+        @if (medicamentoSelecionado.desconto) {
+          <po-tag [p-value]="medicamentoSelecionado.desconto + '% de Desconto'" [p-type]="tagTypeDanger" p-inverse></po-tag>
+        }
+      </div>
+
+      @if (medicamentoSelecionado.receita) {
+        <div class="farm-modal-detalhe__aviso">
+          <span class="an an-warning"></span>
+          <span>Este medicamento exige apresentação de <strong>receita médica válida</strong> para a compra.</span>
+        </div>
+      }
+    </div>
+  }
+</po-modal>
+
+<!-- ── Modal Carrinho ── -->
+<po-modal
+  #modalCarrinho
+  p-title="Meu Carrinho"
+  [p-primary-action]="acaoFinalizarCarrinho"
+  [p-secondary-action]="acaoFecharCarrinho"
+  p-size="lg">
+
+  @if (carrinho.length === 0) {
+    <div class="farm-vazio">
+      <span class="an an-shopping-cart farm-vazio__icone"></span>
+      <p class="farm-vazio__texto">Seu carrinho está vazio.</p>
+    </div>
+  } @else {
+    <div class="farm-carrinho">
+      @for (item of carrinho; track item.medicamento.id; let i = $index) {
+        <div class="farm-carrinho__item">
+          <div class="farm-carrinho__item-info">
+            <span class="farm-carrinho__item-nome">{{ item.medicamento.nome }}</span>
+            <span class="farm-carrinho__item-lab">{{ item.medicamento.laboratorio }}</span>
+            <span class="farm-carrinho__item-preco-unit">{{ formatarMoeda(item.medicamento.preco) }} / un.</span>
+          </div>
+          <div class="farm-carrinho__item-qty">
+            <po-button p-icon="an an-minus" p-kind="tertiary" (p-click)="alterarQuantidade(i, -1)"></po-button>
+            <span class="farm-carrinho__qty-valor">{{ item.quantidade }}</span>
+            <po-button p-icon="an an-plus" p-kind="tertiary" (p-click)="alterarQuantidade(i, 1)"></po-button>
+          </div>
+          <div class="farm-carrinho__item-subtotal">
+            <span>{{ formatarMoeda(item.medicamento.preco * item.quantidade) }}</span>
+          </div>
+          <po-button p-icon="an an-trash" p-danger (p-click)="removerDoCarrinho(i)"></po-button>
+        </div>
+      }
+
+      <po-divider></po-divider>
+
+      <div class="farm-carrinho__total">
+        <span class="farm-carrinho__total-label">Total</span>
+        <span class="farm-carrinho__total-valor">{{ formatarMoeda(totalValor) }}</span>
+      </div>
+    </div>
+  }
+</po-modal>
