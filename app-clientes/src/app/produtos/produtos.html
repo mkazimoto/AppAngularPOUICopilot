@@ -1,0 +1,284 @@
+<po-page-default
+  p-title="Loja Online"
+  p-subtitle="Confira nossos produtos em destaque"
+  [p-breadcrumb]="breadcrumb">
+
+  <!-- Barra de busca e filtros -->
+  <div class="produtos-filtros po-mb-3">
+    <div class="po-row po-align-items-center">
+
+      <div class="po-col-12 po-col-md-5">
+        <div class="produtos-busca">
+          <span class="an an-magnifying-glass produtos-busca-icone"></span>
+          <input
+            class="produtos-busca-input"
+            type="text"
+            placeholder="Buscar produtos..."
+            [value]="termoBusca"
+            (input)="buscar($any($event.target).value)" />
+        </div>
+      </div>
+
+      <div class="po-col-12 po-col-md-7">
+        <div class="produtos-categorias">
+          @for (cat of categorias; track cat) {
+            <button
+              class="produto-categoria-btn"
+              [class.produto-categoria-btn--ativo]="(filtroCategoria === '' && cat === 'Todos') || filtroCategoria === cat"
+              (click)="filtrarCategoria(cat)">
+              {{ cat }}
+            </button>
+          }
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Contador de resultados -->
+  <div class="produtos-resultado-info po-mb-3">
+    <small>
+      <span class="an an-package po-mr-1"></span>
+      {{ produtosFiltrados.length }} produto(s) encontrado(s)
+    </small>
+    @if (totalCarrinho > 0) {
+      <button class="carrinho-flutuante" (click)="abrirCarrinho()">
+        <span class="an an-shopping-cart"></span>
+        <span class="carrinho-badge">{{ totalCarrinho }}</span>
+        Meu Carrinho
+      </button>
+    }
+  </div>
+
+  <!-- Grade de Produtos -->
+  <div class="po-row">
+    @for (produto of produtosFiltrados; track produto.id) {
+      <div class="po-col-12 po-col-sm-6 po-col-md-4 po-col-lg-3 po-mb-3">
+        <po-widget
+          [p-no-shadow]="false"
+          class="produto-widget"
+          [class.produto-widget--indisponivel]="!produto.disponivel">
+
+          <!-- Imagem do produto -->
+          <div class="produto-imagem-wrapper">
+            @if (produto.destaque) {
+              <div class="produto-badge-destaque">
+                <span class="an an-star po-mr-1"></span>Destaque
+              </div>
+            }
+            @if (produto.precoOriginal) {
+              <div class="produto-badge-desconto">
+                -{{ porcentagemDescontoItem(produto) }}%
+              </div>
+            }
+            @if (!produto.disponivel) {
+              <div class="produto-overlay-indisponivel">
+                <span class="an an-x-circle po-mr-1"></span>Indisponível
+              </div>
+            }
+            <img
+              [src]="produto.imagemUrl"
+              [alt]="produto.nome"
+              class="produto-imagem"
+              (error)="onImageError($event)" />
+          </div>
+
+          <!-- Informações do produto -->
+          <div class="produto-info">
+            <div class="produto-categoria-tag po-mb-1">
+              <po-tag
+                [p-value]="produto.categoria"
+                [p-type]="tagTypeInfo"
+                p-inverse>
+              </po-tag>
+              @if (!produto.disponivel) {
+                <po-tag
+                  p-value="Sem estoque"
+                  [p-type]="tagTypeDanger"
+                  p-inverse>
+                </po-tag>
+              }
+            </div>
+
+            <h3 class="produto-nome" (click)="abrirDetalhe(produto)">{{ produto.nome }}</h3>
+
+            <p class="produto-descricao">{{ produto.descricao }}</p>
+
+            <!-- Avaliações -->
+            <div class="produto-avaliacoes">
+              @for (estrela of gerarEstrelas(produto.estrelas); track $index) {
+                <span class="an an-star produto-estrela"></span>
+              }
+              <span class="produto-avaliacoes-total">({{ produto.avaliacoes | number }})</span>
+            </div>
+
+            <!-- Preços -->
+            <div class="produto-preco-wrapper">
+              @if (produto.precoOriginal) {
+                <span class="produto-preco-original">{{ formatarPreco(produto.precoOriginal) }}</span>
+              }
+              <span class="produto-preco">{{ formatarPreco(produto.preco) }}</span>
+            </div>
+
+            <!-- Ações -->
+            <div class="produto-acoes">
+              <po-button
+                p-label="Ver Detalhes"
+                p-kind="secondary"
+                p-icon="an an-eye"
+                p-size="small"
+                (p-click)="abrirDetalhe(produto)">
+              </po-button>
+              <po-button
+                p-label="Comprar"
+                p-kind="primary"
+                p-icon="an an-shopping-cart"
+                p-size="small"
+                [p-disabled]="!produto.disponivel"
+                (p-click)="adicionarAoCarrinho(produto)">
+              </po-button>
+            </div>
+          </div>
+
+        </po-widget>
+      </div>
+    }
+
+    @empty {
+      <div class="po-col-12">
+        <po-container>
+          <div class="produtos-vazio">
+            <span class="an an-smiley-sad produtos-vazio-icone"></span>
+            <h3>Nenhum produto encontrado</h3>
+            <p>Tente ajustar os filtros ou o termo de busca.</p>
+            <po-button
+              p-label="Limpar Filtros"
+              p-kind="secondary"
+              (p-click)="filtrarCategoria('Todos'); buscar('')">
+            </po-button>
+          </div>
+        </po-container>
+      </div>
+    }
+  </div>
+
+</po-page-default>
+
+<!-- Modal: Detalhe do Produto -->
+<po-modal
+  #modalDetalhe
+  [p-title]="produtoSelecionado?.nome ?? ''"
+  p-size="lg"
+  [p-primary-action]="acaoModalDetalhe"
+  [p-secondary-action]="acaoSecundariaModalDetalhe">
+
+  @if (produtoSelecionado) {
+    <div class="po-row">
+      <div class="po-col-12 po-col-md-5">
+        <img
+          [src]="produtoSelecionado.imagemUrl"
+          [alt]="produtoSelecionado.nome"
+          class="produto-detalhe-imagem" />
+        <div class="produto-avaliacoes po-mt-2 po-mb-2">
+          @for (estrela of gerarEstrelas(produtoSelecionado.estrelas); track $index) {
+            <span class="an an-star produto-estrela"></span>
+          }
+          <span class="produto-avaliacoes-total">({{ produtoSelecionado.avaliacoes | number }} avaliações)</span>
+        </div>
+      </div>
+      <div class="po-col-12 po-col-md-7">
+        <div class="po-mb-2">
+          <po-tag
+            [p-value]="produtoSelecionado.categoria"
+            [p-type]="tagTypeInfo"
+            p-inverse>
+          </po-tag>
+          @if (produtoSelecionado.destaque) {
+            <po-tag
+              p-value="Destaque"
+              [p-type]="tagTypeWarning">
+            </po-tag>
+          }
+          @if (!produtoSelecionado.disponivel) {
+            <po-tag
+              p-value="Sem estoque"
+              [p-type]="tagTypeDanger"
+              p-inverse>
+            </po-tag>
+          }
+        </div>
+
+        <p class="produto-detalhe-descricao">{{ produtoSelecionado.descricao }}</p>
+
+        <div class="produto-preco-wrapper po-mt-2">
+          @if (produtoSelecionado.precoOriginal) {
+            <span class="produto-preco-original">{{ formatarPreco(produtoSelecionado.precoOriginal) }}</span>
+            <span class="produto-desconto-label po-ml-2">
+              {{ porcentagemDesconto }}% OFF
+            </span>
+          }
+          <div class="produto-preco-destaque">{{ formatarPreco(produtoSelecionado.preco) }}</div>
+        </div>
+
+        @if (produtoSelecionado.disponivel) {
+          <p class="produto-disponivel-texto">
+            <span class="an an-check-circle po-mr-1"></span>
+            Em estoque — envio em até 2 dias úteis
+          </p>
+        }
+      </div>
+    </div>
+  }
+
+</po-modal>
+
+<!-- Modal: Carrinho de Compras -->
+<po-modal
+  #modalCarrinho
+  p-title="Meu Carrinho"
+  p-size="lg"
+  [p-primary-action]="acaoPrimariaCarrinho"
+  [p-secondary-action]="acaoSecundariaCarrinho">
+
+  @if (carrinho.length === 0) {
+    <div class="produtos-vazio">
+      <span class="an an-shopping-cart produtos-vazio-icone"></span>
+      <h3>Seu carrinho está vazio</h3>
+      <p>Adicione produtos para continuar.</p>
+    </div>
+  } @else {
+    <div class="carrinho-lista">
+      @for (item of carrinho; track item.produto.id) {
+        <div class="carrinho-item">
+          <img [src]="item.produto.imagemUrl" [alt]="item.produto.nome" class="carrinho-item-imagem" />
+          <div class="carrinho-item-info">
+            <strong>{{ item.produto.nome }}</strong>
+            <div class="carrinho-item-preco">{{ formatarPreco(item.produto.preco) }} × {{ item.quantidade }}</div>
+            <div class="carrinho-item-subtotal">{{ formatarPreco(item.produto.preco * item.quantidade) }}</div>
+          </div>
+          <po-button
+            p-kind="tertiary"
+            p-icon="an an-trash"
+            p-size="small"
+            p-danger
+            (p-click)="removerDoCarrinho(item.produto.id)">
+          </po-button>
+        </div>
+      }
+    </div>
+
+    <div class="carrinho-resumo">
+      @if (desconto > 0) {
+        <div class="carrinho-resumo-linha">
+          <span>Desconto:</span>
+          <span class="carrinho-desconto">- {{ formatarPreco(desconto) }}</span>
+        </div>
+      }
+      <div class="carrinho-resumo-linha carrinho-resumo-total">
+        <strong>Total:</strong>
+        <strong class="carrinho-total-valor">{{ formatarPreco(valorTotalCarrinho) }}</strong>
+      </div>
+    </div>
+  }
+
+</po-modal>
