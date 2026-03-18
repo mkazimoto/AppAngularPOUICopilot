@@ -15,6 +15,6 @@ export const routes: Routes = [
   { path: 'produtos', component: Produtos },
   { path: 'petsocial', component: Pets },
   { path: 'carros', component: Carros },
-  { path: 'passagens', component: Passagens },
+  { path: 'passagens', component: Passagens },    
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 ];

@@ -1,20 +1,27 @@
-import { DecimalPipe } from '@angular/common';
-import { Component, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
     PoButtonModule,
     PoDividerModule,
     PoFieldModule,
     PoInfoModule,
-    PoModalAction,
-    PoModalComponent,
-    PoModalModule,
     PoNotificationService,
     PoPageModule,
+    PoStepperModule,
     PoTagModule,
     PoTagType,
     PoWidgetModule,
 } from '@po-ui/ng-components';
+
+interface Busca {
+  origem: string;
+  destino: string;
+  dataIda: string;
+  dataVolta: string;
+  passageiros: number;
+  classe: string;
+}
 
 interface Voo {
   id: number;
@@ -24,21 +31,38 @@ interface Voo {
   partida: string;
   chegada: string;
   duracao: string;
-  preco: number;
-  classe: string;
   escalas: number;
+  preco: number;
   foto: string;
+}
+
+interface Passageiro {
+  nome: string;
+  sobrenome: string;
+  cpf: string;
+  email: string;
+  telefone: string;
+  dataNascimento: string;
+}
+
+interface Pagamento {
+  metodo: string;
+  numeroCartao: string;
+  nomeCartao: string;
+  validade: string;
+  cvv: string;
+  parcelas: string;
 }
 
 @Component({
   selector: 'app-passagens',
   imports: [
-    DecimalPipe,
+    CommonModule,
     FormsModule,
     PoPageModule,
+    PoStepperModule,
     PoWidgetModule,
     PoTagModule,
-    PoModalModule,
     PoButtonModule,
     PoInfoModule,
     PoFieldModule,
@@ -51,186 +75,242 @@ interface Voo {
 export class Passagens {
   readonly PoTagType = PoTagType;
 
-  @ViewChild('modalReserva') modalReserva!: PoModalComponent;
+  passoAtual = 1;
+
+  passos = [
+    { label: 'Busca' },
+    { label: 'Escolha o Voo' },
+    { label: 'Passageiro' },
+    { label: 'Pagamento' },
+    { label: 'Confirmação' },
+  ];
+
+  busca: Busca = {
+    origem: '',
+    destino: '',
+    dataIda: '',
+    dataVolta: '',
+    passageiros: 1,
+    classe: 'economy',
+  };
 
   vooSelecionado: Voo | null = null;
-  filtroOrigem = '';
-  filtroDestino = '';
 
-  nomePassageiro = '';
-  cpfPassageiro = '';
-  emailPassageiro = '';
+  passageiro: Passageiro = {
+    nome: '',
+    sobrenome: '',
+    cpf: '',
+    email: '',
+    telefone: '',
+    dataNascimento: '',
+  };
 
-  origemOpcoes = [
-    { value: '', label: 'Todas as origens' },
-    { value: 'GRU', label: 'São Paulo (GRU)' },
-    { value: 'GIG', label: 'Rio de Janeiro (GIG)' },
+  pagamento: Pagamento = {
+    metodo: 'credito',
+    numeroCartao: '',
+    nomeCartao: '',
+    validade: '',
+    cvv: '',
+    parcelas: '1',
+  };
+
+  codigoReserva = '';
+
+  aeroportos = [
+    { value: 'GRU', label: 'São Paulo - Guarulhos (GRU)' },
+    { value: 'CGH', label: 'São Paulo - Congonhas (CGH)' },
+    { value: 'GIG', label: 'Rio de Janeiro - Galeão (GIG)' },
+    { value: 'SDU', label: 'Rio de Janeiro - Santos Dumont (SDU)' },
     { value: 'BSB', label: 'Brasília (BSB)' },
     { value: 'SSA', label: 'Salvador (SSA)' },
     { value: 'FOR', label: 'Fortaleza (FOR)' },
-  ];
-
-  destinoOpcoes = [
-    { value: '', label: 'Todos os destinos' },
-    { value: 'MIA', label: 'Miami (MIA)' },
-    { value: 'LIS', label: 'Lisboa (LIS)' },
-    { value: 'CDG', label: 'Paris (CDG)' },
-    { value: 'GRU', label: 'São Paulo (GRU)' },
+    { value: 'REC', label: 'Recife (REC)' },
+    { value: 'MAO', label: 'Manaus (MAO)' },
+    { value: 'POA', label: 'Porto Alegre (POA)' },
+    { value: 'CNF', label: 'Belo Horizonte - Confins (CNF)' },
     { value: 'CWB', label: 'Curitiba (CWB)' },
     { value: 'FLN', label: 'Florianópolis (FLN)' },
+    { value: 'MCZ', label: 'Maceió (MCZ)' },
+    { value: 'NAT', label: 'Natal (NAT)' },
   ];
 
-  voos: Voo[] = [
+  classeOpcoes = [
+    { value: 'economy', label: 'Econômica' },
+    { value: 'premium_economy', label: 'Econômica Premium' },
+    { value: 'business', label: 'Executiva' },
+    { value: 'first', label: 'Primeira Classe' },
+  ];
+
+  passageirosOpcoes = [
+    { value: 1, label: '1 Passageiro' },
+    { value: 2, label: '2 Passageiros' },
+    { value: 3, label: '3 Passageiros' },
+    { value: 4, label: '4 Passageiros' },
+    { value: 5, label: '5 Passageiros' },
+    { value: 6, label: '6 Passageiros' },
+  ];
+
+  metodoPagamentoOpcoes = [
+    { value: 'credito', label: 'Cartão de Crédito' },
+    { value: 'debito', label: 'Cartão de Débito' },
+    { value: 'pix', label: 'PIX' },
+  ];
+
+  parcelasOpcoes = [
+    { value: '1', label: '1x sem juros' },
+    { value: '2', label: '2x sem juros' },
+    { value: '3', label: '3x sem juros' },
+    { value: '6', label: '6x + juros' },
+    { value: '12', label: '12x + juros' },
+  ];
+
+  voosDisponiveis: Voo[] = [
     {
       id: 1,
       companhia: 'LATAM Airlines',
       origem: 'GRU',
-      destino: 'MIA',
-      partida: '08:00',
-      chegada: '16:30',
-      duracao: '9h 30min',
-      preco: 2850,
-      classe: 'Econômica',
+      destino: 'SSA',
+      partida: '07:30',
+      chegada: '09:50',
+      duracao: '2h 20min',
       escalas: 0,
-      foto: 'https://picsum.photos/seed/miami-beach/600/300',
+      preco: 489,
+      foto: 'https://picsum.photos/seed/salvador-beach-101/800/260',
     },
     {
       id: 2,
-      companhia: 'TAP Air Portugal',
+      companhia: 'GOL Linhas Aéreas',
       origem: 'GRU',
-      destino: 'LIS',
-      partida: '23:45',
-      chegada: '13:15',
-      duracao: '9h 30min',
-      preco: 3400,
-      classe: 'Econômica',
+      destino: 'SSA',
+      partida: '10:15',
+      chegada: '12:45',
+      duracao: '2h 30min',
       escalas: 0,
-      foto: 'https://picsum.photos/seed/lisbon-city/600/300',
+      preco: 412,
+      foto: 'https://picsum.photos/seed/bahia-coast-202/800/260',
     },
     {
       id: 3,
-      companhia: 'Air France',
-      origem: 'GIG',
-      destino: 'CDG',
-      partida: '21:10',
-      chegada: '12:40',
-      duracao: '11h 30min',
-      preco: 4100,
-      classe: 'Business',
-      escalas: 0,
-      foto: 'https://picsum.photos/seed/paris-tower/600/300',
+      companhia: 'Azul Linhas Aéreas',
+      origem: 'GRU',
+      destino: 'SSA',
+      partida: '14:00',
+      chegada: '17:30',
+      duracao: '3h 30min',
+      escalas: 1,
+      preco: 298,
+      foto: 'https://picsum.photos/seed/beach-sunset-303/800/260',
     },
     {
       id: 4,
-      companhia: 'Gol Linhas Aéreas',
-      origem: 'BSB',
-      destino: 'GRU',
-      partida: '06:30',
-      chegada: '08:05',
-      duracao: '1h 35min',
-      preco: 490,
-      classe: 'Econômica',
-      escalas: 0,
-      foto: 'https://picsum.photos/seed/sao-paulo-skyline/600/300',
-    },
-    {
-      id: 5,
-      companhia: 'Azul Linhas Aéreas',
-      origem: 'SSA',
-      destino: 'CWB',
-      partida: '11:20',
-      chegada: '14:50',
-      duracao: '3h 30min',
-      preco: 780,
-      classe: 'Econômica',
-      escalas: 1,
-      foto: 'https://picsum.photos/seed/curitiba-city/600/300',
-    },
-    {
-      id: 6,
       companhia: 'LATAM Airlines',
-      origem: 'FOR',
-      destino: 'FLN',
-      partida: '07:45',
-      chegada: '11:30',
-      duracao: '3h 45min',
-      preco: 650,
-      classe: 'Econômica',
-      escalas: 1,
-      foto: 'https://picsum.photos/seed/florianopolis-beach/600/300',
-    },
-    {
-      id: 7,
-      companhia: 'Emirates',
       origem: 'GRU',
-      destino: 'CDG',
-      partida: '14:00',
-      chegada: '09:30',
-      duracao: '14h 30min',
-      preco: 5200,
-      classe: 'Business',
-      escalas: 1,
-      foto: 'https://picsum.photos/seed/paris-louvre/600/300',
-    },
-    {
-      id: 8,
-      companhia: 'American Airlines',
-      origem: 'GIG',
-      destino: 'MIA',
-      partida: '09:55',
-      chegada: '17:20',
-      duracao: '7h 25min',
-      preco: 3100,
-      classe: 'Econômica',
+      destino: 'SSA',
+      partida: '18:45',
+      chegada: '21:10',
+      duracao: '2h 25min',
       escalas: 0,
-      foto: 'https://picsum.photos/seed/miami-port/600/300',
+      preco: 567,
+      foto: 'https://picsum.photos/seed/tropical-bay-404/800/260',
     },
   ];
 
-  get voosFiltrados(): Voo[] {
-    return this.voos.filter(
-      (v) =>
-        (!this.filtroOrigem || v.origem === this.filtroOrigem) &&
-        (!this.filtroDestino || v.destino === this.filtroDestino),
-    );
+  destinos = [
+    {
+      cidade: 'Salvador',
+      codigo: 'SSA',
+      descricao: 'A capital da alegria',
+      preco: 'A partir de R$ 298',
+      foto: 'https://picsum.photos/seed/salvador-city-11/600/360',
+    },
+    {
+      cidade: 'Fortaleza',
+      codigo: 'FOR',
+      descricao: 'Sol e praias incríveis',
+      preco: 'A partir de R$ 399',
+      foto: 'https://picsum.photos/seed/fortaleza-coast-22/600/360',
+    },
+    {
+      cidade: 'Rio de Janeiro',
+      codigo: 'GIG',
+      descricao: 'A cidade maravilhosa',
+      preco: 'A partir de R$ 249',
+      foto: 'https://picsum.photos/seed/rio-janeiro-33/600/360',
+    },
+    {
+      cidade: 'Manaus',
+      codigo: 'MAO',
+      descricao: 'Porta de entrada da Amazônia',
+      preco: 'A partir de R$ 589',
+      foto: 'https://picsum.photos/seed/amazon-jungle-44/600/360',
+    },
+    {
+      cidade: 'Florianópolis',
+      codigo: 'FLN',
+      descricao: 'A ilha da magia',
+      preco: 'A partir de R$ 312',
+      foto: 'https://picsum.photos/seed/floripa-island-55/600/360',
+    },
+    {
+      cidade: 'Recife',
+      codigo: 'REC',
+      descricao: 'Cultura e praias maravilhosas',
+      preco: 'A partir de R$ 378',
+      foto: 'https://picsum.photos/seed/recife-praia-66/600/360',
+    },
+  ];
+
+  buscarVoos(): void {
+    this.passoAtual = 2;
   }
 
-  abrirModal(voo: Voo): void {
+  selecionarDestinoDestaque(codigo: string): void {
+    this.busca.destino = codigo;
+    this.passoAtual = 2;
+  }
+
+  selecionarVoo(voo: Voo): void {
     this.vooSelecionado = voo;
-    this.nomePassageiro = '';
-    this.cpfPassageiro = '';
-    this.emailPassageiro = '';
-    this.modalReserva.open();
+    this.passoAtual = 3;
   }
 
-  confirmarReservaAcao: PoModalAction = {
-    label: 'Confirmar Reserva',
-    action: () => this.confirmarReserva(),
-  };
+  avancarParaPagamento(): void {
+    this.passoAtual = 4;
+  }
 
-  cancelarAcao: PoModalAction = {
-    label: 'Cancelar',
-    action: () => this.modalReserva.close(),
-  };
+  confirmarPagamento(): void {
+    this.codigoReserva = 'BR' + Math.floor(Math.random() * 900000 + 100000).toString();
+    this.passoAtual = 5;
+  }
 
-  private confirmarReserva(): void {
-    if (!this.nomePassageiro || !this.cpfPassageiro || !this.emailPassageiro) {
-      return;
+  voltarPasso(): void {
+    if (this.passoAtual > 1) {
+      this.passoAtual--;
     }
-    this.modalReserva.close();
   }
 
-  getOrigemLabel(codigo: string): string {
-    return this.origemOpcoes.find((o) => o.value === codigo)?.label ?? codigo;
+  novaCompra(): void {
+    this.passoAtual = 1;
+    this.vooSelecionado = null;
+    this.busca = { origem: '', destino: '', dataIda: '', dataVolta: '', passageiros: 1, classe: 'economy' };
+    this.passageiro = { nome: '', sobrenome: '', cpf: '', email: '', telefone: '', dataNascimento: '' };
+    this.pagamento = { metodo: 'credito', numeroCartao: '', nomeCartao: '', validade: '', cvv: '', parcelas: '1' };
+    this.codigoReserva = '';
   }
 
-  getDestinoLabel(codigo: string): string {
-    return this.destinoOpcoes.find((o) => o.value === codigo)?.label ?? codigo;
+  getAeroportoLabel(code: string): string {
+    return this.aeroportos.find(a => a.value === code)?.label ?? code;
   }
 
-  getEscalasLabel(escalas: number): string {
-    if (escalas === 0) return 'Voo Direto';
-    if (escalas === 1) return '1 Escala';
-    return `${escalas} Escalas`;
+  getClasseLabel(value: string): string {
+    return this.classeOpcoes.find(c => c.value === value)?.label ?? value;
+  }
+
+  getMetodoPagamentoLabel(value: string): string {
+    return this.metodoPagamentoOpcoes.find(m => m.value === value)?.label ?? value;
+  }
+
+  getTotalPassagem(): number {
+    return (this.vooSelecionado?.preco ?? 0) * this.busca.passageiros;
   }
 }

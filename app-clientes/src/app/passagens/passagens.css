@@ -1,80 +1,346 @@
-.voo-foto {
+/* ===== HERO BANNER ===== */
+.hero-banner {
+  position: relative;
   width: 100%;
-  height: 180px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+}
+
+.hero-img {
+  width: 100%;
+  height: 340px;
   object-fit: cover;
-  border-radius: 4px;
   display: block;
 }
 
-.voo-tags {
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0, 82, 204, 0.72) 0%, rgba(0, 30, 80, 0.55) 100%);
   display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.voo-rota {
-  margin-top: 10px;
-}
-
-.rota-linha {
-  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  font-weight: bold;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.hero-title {
+  color: #fff;
+  font-size: 2.4rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.hero-subtitle {
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 1.15rem;
+  margin: 0;
+  text-align: center;
+}
+
+/* ===== BUSCA BTN ===== */
+.busca-btn-container {
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 0.25rem;
+}
+
+/* ===== DESTINOS ===== */
+.destino-foto {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+
+.destino-descricao {
+  margin: 0.5rem 0 0.2rem;
+  color: var(--color-neutral-dark-70);
+  font-size: 0.875rem;
+}
+
+.destino-preco {
+  margin: 0;
+  color: var(--color-action-default);
+  font-weight: 700;
   font-size: 1rem;
 }
 
-.rota-codigo {
-  font-size: 1.1rem;
+/* ===== VOOS STEP 2 ===== */
+.voos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.rota-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.rota-texto {
+  font-size: 1.3rem;
   font-weight: 700;
   color: var(--color-neutral-dark-95);
 }
 
-.rota-seta {
-  color: var(--color-brand-01-base);
-  font-size: 1rem;
-  flex: 1;
-  text-align: center;
+.rota-detalhe {
+  font-size: 0.875rem;
+  color: var(--color-neutral-dark-70);
 }
 
-.rota-horarios {
+.voo-foto {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+
+.voo-info {
+  padding: 0 0.25rem;
+}
+
+.voo-horario {
   display: flex;
   justify-content: space-between;
-  font-size: 0.8rem;
-  color: var(--color-neutral-mid-60);
-  margin-top: 2px;
+  align-items: center;
+  margin-bottom: 0.75rem;
 }
 
-.rota-duracao {
-  font-size: 0.75rem;
+.horario-bloco {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.horario-bloco--right {
+  align-items: flex-end;
+}
+
+.horario-hora {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-neutral-dark-95);
+}
+
+.horario-aeroporto {
+  font-size: 0.8rem;
+  color: var(--color-neutral-dark-70);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.horario-meio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--color-neutral-mid-60);
+  font-size: 0.8rem;
+  gap: 0.15rem;
+}
+
+.seta-voo {
+  font-size: 1.25rem;
   color: var(--color-neutral-mid-40);
-  text-align: center;
+}
+
+.duracao-texto {
+  font-size: 0.75rem;
+  color: var(--color-neutral-dark-70);
+}
+
+.voo-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .voo-preco {
-  font-size: 1.4rem;
-  font-weight: bold;
-  color: var(--color-brand-01-dark);
-  margin: 8px 0 0;
+  margin: 0.75rem 0 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-action-default);
 }
 
-.preco-label {
-  font-size: 0.8rem;
-  font-weight: normal;
-  color: var(--color-neutral-mid-60);
-  margin-left: 2px;
+.por-pessoa {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--color-neutral-dark-70);
 }
 
-.sem-resultados {
-  font-size: 1rem;
-  color: var(--color-neutral-mid-60);
+/* ===== STEP 3 - RESUMO VOO ===== */
+.resumo-voo {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--color-neutral-light-20);
+  background: var(--color-neutral-light-00);
+  box-shadow: var(--shadow-md);
 }
 
-.modal-foto {
+.resumo-voo-foto {
   width: 100%;
-  height: 220px;
+  height: 160px;
   object-fit: cover;
-  border-radius: 4px;
   display: block;
-  margin-bottom: 8px;
+}
+
+.resumo-voo-infos {
+  padding: 1rem;
+}
+
+/* ===== ACÕES NAVEGAÇÃO ===== */
+.acoes-navegacao {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+/* ===== PIX ===== */
+.pix-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  background: var(--color-neutral-light-05);
+  border-radius: 10px;
+  padding: 1.5rem;
+  border: 1px dashed var(--color-neutral-mid-40);
+  flex-wrap: wrap;
+}
+
+.pix-qrcode {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 3px solid var(--color-neutral-light-20);
+}
+
+.pix-info {
+  flex: 1;
+  min-width: 200px;
+}
+
+.pix-instrucao {
+  margin-bottom: 1rem;
+  color: var(--color-neutral-dark-70);
+}
+
+/* ===== STEP 5 CONFIRMAÇÃO ===== */
+.confirmacao-banner-wrapper {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+}
+
+.confirmacao-banner {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  display: block;
+}
+
+.confirmacao-banner-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(22, 119, 40, 0.78) 0%, rgba(0, 60, 30, 0.60) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  gap: 0.5rem;
+}
+
+.confirmacao-icone {
+  font-size: 3.5rem;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.confirmacao-titulo {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.confirmacao-subtitulo {
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 1.1rem;
+  margin: 0;
+  text-align: center;
+}
+
+.codigo-reserva-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--color-brand-01-lightest);
+  border-radius: 10px;
+  padding: 1.25rem 2rem;
+  border: 2px solid var(--color-brand-01-lighter);
+  gap: 0.35rem;
+}
+
+.codigo-label {
+  font-size: 0.9rem;
+  color: var(--color-neutral-dark-70);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.codigo-valor {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--color-action-default);
+  letter-spacing: 0.12em;
+}
+
+.acoes-confirmacao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* ===== RESPONSIVO ===== */
+@media (max-width: 768px) {
+  .hero-img {
+    height: 220px;
+  }
+
+  .hero-title {
+    font-size: 1.6rem;
+  }
+
+  .voos-header {
+    flex-direction: column;
+  }
+
+  .acoes-navegacao {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .confirmacao-banner {
+    height: 200px;
+  }
+
+  .confirmacao-titulo {
+    font-size: 1.5rem;
+  }
 }

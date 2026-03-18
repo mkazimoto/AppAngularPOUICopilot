@@ -1,166 +1,496 @@
-<po-page-list
-  p-title="Reserva de Passagens Aéreas"
-  p-subtitle="Encontre o voo ideal e reserve com facilidade">
+<po-page-default
+  p-title="Passagens Aéreas"
+  p-subtitle="Encontre e reserve o melhor voo para o seu destino">
 
-  <div class="po-row po-mb-2">
-    <po-select
-      class="po-md-3 po-sm-12"
-      p-label="Origem"
-      [p-options]="origemOpcoes"
-      (p-change)="filtroOrigem = $event">
-    </po-select>
-    <po-select
-      class="po-md-3 po-sm-12"
-      p-label="Destino"
-      [p-options]="destinoOpcoes"
-      (p-change)="filtroDestino = $event">
-    </po-select>
-  </div>
+  <!-- STEPPER -->
+  <po-stepper
+    [p-step]="passoAtual"
+    [p-steps]="passos"
+    [p-step-size]="32">
+  </po-stepper>
 
-  <po-divider p-label="Voos Disponíveis"></po-divider>
+  <!-- ===== STEP 1: BUSCA ===== -->
+  @if (passoAtual === 1) {
 
-  <div class="po-row">
-    @for (voo of voosFiltrados; track voo.id) {
-      <div class="po-md-4 po-sm-12 po-lg-3 po-mb-3">
-        <po-widget
-          [p-title]="voo.companhia"
-          p-primary-label="Reservar"
-          (p-primary-action)="abrirModal(voo)">
-
-          <img
-            [src]="voo.foto"
-            [alt]="'Destino ' + voo.destino"
-            class="voo-foto">
-
-          <div class="voo-tags po-mt-1">
-            <po-tag [p-value]="voo.classe" [p-type]="PoTagType.Info"></po-tag>
-            @if (voo.escalas === 0) {
-              <po-tag [p-value]="getEscalasLabel(voo.escalas)" [p-type]="PoTagType.Success"></po-tag>
-            } @else {
-              <po-tag [p-value]="getEscalasLabel(voo.escalas)" [p-type]="PoTagType.Warning"></po-tag>
-            }
-          </div>
-
-          <div class="voo-rota po-mt-1">
-            <div class="rota-linha">
-              <span class="rota-codigo">{{ voo.origem }}</span>
-              <span class="rota-seta">✈</span>
-              <span class="rota-codigo">{{ voo.destino }}</span>
-            </div>
-            <div class="rota-horarios">
-              <span>{{ voo.partida }}</span>
-              <span class="rota-duracao">{{ voo.duracao }}</span>
-              <span>{{ voo.chegada }}</span>
-            </div>
-          </div>
-
-          <p class="voo-preco">
-            R$ {{ voo.preco | number:'1.2-2' }}<span class="preco-label">/pax</span>
-          </p>
-
-        </po-widget>
+    <!-- Hero Banner -->
+    <div class="hero-banner po-mt-3 po-mb-4">
+      <img
+        src="https://picsum.photos/seed/airplane-blue-sky/1400/420"
+        alt="Viagem aérea"
+        class="hero-img">
+      <div class="hero-overlay">
+        <h2 class="hero-title">Para onde você quer ir?</h2>
+        <p class="hero-subtitle">Descubra destinos incríveis com os melhores preços</p>
       </div>
-    }
+    </div>
 
-    @if (voosFiltrados.length === 0) {
-      <div class="po-md-12 po-text-center po-mt-4">
-        <p class="sem-resultados">Nenhum voo encontrado para os filtros selecionados.</p>
+    <!-- Formulário de Busca -->
+    <po-divider p-label="Informações da Viagem"></po-divider>
+
+    <form #formBusca="ngForm">
+      <div class="po-row">
+        <po-select
+          class="po-md-4 po-sm-12"
+          name="origem"
+          p-name="origem"
+          p-label="Origem"
+          p-placeholder="Selecione a origem"
+          [p-options]="aeroportos"
+          [ngModel]="busca.origem"
+          (ngModelChange)="busca.origem = $event">
+        </po-select>
+
+        <po-select
+          class="po-md-4 po-sm-12"
+          name="destino"
+          p-name="destino"
+          p-label="Destino"
+          p-placeholder="Selecione o destino"
+          [p-options]="aeroportos"
+          [ngModel]="busca.destino"
+          (ngModelChange)="busca.destino = $event">
+        </po-select>
+
+        <po-select
+          class="po-md-4 po-sm-12"
+          name="classe"
+          p-name="classe"
+          p-label="Classe"
+          [p-options]="classeOpcoes"
+          [ngModel]="busca.classe"
+          (ngModelChange)="busca.classe = $event">
+        </po-select>
       </div>
-    }
-  </div>
 
-</po-page-list>
+      <div class="po-row po-mb-4">
+        <po-datepicker
+          class="po-md-3 po-sm-12"
+          name="dataIda"
+          p-name="dataIda"
+          p-label="Data de Ida"
+          p-placeholder="dd/mm/aaaa"
+          [ngModel]="busca.dataIda"
+          (ngModelChange)="busca.dataIda = $event">
+        </po-datepicker>
 
-<!-- Modal de Reserva -->
-<po-modal
-  #modalReserva
-  p-title="Confirmar Reserva"
-  p-size="lg"
-  [p-primary-action]="confirmarReservaAcao"
-  [p-secondary-action]="cancelarAcao">
+        <po-datepicker
+          class="po-md-3 po-sm-12"
+          name="dataVolta"
+          p-name="dataVolta"
+          p-label="Data de Volta"
+          p-placeholder="dd/mm/aaaa"
+          [ngModel]="busca.dataVolta"
+          (ngModelChange)="busca.dataVolta = $event">
+        </po-datepicker>
 
-  @if (vooSelecionado) {
-    <img
-      [src]="vooSelecionado.foto"
-      [alt]="'Destino ' + vooSelecionado.destino"
-      class="modal-foto">
+        <po-select
+          class="po-md-3 po-sm-12"
+          name="passageiros"
+          p-name="passageiros"
+          p-label="Passageiros"
+          [p-options]="passageirosOpcoes"
+          [ngModel]="busca.passageiros"
+          (ngModelChange)="busca.passageiros = $event">
+        </po-select>
 
-    <po-divider p-label="Detalhes do Voo"></po-divider>
+        <div class="po-md-3 po-sm-12 busca-btn-container">
+          <po-button
+            p-label="Buscar Voos"
+            p-kind="primary"
+            p-icon="an an-magnifying-glass"
+            (p-click)="buscarVoos()">
+          </po-button>
+        </div>
+      </div>
+    </form>
+
+    <!-- Destinos em Destaque -->
+    <po-divider p-label="Destinos em Destaque"></po-divider>
+
+    <div class="po-row po-mb-3">
+      @for (destino of destinos; track destino.cidade) {
+        <div class="po-md-4 po-sm-12 po-lg-4 po-mb-3">
+          <po-widget
+            [p-title]="destino.cidade"
+            p-primary-label="Ver Voos"
+            (p-primary-action)="selecionarDestinoDestaque(destino.codigo)">
+
+            <img
+              [src]="destino.foto"
+              [alt]="'Destino ' + destino.cidade"
+              class="destino-foto">
+
+            <p class="destino-descricao">{{ destino.descricao }}</p>
+            <p class="destino-preco">{{ destino.preco }}</p>
+
+          </po-widget>
+        </div>
+      }
+    </div>
+
+  }
+
+  <!-- ===== STEP 2: SELECIONAR VOO ===== -->
+  @if (passoAtual === 2) {
+
+    <div class="voos-header po-mt-3 po-mb-3">
+      <div class="rota-info">
+        @if (busca.origem && busca.destino) {
+          <span class="rota-texto">
+            {{ getAeroportoLabel(busca.origem) }} &rarr; {{ getAeroportoLabel(busca.destino) }}
+          </span>
+          <span class="rota-detalhe">
+            {{ busca.dataIda || 'Data não informada' }}
+            &bull; {{ busca.passageiros }} passageiro(s)
+            &bull; {{ getClasseLabel(busca.classe) }}
+          </span>
+        }
+      </div>
+      <po-button
+        p-label="Voltar"
+        p-kind="secondary"
+        p-icon="an an-arrow-left"
+        (p-click)="voltarPasso()">
+      </po-button>
+    </div>
 
     <div class="po-row">
-      <po-info
-        class="po-md-6 po-sm-12"
-        p-label="Companhia Aérea"
-        [p-value]="vooSelecionado.companhia">
-      </po-info>
-      <po-info
-        class="po-md-6 po-sm-12"
-        p-label="Classe"
-        [p-value]="vooSelecionado.classe">
-      </po-info>
-      <po-info
-        class="po-md-6 po-sm-12"
-        p-label="Origem"
-        [p-value]="getOrigemLabel(vooSelecionado.origem)">
-      </po-info>
-      <po-info
-        class="po-md-6 po-sm-12"
-        p-label="Destino"
-        [p-value]="getDestinoLabel(vooSelecionado.destino)">
-      </po-info>
-      <po-info
-        class="po-md-4 po-sm-12"
-        p-label="Partida"
-        [p-value]="vooSelecionado.partida">
-      </po-info>
-      <po-info
-        class="po-md-4 po-sm-12"
-        p-label="Chegada"
-        [p-value]="vooSelecionado.chegada">
-      </po-info>
-      <po-info
-        class="po-md-4 po-sm-12"
-        p-label="Duração"
-        [p-value]="vooSelecionado.duracao">
-      </po-info>
-      <po-info
-        class="po-md-6 po-sm-12"
-        p-label="Escalas"
-        [p-value]="getEscalasLabel(vooSelecionado.escalas)">
-      </po-info>
-      <po-info
-        class="po-md-6 po-sm-12"
-        p-label="Valor por Passageiro"
-        [p-value]="'R$ ' + (vooSelecionado.preco | number:'1.2-2')">
-      </po-info>
+      @for (voo of voosDisponiveis; track voo.id) {
+        <div class="po-md-6 po-sm-12 po-mb-3">
+          <po-widget
+            [p-title]="voo.companhia"
+            p-primary-label="Selecionar este voo"
+            (p-primary-action)="selecionarVoo(voo)">
+
+            <img
+              [src]="voo.foto"
+              [alt]="'Voo para ' + voo.destino"
+              class="voo-foto">
+
+            <div class="voo-info po-mt-2">
+              <div class="voo-horario">
+                <div class="horario-bloco">
+                  <span class="horario-hora">{{ voo.partida }}</span>
+                  <span class="horario-aeroporto">{{ voo.origem }}</span>
+                </div>
+                <div class="horario-meio">
+                  <span class="duracao-texto">{{ voo.duracao }}</span>
+                  <span class="seta-voo">&rarr;</span>
+                </div>
+                <div class="horario-bloco horario-bloco--right">
+                  <span class="horario-hora">{{ voo.chegada }}</span>
+                  <span class="horario-aeroporto">{{ voo.destino }}</span>
+                </div>
+              </div>
+
+              <div class="voo-tags po-mt-1">
+                @if (voo.escalas === 0) {
+                  <po-tag p-value="Voo Direto" [p-type]="PoTagType.Success"></po-tag>
+                } @else {
+                  <po-tag [p-value]="voo.escalas + ' escala(s)'" [p-type]="PoTagType.Warning"></po-tag>
+                }
+                <po-tag [p-value]="voo.duracao" [p-type]="PoTagType.Info"></po-tag>
+              </div>
+
+              <p class="voo-preco">
+                R$ {{ voo.preco }}<span class="por-pessoa">/pessoa</span>
+              </p>
+            </div>
+
+          </po-widget>
+        </div>
+      }
     </div>
+
+  }
+
+  <!-- ===== STEP 3: DADOS DO PASSAGEIRO ===== -->
+  @if (passoAtual === 3) {
+
+    <!-- Resumo do voo selecionado -->
+    @if (vooSelecionado) {
+      <div class="resumo-voo po-mt-3 po-mb-3">
+        <img
+          [src]="vooSelecionado.foto"
+          [alt]="'Destino ' + vooSelecionado.destino"
+          class="resumo-voo-foto">
+        <div class="resumo-voo-infos po-row">
+          <po-info class="po-md-3 po-sm-6" p-label="Companhia" [p-value]="vooSelecionado.companhia"></po-info>
+          <po-info class="po-md-3 po-sm-6" p-label="Rota" [p-value]="vooSelecionado.origem + ' → ' + vooSelecionado.destino"></po-info>
+          <po-info class="po-md-3 po-sm-6" p-label="Horário" [p-value]="vooSelecionado.partida + ' – ' + vooSelecionado.chegada"></po-info>
+          <po-info class="po-md-3 po-sm-6" p-label="Valor/pessoa" [p-value]="'R$ ' + vooSelecionado.preco + ',00'"></po-info>
+        </div>
+      </div>
+    }
 
     <po-divider p-label="Dados do Passageiro"></po-divider>
 
-    <div class="po-row">
-      <po-input
-        class="po-md-12 po-sm-12"
-        p-label="Nome Completo"
-        p-placeholder="Informe o nome completo"
-        p-required
-        [(ngModel)]="nomePassageiro">
-      </po-input>
-      <po-input
-        class="po-md-6 po-sm-12"
-        p-label="CPF"
-        p-placeholder="000.000.000-00"
-        p-mask="999.999.999-99"
-        p-required
-        [(ngModel)]="cpfPassageiro">
-      </po-input>
-      <po-email
-        class="po-md-6 po-sm-12"
-        p-label="E-mail"
-        p-placeholder="seu@email.com"
-        p-required
-        [(ngModel)]="emailPassageiro">
-      </po-email>
+    <form #formPassageiro="ngForm">
+      <div class="po-row">
+        <po-input
+          class="po-md-4 po-sm-12"
+          name="nome"
+          p-name="nome"
+          p-label="Nome"
+          p-placeholder="Primeiro nome"
+          [ngModel]="passageiro.nome"
+          (ngModelChange)="passageiro.nome = $event">
+        </po-input>
+        <po-input
+          class="po-md-4 po-sm-12"
+          name="sobrenome"
+          p-name="sobrenome"
+          p-label="Sobrenome"
+          p-placeholder="Sobrenome completo"
+          [ngModel]="passageiro.sobrenome"
+          (ngModelChange)="passageiro.sobrenome = $event">
+        </po-input>
+        <po-input
+          class="po-md-4 po-sm-12"
+          name="cpf"
+          p-name="cpf"
+          p-label="CPF"
+          p-mask="999.999.999-99"
+          p-placeholder="000.000.000-00"
+          [ngModel]="passageiro.cpf"
+          (ngModelChange)="passageiro.cpf = $event">
+        </po-input>
+      </div>
+
+      <div class="po-row po-mb-3">
+        <po-input
+          class="po-md-4 po-sm-12"
+          name="email"
+          p-name="email"
+          p-label="E-mail"
+          p-placeholder="seu@email.com"
+          [ngModel]="passageiro.email"
+          (ngModelChange)="passageiro.email = $event">
+        </po-input>
+        <po-input
+          class="po-md-4 po-sm-12"
+          name="telefone"
+          p-name="telefone"
+          p-label="Telefone"
+          p-mask="(99) 9 9999-9999"
+          p-placeholder="(00) 0 0000-0000"
+          [ngModel]="passageiro.telefone"
+          (ngModelChange)="passageiro.telefone = $event">
+        </po-input>
+        <po-datepicker
+          class="po-md-4 po-sm-12"
+          name="dataNascimento"
+          p-name="dataNascimento"
+          p-label="Data de Nascimento"
+          p-placeholder="dd/mm/aaaa"
+          [ngModel]="passageiro.dataNascimento"
+          (ngModelChange)="passageiro.dataNascimento = $event">
+        </po-datepicker>
+      </div>
+    </form>
+
+    <div class="acoes-navegacao">
+      <po-button
+        p-label="Voltar"
+        p-kind="secondary"
+        p-icon="an an-arrow-left"
+        (p-click)="voltarPasso()">
+      </po-button>
+      <po-button
+        p-label="Continuar para Pagamento"
+        p-kind="primary"
+        p-icon="an an-arrow-right"
+        (p-click)="avancarParaPagamento()">
+      </po-button>
     </div>
+
   }
 
-</po-modal>
+  <!-- ===== STEP 4: PAGAMENTO ===== -->
+  @if (passoAtual === 4) {
+
+    <po-divider p-label="Resumo da Compra" class="po-mt-3"></po-divider>
+
+    @if (vooSelecionado) {
+      <div class="po-row po-mb-3">
+        <po-info class="po-md-3 po-sm-6" p-label="Voo" [p-value]="vooSelecionado.companhia"></po-info>
+        <po-info class="po-md-3 po-sm-6" p-label="Rota" [p-value]="vooSelecionado.origem + ' → ' + vooSelecionado.destino"></po-info>
+        <po-info class="po-md-3 po-sm-6" p-label="Passageiro" [p-value]="passageiro.nome + ' ' + passageiro.sobrenome"></po-info>
+        <po-info class="po-md-3 po-sm-6" p-label="Total a pagar" [p-value]="'R$ ' + getTotalPassagem() + ',00'"></po-info>
+      </div>
+    }
+
+    <po-divider p-label="Forma de Pagamento"></po-divider>
+
+    <form #formPagamento="ngForm">
+      <div class="po-row po-mb-2">
+        <po-select
+          class="po-md-4 po-sm-12"
+          name="metodoPagamento"
+          p-name="metodoPagamento"
+          p-label="Método de Pagamento"
+          [p-options]="metodoPagamentoOpcoes"
+          [ngModel]="pagamento.metodo"
+          (ngModelChange)="pagamento.metodo = $event">
+        </po-select>
+      </div>
+
+      @if (pagamento.metodo === 'credito' || pagamento.metodo === 'debito') {
+        <div class="po-row">
+          <po-input
+            class="po-md-6 po-sm-12"
+            name="numeroCartao"
+            p-name="numeroCartao"
+            p-label="Número do Cartão"
+            p-mask="9999 9999 9999 9999"
+            p-placeholder="0000 0000 0000 0000"
+            [ngModel]="pagamento.numeroCartao"
+            (ngModelChange)="pagamento.numeroCartao = $event">
+          </po-input>
+          <po-input
+            class="po-md-6 po-sm-12"
+            name="nomeCartao"
+            p-name="nomeCartao"
+            p-label="Nome no Cartão"
+            p-placeholder="Como está impresso no cartão"
+            [ngModel]="pagamento.nomeCartao"
+            (ngModelChange)="pagamento.nomeCartao = $event">
+          </po-input>
+        </div>
+        <div class="po-row po-mb-3">
+          <po-input
+            class="po-md-3 po-sm-6"
+            name="validade"
+            p-name="validade"
+            p-label="Validade"
+            p-mask="99/99"
+            p-placeholder="MM/AA"
+            [ngModel]="pagamento.validade"
+            (ngModelChange)="pagamento.validade = $event">
+          </po-input>
+          <po-input
+            class="po-md-3 po-sm-6"
+            name="cvv"
+            p-name="cvv"
+            p-label="CVV"
+            p-mask="999"
+            p-placeholder="000"
+            [ngModel]="pagamento.cvv"
+            (ngModelChange)="pagamento.cvv = $event">
+          </po-input>
+          @if (pagamento.metodo === 'credito') {
+            <po-select
+              class="po-md-3 po-sm-6"
+              name="parcelas"
+              p-name="parcelas"
+              p-label="Parcelas"
+              [p-options]="parcelasOpcoes"
+              [ngModel]="pagamento.parcelas"
+              (ngModelChange)="pagamento.parcelas = $event">
+            </po-select>
+          }
+        </div>
+      }
+
+      @if (pagamento.metodo === 'pix') {
+        <div class="pix-container po-mt-3 po-mb-4">
+          <img
+            src="https://picsum.photos/seed/qrcode-placeholder/200/200"
+            alt="QR Code PIX"
+            class="pix-qrcode">
+          <div class="pix-info">
+            <p class="pix-instrucao">Escaneie o QR Code ou use a chave abaixo para pagar via PIX</p>
+            <po-input
+              class="po-md-8"
+              name="chavePix"
+              p-name="chavePix"
+              p-label="Chave PIX"
+              p-placeholder="aerocompras@passagens.com.br"
+              [ngModel]="pagamento.nomeCartao"
+              (ngModelChange)="pagamento.nomeCartao = $event"
+              p-disabled>
+            </po-input>
+          </div>
+        </div>
+      }
+    </form>
+
+    <div class="acoes-navegacao po-mb-3">
+      <po-button
+        p-label="Voltar"
+        p-kind="secondary"
+        p-icon="an an-arrow-left"
+        (p-click)="voltarPasso()">
+      </po-button>
+      <po-button
+        p-label="Confirmar e Pagar"
+        p-kind="primary"
+        p-icon="an an-lock"
+        (p-click)="confirmarPagamento()">
+      </po-button>
+    </div>
+
+  }
+
+  <!-- ===== STEP 5: CONFIRMAÇÃO ===== -->
+  @if (passoAtual === 5) {
+
+    <div class="confirmacao-banner-wrapper po-mt-3 po-mb-4">
+      <img
+        src="https://picsum.photos/seed/travel-adventure-sky/1400/380"
+        alt="Viagem confirmada"
+        class="confirmacao-banner">
+      <div class="confirmacao-banner-overlay">
+        <span class="confirmacao-icone">✈</span>
+        <h2 class="confirmacao-titulo">Reserva Confirmada!</h2>
+        <p class="confirmacao-subtitulo">Boa viagem! Seu bilhete foi gerado com sucesso.</p>
+      </div>
+    </div>
+
+    <div class="codigo-reserva-box po-mb-4">
+      <span class="codigo-label">Código da Reserva</span>
+      <span class="codigo-valor">{{ codigoReserva }}</span>
+    </div>
+
+    <po-divider p-label="Detalhes do Voo"></po-divider>
+
+    @if (vooSelecionado) {
+      <div class="po-row po-mb-3">
+        <po-info class="po-md-4 po-sm-12" p-label="Companhia Aérea" [p-value]="vooSelecionado.companhia"></po-info>
+        <po-info class="po-md-4 po-sm-12" p-label="Origem" [p-value]="getAeroportoLabel(vooSelecionado.origem)"></po-info>
+        <po-info class="po-md-4 po-sm-12" p-label="Destino" [p-value]="getAeroportoLabel(vooSelecionado.destino)"></po-info>
+        <po-info class="po-md-4 po-sm-12" p-label="Partida" [p-value]="vooSelecionado.partida"></po-info>
+        <po-info class="po-md-4 po-sm-12" p-label="Chegada" [p-value]="vooSelecionado.chegada"></po-info>
+        <po-info class="po-md-4 po-sm-12" p-label="Duração" [p-value]="vooSelecionado.duracao"></po-info>
+      </div>
+    }
+
+    <po-divider p-label="Dados do Passageiro"></po-divider>
+
+    <div class="po-row po-mb-3">
+      <po-info class="po-md-4 po-sm-12" p-label="Nome Completo" [p-value]="passageiro.nome + ' ' + passageiro.sobrenome"></po-info>
+      <po-info class="po-md-4 po-sm-12" p-label="CPF" [p-value]="passageiro.cpf"></po-info>
+      <po-info class="po-md-4 po-sm-12" p-label="E-mail" [p-value]="passageiro.email"></po-info>
+    </div>
+
+    <po-divider p-label="Pagamento"></po-divider>
+
+    <div class="po-row po-mb-4">
+      <po-info class="po-md-4 po-sm-12" p-label="Forma de Pagamento" [p-value]="getMetodoPagamentoLabel(pagamento.metodo)"></po-info>
+      <po-info class="po-md-4 po-sm-12" p-label="Passageiros" [p-value]="busca.passageiros + ' passageiro(s)'"></po-info>
+      <po-info class="po-md-4 po-sm-12" p-label="Valor Total" [p-value]="'R$ ' + getTotalPassagem() + ',00'"></po-info>
+    </div>
+
+    <div class="acoes-confirmacao po-mb-3">
+      <po-tag p-value="Reserva confirmada com sucesso!" [p-type]="PoTagType.Success"></po-tag>
+      <po-button
+        p-label="Comprar Nova Passagem"
+        p-kind="primary"
+        p-icon="an an-plus"
+        (p-click)="novaCompra()">
+      </po-button>
+    </div>
+
+  }
+
+</po-page-default>
