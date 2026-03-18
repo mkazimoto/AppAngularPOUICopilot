@@ -1,0 +1,347 @@
+/* ===== Filtros e Busca ===== */
+.carros-filtros {
+  background: var(--color-neutral-light-05, #f8f9fa);
+  border-radius: var(--border-radius-md, 8px);
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--color-neutral-light-20, #e9ecef);
+}
+
+.carros-busca {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.carros-busca-icone {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--color-neutral-mid-60, #6c757d);
+  font-size: 1rem;
+}
+
+.carros-busca-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+  border: 1px solid var(--color-neutral-light-20, #dee2e6);
+  border-radius: var(--border-radius-md, 6px);
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.carros-busca-input:focus {
+  border-color: var(--color-action-default, #0e6abf);
+  box-shadow: 0 0 0 3px var(--color-action-focus, rgba(14, 106, 191, 0.15));
+}
+
+/* ===== Categorias ===== */
+.carros-categorias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.carro-categoria-btn {
+  padding: 0.3rem 0.875rem;
+  border: 1px solid var(--color-neutral-light-20, #dee2e6);
+  border-radius: 2rem;
+  background: transparent;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--color-neutral-dark-70, #495057);
+}
+
+.carro-categoria-btn:hover {
+  background: var(--color-brand-01-lightest, #e7f1fb);
+  border-color: var(--color-action-default, #0e6abf);
+  color: var(--color-action-default, #0e6abf);
+}
+
+.carro-categoria-btn--ativo {
+  background: var(--color-action-default, #0e6abf);
+  border-color: var(--color-action-default, #0e6abf);
+  color: white;
+}
+
+/* ===== Resultado ===== */
+.carros-resultado-info {
+  display: flex;
+  align-items: center;
+  color: var(--color-neutral-mid-60, #6c757d);
+  font-size: 0.875rem;
+}
+
+/* ===== Widget do Carro ===== */
+.carro-widget {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: var(--border-radius-md, 8px);
+  overflow: hidden;
+}
+
+.carro-widget:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.carro-widget--indisponivel {
+  opacity: 0.75;
+}
+
+/* ===== Imagem do Carro ===== */
+.carro-imagem-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--border-radius-md, 8px) var(--border-radius-md, 8px) 0 0;
+  background: var(--color-neutral-light-10, #f0f0f0);
+}
+
+.carro-imagem {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.carro-widget:hover .carro-imagem {
+  transform: scale(1.04);
+}
+
+.carro-badge-destaque {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.6rem;
+  background: var(--color-feedback-warning-base, #f5a623);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  z-index: 1;
+}
+
+.carro-overlay-indisponivel {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.52);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  gap: 0.3rem;
+  z-index: 2;
+}
+
+/* ===== Info ===== */
+.carro-info {
+  padding: 0.875rem 1rem 0;
+  flex: 1;
+}
+
+.carro-categoria-tag {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.carro-nome {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-neutral-dark-95, #1a1a1a);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.carro-ano {
+  font-size: 0.8rem;
+  color: var(--color-neutral-mid-60, #6c757d);
+  margin: 0;
+}
+
+.carro-features {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.carro-feature {
+  display: flex;
+  align-items: center;
+  font-size: 0.78rem;
+  color: var(--color-neutral-dark-70, #495057);
+}
+
+/* ===== Preço ===== */
+.carro-preco {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.carro-preco-label {
+  font-size: 0.72rem;
+  color: var(--color-neutral-mid-60, #6c757d);
+}
+
+.carro-preco-valor {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--color-action-default, #0e6abf);
+}
+
+.carro-preco-periodo {
+  font-size: 0.78rem;
+  color: var(--color-neutral-mid-60, #6c757d);
+}
+
+/* ===== Avaliações ===== */
+.carro-avaliacoes {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.carro-estrela {
+  color: var(--color-feedback-warning-base, #f5a623);
+  font-size: 0.875rem;
+}
+
+.carro-avaliacoes-texto {
+  font-size: 0.78rem;
+  color: var(--color-neutral-mid-60, #6c757d);
+}
+
+/* ===== Ações ===== */
+.carro-acoes {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem 0.875rem;
+  border-top: 1px solid var(--color-neutral-light-10, #f0f0f0);
+  margin-top: 0.75rem;
+}
+
+.carro-acoes po-button {
+  flex: 1;
+}
+
+/* ===== Estado Vazio ===== */
+.carros-vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  color: var(--color-neutral-mid-60, #6c757d);
+  text-align: center;
+  gap: 1rem;
+}
+
+.carros-vazio-icone {
+  font-size: 3.5rem;
+  color: var(--color-neutral-light-30, #ccc);
+}
+
+/* ===== Modal Detalhes ===== */
+.modal-carro-imagem {
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  border-radius: var(--border-radius-md, 8px);
+}
+
+.modal-descricao {
+  font-size: 0.9rem;
+  color: var(--color-neutral-dark-70, #495057);
+  line-height: 1.6;
+}
+
+.modal-specs {
+  gap: 0.75rem 0;
+}
+
+.modal-spec-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0.75rem 0.5rem;
+  background: var(--color-neutral-light-05, #f8f9fa);
+  border-radius: var(--border-radius-md, 8px);
+  border: 1px solid var(--color-neutral-light-20, #e9ecef);
+  gap: 0.25rem;
+}
+
+.modal-spec-icone {
+  font-size: 1.4rem;
+  color: var(--color-action-default, #0e6abf);
+}
+
+.modal-spec-icone--star {
+  color: var(--color-feedback-warning-base, #f5a623);
+}
+
+.modal-spec-label {
+  font-size: 0.72rem;
+  color: var(--color-neutral-mid-60, #6c757d);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.modal-spec-valor {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-neutral-dark-95, #1a1a1a);
+}
+
+.modal-spec-item--preco {
+  background: var(--color-brand-01-lightest, #e7f1fb);
+  border-color: var(--color-brand-01-lighter, #b3d4f5);
+}
+
+.modal-preco-valor {
+  color: var(--color-action-default, #0e6abf);
+  font-size: 1.1rem;
+}
+
+/* ===== Modal Reserva ===== */
+.modal-reserva-imagem {
+  width: 100%;
+  border-radius: var(--border-radius-md, 8px);
+  object-fit: cover;
+  aspect-ratio: 4/3;
+}
+
+.modal-reserva-preco {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--color-action-default, #0e6abf);
+}
+
+.modal-reserva-preco small {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--color-neutral-mid-60, #6c757d);
+}
+
+.modal-reserva-aviso {
+  background: var(--color-feedback-info-lightest, #e8f4fd);
+  border: 1px solid var(--color-feedback-info-light, #bee5f5);
+  border-radius: var(--border-radius-md, 8px);
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  color: var(--color-feedback-info-dark, #0a5c8a);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.25rem;
+}

@@ -1,0 +1,260 @@
+<po-page-default
+  p-title="Aluguel de Carros"
+  p-subtitle="Escolha seu veículo ideal para a sua viagem"
+  [p-breadcrumb]="breadcrumb">
+
+  <!-- Filtros e Busca -->
+  <div class="carros-filtros po-mb-3">
+    <div class="po-row po-align-items-center">
+
+      <div class="po-col-12 po-col-md-5">
+        <div class="carros-busca">
+          <span class="an an-magnifying-glass carros-busca-icone"></span>
+          <input
+            class="carros-busca-input"
+            type="text"
+            placeholder="Buscar por modelo ou marca..."
+            [value]="termoBusca"
+            (input)="buscar($any($event.target).value)" />
+        </div>
+      </div>
+
+      <div class="po-col-12 po-col-md-7">
+        <div class="carros-categorias">
+          @for (cat of categorias; track cat) {
+            <button
+              class="carro-categoria-btn"
+              [class.carro-categoria-btn--ativo]="(filtroCategoria === '' && cat === 'Todos') || filtroCategoria === cat"
+              (click)="filtrarCategoria(cat)">
+              {{ cat }}
+            </button>
+          }
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Contador de resultados -->
+  <div class="carros-resultado-info po-mb-3">
+    <small>
+      <span class="an an-car po-mr-1"></span>
+      {{ carrosFiltrados.length }} veículo(s) disponível(is)
+    </small>
+  </div>
+
+  <!-- Grade de Carros -->
+  <div class="po-row">
+    @for (carro of carrosFiltrados; track carro.id) {
+      <div class="po-col-12 po-col-sm-6 po-col-md-4 po-col-lg-4 po-mb-3">
+        <po-widget
+          [p-no-shadow]="false"
+          class="carro-widget"
+          [class.carro-widget--indisponivel]="!carro.disponivel">
+
+          <!-- Imagem do carro -->
+          <div class="carro-imagem-wrapper">
+            @if (carro.destaque) {
+              <div class="carro-badge-destaque">
+                <span class="an an-star po-mr-1"></span>Destaque
+              </div>
+            }
+            @if (!carro.disponivel) {
+              <div class="carro-overlay-indisponivel">
+                <span class="an an-x-circle po-mr-1"></span>Indisponível
+              </div>
+            }
+            <img
+              [src]="carro.imagemUrl"
+              [alt]="carro.marca + ' ' + carro.modelo"
+              class="carro-imagem"
+              (error)="onImageError($event)" />
+          </div>
+
+          <!-- Informações do carro -->
+          <div class="carro-info">
+            <div class="carro-categoria-tag po-mb-1">
+              <po-tag
+                [p-value]="carro.categoria"
+                [p-type]="tagTypeInfo"
+                p-inverse>
+              </po-tag>
+              @if (!carro.disponivel) {
+                <po-tag
+                  p-value="Indisponível"
+                  [p-type]="tagTypeDanger"
+                  p-inverse>
+                </po-tag>
+              } @else {
+                <po-tag
+                  p-value="Disponível"
+                  [p-type]="tagTypeSuccess"
+                  p-inverse>
+                </po-tag>
+              }
+            </div>
+
+            <h3 class="carro-nome po-mb-1">{{ carro.marca }} {{ carro.modelo }}</h3>
+            <p class="carro-ano po-mb-2">{{ carro.ano }} &bull; {{ carro.cambio }} &bull; {{ carro.combustivel }}</p>
+
+            <!-- Ícones de características -->
+            <div class="carro-features po-mb-2">
+              <span class="carro-feature">
+                <span class="an an-users po-mr-1"></span>{{ carro.lugares }} lugares
+              </span>
+              <span class="carro-feature">
+                <span class="an an-road po-mr-1"></span>{{ carro.km }}
+              </span>
+            </div>
+
+            <!-- Preço -->
+            <div class="carro-preco po-mb-2">
+              <span class="carro-preco-label">A partir de</span>
+              <span class="carro-preco-valor">R$ {{ carro.precoDiaria | number: '1.2-2' }}</span>
+              <span class="carro-preco-periodo">/dia</span>
+            </div>
+
+            <!-- Avaliações -->
+            <div class="carro-avaliacoes po-mb-2">
+              <span class="an an-star carro-estrela"></span>
+              <span class="carro-avaliacoes-texto">{{ carro.avaliacoes }} avaliações</span>
+            </div>
+          </div>
+
+          <!-- Ações -->
+          <div class="carro-acoes">
+            <po-button
+              p-label="Ver Detalhes"
+              p-kind="tertiary"
+              p-icon="an an-info"
+              (p-click)="abrirDetalhe(carro)">
+            </po-button>
+            <po-button
+              p-label="Reservar"
+              p-kind="primary"
+              p-icon="an an-calendar"
+              [p-disabled]="!carro.disponivel"
+              (p-click)="abrirReserva(carro)">
+            </po-button>
+          </div>
+
+        </po-widget>
+      </div>
+    }
+
+    @if (carrosFiltrados.length === 0) {
+      <div class="po-col-12">
+        <div class="carros-vazio">
+          <span class="an an-car carros-vazio-icone"></span>
+          <p>Nenhum veículo encontrado para os filtros selecionados.</p>
+          <po-button
+            p-label="Limpar Filtros"
+            p-kind="secondary"
+            (p-click)="filtrarCategoria('Todos')">
+          </po-button>
+        </div>
+      </div>
+    }
+  </div>
+
+</po-page-default>
+
+<!-- Modal: Detalhes do Carro -->
+<po-modal
+  #modalDetalhe
+  [p-title]="carroSelecionado ? carroSelecionado.marca + ' ' + carroSelecionado.modelo : 'Detalhes'"
+  p-size="lg"
+  [p-primary-action]="acaoReservarDetalhe"
+  [p-secondary-action]="acaoFecharDetalhe">
+
+  @if (carroSelecionado) {
+    <div class="modal-detalhe">
+      <img
+        [src]="carroSelecionado.imagemUrl"
+        [alt]="carroSelecionado.marca + ' ' + carroSelecionado.modelo"
+        class="modal-carro-imagem"
+        (error)="onImageError($event)" />
+
+      <p class="modal-descricao po-mt-2 po-mb-3">{{ carroSelecionado.descricao }}</p>
+
+      <div class="po-row modal-specs">
+        <div class="po-col-6 po-col-md-3 modal-spec-item">
+          <span class="an an-calendar modal-spec-icone"></span>
+          <span class="modal-spec-label">Ano</span>
+          <span class="modal-spec-valor">{{ carroSelecionado.ano }}</span>
+        </div>
+        <div class="po-col-6 po-col-md-3 modal-spec-item">
+          <span class="an an-gauge modal-spec-icone"></span>
+          <span class="modal-spec-label">Câmbio</span>
+          <span class="modal-spec-valor">{{ carroSelecionado.cambio }}</span>
+        </div>
+        <div class="po-col-6 po-col-md-3 modal-spec-item">
+          <span class="an an-gas-pump modal-spec-icone"></span>
+          <span class="modal-spec-label">Combustível</span>
+          <span class="modal-spec-valor">{{ carroSelecionado.combustivel }}</span>
+        </div>
+        <div class="po-col-6 po-col-md-3 modal-spec-item">
+          <span class="an an-users modal-spec-icone"></span>
+          <span class="modal-spec-label">Lugares</span>
+          <span class="modal-spec-valor">{{ carroSelecionado.lugares }}</span>
+        </div>
+        <div class="po-col-6 po-col-md-3 modal-spec-item">
+          <span class="an an-road modal-spec-icone"></span>
+          <span class="modal-spec-label">Quilometragem</span>
+          <span class="modal-spec-valor">{{ carroSelecionado.km }}</span>
+        </div>
+        <div class="po-col-6 po-col-md-3 modal-spec-item">
+          <span class="an an-tag modal-spec-icone"></span>
+          <span class="modal-spec-label">Categoria</span>
+          <span class="modal-spec-valor">{{ carroSelecionado.categoria }}</span>
+        </div>
+        <div class="po-col-6 po-col-md-3 modal-spec-item">
+          <span class="an an-star modal-spec-icone modal-spec-icone--star"></span>
+          <span class="modal-spec-label">Avaliações</span>
+          <span class="modal-spec-valor">{{ carroSelecionado.avaliacoes }}</span>
+        </div>
+        <div class="po-col-6 po-col-md-3 modal-spec-item modal-spec-item--preco">
+          <span class="an an-money modal-spec-icone"></span>
+          <span class="modal-spec-label">Diária</span>
+          <span class="modal-spec-valor modal-preco-valor">R$ {{ carroSelecionado.precoDiaria | number: '1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+  }
+
+</po-modal>
+
+<!-- Modal: Confirmar Reserva -->
+<po-modal
+  #modalReserva
+  [p-title]="'Confirmar Reserva'"
+  p-size="md"
+  [p-primary-action]="acaoConfirmarReserva"
+  [p-secondary-action]="acaoCancelarReserva">
+
+  @if (carroSelecionado) {
+    <div class="modal-reserva">
+      <div class="po-row po-align-items-center po-mb-3">
+        <div class="po-col-4">
+          <img
+            [src]="carroSelecionado.imagemUrl"
+            [alt]="carroSelecionado.modelo"
+            class="modal-reserva-imagem"
+            (error)="onImageError($event)" />
+        </div>
+        <div class="po-col-8">
+          <h3 class="po-mb-1">{{ carroSelecionado.marca }} {{ carroSelecionado.modelo }}</h3>
+          <p class="po-mb-1">{{ carroSelecionado.ano }} &bull; {{ carroSelecionado.categoria }}</p>
+          <div class="modal-reserva-preco">
+            <span>R$ {{ carroSelecionado.precoDiaria | number: '1.2-2' }}<small>/dia</small></span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-reserva-aviso">
+        <span class="an an-info po-mr-1"></span>
+        Ao confirmar, nossa equipe entrará em contato para finalizar os detalhes da reserva.
+      </div>
+    </div>
+  }
+
+</po-modal>
