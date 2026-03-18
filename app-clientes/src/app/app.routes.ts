@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { Carros } from './carros/carros';
 import { ClienteEdit } from './clientes/cliente-edit/cliente-edit';
 import { Clientes } from './clientes/clientes';
 import { Dashboard } from './dashboard/dashboard';
@@ -14,7 +13,6 @@ export const routes: Routes = [
   { path: 'clientes/editar/:id', component: ClienteEdit },
   { path: 'produtos', component: Produtos },
   { path: 'petsocial', component: Pets },
-  { path: 'carros', component: Carros },
   { path: 'passagens', component: Passagens },    
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 ];
