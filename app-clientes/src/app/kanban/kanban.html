@@ -1,0 +1,85 @@
+<po-page-default p-title="Kanban — Tarefas da Equipe">
+
+  <div class="kanban-board">
+
+    <div *ngFor="let column of columns" class="kanban-column">
+
+      <!-- Cabeçalho da coluna -->
+      <div class="kanban-column-header">
+        <span class="kanban-column-title">{{ column.title }}</span>
+        <po-badge
+          [p-value]="getColumnCount(column.id)"
+          [p-status]="column.badgeStatus"
+          p-size="medium">
+        </po-badge>
+      </div>
+
+      <!-- Cards -->
+      <div
+        class="kanban-cards"
+        [class.kanban-drop-target]="isDropTarget(column.id)"
+        (dragover)="onDragOver($event, column.id)"
+        (dragleave)="onDragLeave(column.id)"
+        (drop)="onDrop(column.id)">
+        <div
+          *ngFor="let task of getTasksByColumn(column.id)"
+          class="kanban-card"
+          draggable="true"
+          [class.kanban-card--dragging]="isDragging(task)"
+          (dragstart)="onDragStart(task)"
+          (dragend)="onDragEnd()">
+
+          <!-- Header do card: avatar + nome -->
+          <div class="kanban-card-top">
+            <po-avatar
+              [p-src]="task.photo"
+              p-size="sm">
+            </po-avatar>
+            <div class="kanban-card-assignee-info">
+              <span class="kanban-card-title">{{ task.title }}</span>
+              <span class="kanban-card-assignee">{{ task.assignee }}</span>
+            </div>
+          </div>
+
+          <!-- Descrição -->
+          <p class="kanban-card-description">{{ task.description }}</p>
+
+          <!-- Rodapé: prioridade + ações -->
+          <div class="kanban-card-footer">
+            <po-tag
+              [p-value]="task.priority"
+              [p-type]="task.priorityType">
+            </po-tag>
+
+            <div class="kanban-card-actions">
+              <po-button
+                *ngIf="!isFirstColumn(column.id)"
+                p-icon="an an-arrow-left"
+                p-kind="tertiary"
+                p-aria-label="Mover para coluna anterior"
+                (p-click)="moveTask(task, 'back')">
+              </po-button>
+              <po-button
+                *ngIf="!isLastColumn(column.id)"
+                p-icon="an an-arrow-right"
+                p-kind="tertiary"
+                p-aria-label="Mover para próxima coluna"
+                (p-click)="moveTask(task, 'forward')">
+              </po-button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Estado vazio -->
+        <div *ngIf="getTasksByColumn(column.id).length === 0" class="kanban-empty">
+          <span class="an an-tray kanban-empty-icon"></span>
+          <span>Nenhuma tarefa</span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</po-page-default>

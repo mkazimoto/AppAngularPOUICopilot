@@ -5,6 +5,7 @@ import { Clientes } from './clientes/clientes';
 import { Cursos } from './cursos/cursos';
 import { Dashboard } from './dashboard/dashboard';
 import { Imoveis } from './imoveis/imoveis';
+import { Kanban } from './kanban/kanban';
 import { Passagens } from './passagens/passagens';
 import { Pets } from './pets/pets';
 import { Produtos } from './produtos/produtos';
@@ -20,5 +21,6 @@ export const routes: Routes = [
   { path: 'carros', component: Carros },
   { path: 'cursos', component: Cursos },
   { path: 'imoveis', component: Imoveis },
+  { path: 'kanban', component: Kanban },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 ];

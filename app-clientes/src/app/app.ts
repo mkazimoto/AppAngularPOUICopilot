@@ -20,6 +20,7 @@ export class App {
     { label: 'Aluguel de Carros', link: '/carros', icon: 'an an-car' },
     { label: 'Cursos Online', link: '/cursos', icon: 'an an-graduation-cap' },
     { label: 'Imóveis', link: '/imoveis', icon: 'an an-building' },
+    { label: 'Kanban', link: '/kanban', icon: 'an an-kanban' },
   ];
 
 
