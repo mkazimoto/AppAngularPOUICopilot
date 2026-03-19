@@ -53,6 +53,12 @@
 
             <div class="kanban-card-actions">
               <po-button
+                p-icon="an an-eye"
+                p-kind="tertiary"
+                p-aria-label="Ver detalhes"
+                (p-click)="openDetail(task)">
+              </po-button>
+              <po-button
                 *ngIf="!isFirstColumn(column.id)"
                 p-icon="an an-arrow-left"
                 p-kind="tertiary"
@@ -81,5 +87,91 @@
     </div>
 
   </div>
+
+  <!-- Modal de detalhes do card -->
+  <po-modal
+    #detailModal
+    p-title="Detalhes da Tarefa"
+    p-size="md"
+    [p-primary-action]="modalCloseAction">
+
+    <ng-container *ngIf="selectedTask">
+
+      <!-- Perfil do responsável -->
+      <div class="detail-profile">
+        <po-avatar
+          [p-src]="selectedTask.photo"
+          p-size="lg">
+        </po-avatar>
+        <div class="detail-profile-info">
+          <span class="detail-assignee-name">{{ selectedTask.assignee }}</span>
+          <span class="detail-assignee-label">Responsável</span>
+        </div>
+      </div>
+
+      <po-divider p-label="Informações"></po-divider>
+
+      <div class="po-row">
+        <div class="po-col-12">
+          <po-info
+            p-label="Título"
+            [p-value]="selectedTask.title">
+          </po-info>
+        </div>
+      </div>
+
+      <div class="po-row">
+        <div class="po-col-12">
+          <po-info
+            p-label="Descrição"
+            [p-value]="selectedTask.description">
+          </po-info>
+        </div>
+      </div>
+
+      <div class="po-row">
+        <div class="po-col-6">
+          <po-info
+            p-label="Coluna"
+            [p-value]="getColumnLabel(selectedTask.column)">
+          </po-info>
+        </div>
+        <div class="po-col-6">
+          <po-info
+            p-label="Prioridade"
+            [p-value]="selectedTask.priority">
+          </po-info>
+        </div>
+      </div>
+
+      <div class="po-row">
+        <div class="po-col-6">
+          <po-info
+            p-label="Prazo"
+            [p-value]="selectedTask.dueDate || 'Não definido'">
+          </po-info>
+        </div>
+        <div class="po-col-6">
+          <po-info
+            p-label="Esforço estimado"
+            [p-value]="selectedTask.effort || 'Não informado'">
+          </po-info>
+        </div>
+      </div>
+
+      <po-divider p-label="Tags"></po-divider>
+
+      <div class="detail-tags">
+        <po-tag
+          *ngFor="let tag of selectedTask.tags"
+          [p-value]="tag"
+          [p-type]="PoTagType.Info">
+        </po-tag>
+        <span *ngIf="!selectedTask.tags?.length" class="detail-no-tags">Sem tags</span>
+      </div>
+
+    </ng-container>
+
+  </po-modal>
 
 </po-page-default>

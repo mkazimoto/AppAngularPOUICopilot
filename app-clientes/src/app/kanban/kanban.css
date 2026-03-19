@@ -144,3 +144,40 @@
   font-size: 2rem;
   opacity: 0.4;
 }
+
+/* Modal de detalhes */
+.detail-profile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.detail-profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.detail-assignee-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-neutral-dark-80, #333);
+}
+
+.detail-assignee-label {
+  font-size: 0.8rem;
+  color: var(--color-neutral-mid-60, #777);
+}
+
+.detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.25rem 0 0.5rem;
+}
+
+.detail-no-tags {
+  font-size: 0.85rem;
+  color: var(--color-neutral-mid-60, #aaa);
+}

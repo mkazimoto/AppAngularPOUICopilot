@@ -1,9 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import {
     PoAvatarModule,
     PoBadgeModule,
     PoButtonModule,
+    PoDividerModule,
+    PoInfoModule,
+    PoModalAction,
+    PoModalComponent,
+    PoModalModule,
     PoPageModule,
     PoTagModule,
     PoTagType,
@@ -18,6 +23,9 @@ export interface KanbanTask {
   assignee: string;
   photo: string;
   column: string;
+  dueDate?: string;
+  tags?: string[];
+  effort?: string;
 }
 
 export interface KanbanColumn {
@@ -28,11 +36,15 @@ export interface KanbanColumn {
 
 @Component({
   selector: 'app-kanban',
-  imports: [CommonModule, PoPageModule, PoAvatarModule, PoTagModule, PoButtonModule, PoBadgeModule],
+  imports: [CommonModule, PoPageModule, PoAvatarModule, PoTagModule, PoButtonModule, PoBadgeModule, PoModalModule, PoInfoModule, PoDividerModule],
   templateUrl: './kanban.html',
   styleUrl: './kanban.css',
 })
 export class Kanban {
+  @ViewChild('detailModal') detailModal!: PoModalComponent;
+
+  readonly PoTagType = PoTagType;
+
   columns: KanbanColumn[] = [
     { id: 'todo', title: 'A Fazer', badgeStatus: 'disabled' },
     { id: 'doing', title: 'Em Progresso', badgeStatus: 'warning' },
@@ -53,6 +65,9 @@ export class Kanban {
       assignee: 'Ana Silva',
       photo: 'https://i.pravatar.cc/150?img=1',
       column: 'todo',
+      dueDate: '28/03/2026',
+      effort: '8h',
+      tags: ['frontend', 'segurança'],
     },
     {
       id: 2,
@@ -63,6 +78,9 @@ export class Kanban {
       assignee: 'Carlos Souza',
       photo: 'https://i.pravatar.cc/150?img=3',
       column: 'todo',
+      dueDate: '02/04/2026',
+      effort: '5h',
+      tags: ['backend', 'performance'],
     },
     {
       id: 3,
@@ -73,6 +91,9 @@ export class Kanban {
       assignee: 'Beatriz Lima',
       photo: 'https://i.pravatar.cc/150?img=5',
       column: 'todo',
+      dueDate: '10/04/2026',
+      effort: '3h',
+      tags: ['design', 'css'],
     },
     {
       id: 4,
@@ -83,6 +104,9 @@ export class Kanban {
       assignee: 'Marina Costa',
       photo: 'https://i.pravatar.cc/150?img=9',
       column: 'doing',
+      dueDate: '22/03/2026',
+      effort: '6h',
+      tags: ['frontend', 'responsivo'],
     },
     {
       id: 5,
@@ -93,6 +117,9 @@ export class Kanban {
       assignee: 'Pedro Lima',
       photo: 'https://i.pravatar.cc/150?img=7',
       column: 'doing',
+      dueDate: '25/03/2026',
+      effort: '12h',
+      tags: ['backend', 'pagamento'],
     },
     {
       id: 6,
@@ -103,6 +130,9 @@ export class Kanban {
       assignee: 'Rodrigo Neves',
       photo: 'https://i.pravatar.cc/150?img=11',
       column: 'doing',
+      dueDate: '30/03/2026',
+      effort: '4h',
+      tags: ['mobile', 'firebase'],
     },
     {
       id: 7,
@@ -113,6 +143,9 @@ export class Kanban {
       assignee: 'Julia Ferreira',
       photo: 'https://i.pravatar.cc/150?img=16',
       column: 'review',
+      dueDate: '21/03/2026',
+      effort: '6h',
+      tags: ['testes', 'qualidade'],
     },
     {
       id: 8,
@@ -123,6 +156,9 @@ export class Kanban {
       assignee: 'Roberto Alves',
       photo: 'https://i.pravatar.cc/150?img=13',
       column: 'review',
+      dueDate: '20/03/2026',
+      effort: '3h',
+      tags: ['devops', 'ci-cd'],
     },
     {
       id: 9,
@@ -133,6 +169,9 @@ export class Kanban {
       assignee: 'Luciana Ramos',
       photo: 'https://i.pravatar.cc/150?img=20',
       column: 'done',
+      dueDate: '15/03/2026',
+      effort: '4h',
+      tags: ['documentação', 'api'],
     },
     {
       id: 10,
@@ -143,6 +182,9 @@ export class Kanban {
       assignee: 'Felipe Santos',
       photo: 'https://i.pravatar.cc/150?img=15',
       column: 'done',
+      dueDate: '12/03/2026',
+      effort: '2h',
+      tags: ['performance', 'imagens'],
     },
     {
       id: 11,
@@ -153,8 +195,27 @@ export class Kanban {
       assignee: 'Camila Braga',
       photo: 'https://i.pravatar.cc/150?img=25',
       column: 'done',
+      dueDate: '10/03/2026',
+      effort: '5h',
+      tags: ['acessibilidade', 'ux'],
     },
   ];
+
+  selectedTask: KanbanTask | null = null;
+
+  modalCloseAction: PoModalAction = {
+    label: 'Fechar',
+    action: () => this.detailModal.close(),
+  };
+
+  getColumnLabel(columnId: string): string {
+    return this.columns.find(c => c.id === columnId)?.title ?? columnId;
+  }
+
+  openDetail(task: KanbanTask): void {
+    this.selectedTask = task;
+    this.detailModal.open();
+  }
 
   getTasksByColumn(columnId: string): KanbanTask[] {
     return this.tasks.filter(t => t.column === columnId);
