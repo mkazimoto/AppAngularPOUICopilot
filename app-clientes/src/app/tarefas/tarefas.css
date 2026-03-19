@@ -1,0 +1,205 @@
+/* ======================================================
+   GANTT CHART
+   ====================================================== */
+
+.gantt-chart {
+  width: 100%;
+  overflow-x: auto;
+  font-size: 13px;
+}
+
+/* --- Header --- */
+.gantt-header {
+  display: flex;
+  background: var(--color-neutral-light-10, #f2f2f2);
+  border-bottom: 2px solid var(--color-neutral-mid-40, #c8c9ca);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.gantt-header-label {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* --- Shared cell layout --- */
+.gantt-cell-name {
+  width: 200px;
+  min-width: 200px;
+  padding: 8px 12px;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-right: 1px solid var(--color-neutral-mid-40, #c8c9ca);
+  display: flex;
+  align-items: center;
+}
+
+.gantt-cell-bar {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* --- Month labels --- */
+.gantt-months {
+  display: flex;
+  height: 36px;
+}
+
+.gantt-month {
+  text-align: center;
+  padding: 8px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  border-right: 1px dashed var(--color-neutral-mid-40, #c8c9ca);
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* --- Today marker in header --- */
+.gantt-today-header {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 2px;
+  background: #dc3545;
+  pointer-events: none;
+}
+
+.gantt-today-label {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #dc3545;
+  white-space: nowrap;
+  background: var(--color-neutral-light-10, #f2f2f2);
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+/* --- Rows --- */
+.gantt-row {
+  display: flex;
+  border-bottom: 1px solid var(--color-neutral-light-20, #e6e6e6);
+  min-height: 44px;
+  transition: background 0.1s;
+}
+
+.gantt-row:hover {
+  background: var(--color-brand-01-lightest, #f0f4ff);
+}
+
+.gantt-row-alt {
+  background: var(--color-neutral-light-05, #f9f9f9);
+}
+
+.gantt-row-alt:hover {
+  background: var(--color-brand-01-lightest, #f0f4ff);
+}
+
+/* --- Today vertical line inside rows --- */
+.gantt-today-marker {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 2px;
+  background: #dc3545;
+  z-index: 8;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* --- Task bar --- */
+.gantt-bar {
+  position: absolute;
+  top: 10px;
+  height: 24px;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  min-width: 4px;
+  cursor: default;
+  transition: box-shadow 0.15s ease, opacity 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+
+.gantt-bar:hover {
+  opacity: 0.88;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.28);
+}
+
+/* Overlay escuro que indica o progresso concluído */
+.gantt-bar-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.22);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.gantt-bar-label {
+  position: relative;
+  z-index: 1;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0 8px;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+/* --- Legend --- */
+.gantt-legend {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 12px 4px 4px;
+  margin-top: 4px;
+  border-top: 1px solid var(--color-neutral-light-20, #e6e6e6);
+}
+
+.gantt-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--color-neutral-dark-70, #595959);
+}
+
+.gantt-legend-line {
+  display: inline-block;
+  width: 2px;
+  height: 16px;
+  background: #dc3545;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
+.gantt-legend-fill {
+  display: inline-block;
+  width: 16px;
+  height: 10px;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid #aaaaaa;
+  flex-shrink: 0;
+}
+
+.gantt-legend-bar {
+  display: inline-block;
+  width: 16px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}

@@ -1,0 +1,94 @@
+<po-page-default
+  p-title="Gestão de Tarefas"
+  p-subtitle="Planejamento e cronograma do projeto"
+>
+
+  <!-- ======================== GRADE DE TAREFAS ======================== -->
+  <po-container p-title="Grade de Tarefas">
+    <po-table
+      [p-columns]="colunas"
+      [p-items]="tarefas"
+      [p-sort]="true"
+      [p-striped]="true"
+      [p-hide-table-search]="false"
+    >
+      <ng-template p-table-column-template [p-property]="'progresso'" let-value>
+        <po-progress [p-value]="value"></po-progress>
+      </ng-template>
+    </po-table>
+  </po-container>
+
+  <!-- ======================== GRÁFICO DE GANTT ======================== -->
+  <po-divider p-label="Gráfico de Gantt — Março a Maio 2026"></po-divider>
+
+  <po-container p-title="Cronograma do Projeto (01/03/2026 – 31/05/2026)">
+    <div class="gantt-chart">
+
+      <!-- Cabeçalho com meses -->
+      <div class="gantt-header">
+        <div class="gantt-cell-name gantt-header-label">Tarefa</div>
+        <div class="gantt-cell-bar">
+          <div class="gantt-months">
+            <div
+              *ngFor="let m of ganttMonths"
+              class="gantt-month"
+              [style.width.%]="m.widthPct"
+            >{{ m.label }}</div>
+          </div>
+          <!-- Marcador "Hoje" no header -->
+          <div class="gantt-today-header" [style.left]="todayPct + '%'">
+            <span class="gantt-today-label">Hoje</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Linhas de tarefas -->
+      <div
+        *ngFor="let t of tarefas; let odd = odd"
+        class="gantt-row"
+        [class.gantt-row-alt]="odd"
+      >
+        <div class="gantt-cell-name" [title]="t.titulo">{{ t.titulo }}</div>
+        <div class="gantt-cell-bar">
+          <!-- Linha de hoje -->
+          <div class="gantt-today-marker" [style.left]="todayPct + '%'"></div>
+          <!-- Barra da tarefa -->
+          <div
+            class="gantt-bar"
+            [ngStyle]="getBarStyle(t)"
+            [title]="t.titulo + ' — ' + t.dataInicio + ' a ' + t.dataFim + ' (' + t.progresso + '% concluído)'"
+          >
+            <div class="gantt-bar-fill" [style.width.%]="t.progresso"></div>
+            <span class="gantt-bar-label">{{ t.progresso > 0 ? (t.progresso + '%') : t.titulo }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Legenda -->
+      <div class="gantt-legend">
+        <div class="gantt-legend-item">
+          <span class="gantt-legend-line"></span>
+          <span>Hoje (19/03/2026)</span>
+        </div>
+        <div class="gantt-legend-item">
+          <span class="gantt-legend-fill"></span>
+          <span>Progresso concluído</span>
+        </div>
+        <div class="gantt-legend-item">
+          <span class="gantt-legend-bar" style="background:#198754;"></span>
+          <span>Concluído</span>
+        </div>
+        <div class="gantt-legend-item">
+          <span class="gantt-legend-bar" style="background:#fd7e14;"></span>
+          <span>Em Andamento</span>
+        </div>
+        <div class="gantt-legend-item">
+          <span class="gantt-legend-bar" style="background:#17a2b8;"></span>
+          <span>A Fazer</span>
+        </div>
+      </div>
+
+    </div>
+  </po-container>
+
+</po-page-default>
