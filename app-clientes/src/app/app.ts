@@ -18,6 +18,7 @@ export class App {
     { label: 'PetSocial', link: '/petsocial', icon: 'an an-paw-print' },
     { label: 'Passagens Aéreas', link: '/passagens', icon: 'an an-airplane' },
     { label: 'Aluguel de Carros', link: '/carros', icon: 'an an-car' },
+    { label: 'Cursos Online', link: '/cursos', icon: 'an an-graduation-cap' },
   ];
 
 

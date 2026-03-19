@@ -1,0 +1,215 @@
+<po-page-default
+  p-title="Cursos Online"
+  p-subtitle="Aprenda novas habilidades com nossos cursos em vídeo">
+
+  <!-- Resumo Stats -->
+  <div class="po-row po-mb-4">
+    <div class="po-md-4 po-sm-12">
+      <div class="stat-card stat-total">
+        <span class="stat-icon an an-graduation-cap"></span>
+        <div class="stat-info">
+          <span class="stat-value">{{ totalCursos }}</span>
+          <span class="stat-label">Total de Cursos</span>
+        </div>
+      </div>
+    </div>
+    <div class="po-md-4 po-sm-12">
+      <div class="stat-card stat-andamento">
+        <span class="stat-icon an an-play-circle"></span>
+        <div class="stat-info">
+          <span class="stat-value">{{ cursosEmAndamento }}</span>
+          <span class="stat-label">Em Andamento</span>
+        </div>
+      </div>
+    </div>
+    <div class="po-md-4 po-sm-12">
+      <div class="stat-card stat-concluido">
+        <span class="stat-icon an an-check-circle"></span>
+        <div class="stat-info">
+          <span class="stat-value">{{ cursosConcluidos }}</span>
+          <span class="stat-label">Concluídos</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtro por Categoria -->
+  <po-divider p-label="Categorias"></po-divider>
+
+  <po-tabs class="po-mb-4">
+    <po-tab
+      p-label="Todos"
+      [p-active]="categoriaAtiva === 'todos'"
+      (p-click)="selecionarCategoria('todos')">
+    </po-tab>
+    <po-tab
+      p-label="Front-end"
+      [p-active]="categoriaAtiva === 'frontend'"
+      (p-click)="selecionarCategoria('frontend')">
+    </po-tab>
+    <po-tab
+      p-label="Back-end"
+      [p-active]="categoriaAtiva === 'backend'"
+      (p-click)="selecionarCategoria('backend')">
+    </po-tab>
+    <po-tab
+      p-label="Dados & IA"
+      [p-active]="categoriaAtiva === 'dados'"
+      (p-click)="selecionarCategoria('dados')">
+    </po-tab>
+    <po-tab
+      p-label="Design"
+      [p-active]="categoriaAtiva === 'design'"
+      (p-click)="selecionarCategoria('design')">
+    </po-tab>
+    <po-tab
+      p-label="DevOps"
+      [p-active]="categoriaAtiva === 'devops'"
+      (p-click)="selecionarCategoria('devops')">
+    </po-tab>
+  </po-tabs>
+
+  <!-- Grid de Cursos -->
+  <po-divider [p-label]="categoriaAtiva === 'todos' ? 'Todos os Cursos' : 'Cursos Filtrados'"></po-divider>
+
+  <div class="po-row">
+    @for (curso of cursosFiltrados; track curso.id) {
+      <div class="po-md-4 po-sm-12 po-mb-3">
+        <po-widget
+          [p-title]="curso.titulo"
+          p-primary-label="Assistir Agora"
+          (p-primary-action)="assistirCurso(curso)">
+
+          <!-- Thumbnail com overlay de play -->
+          <div class="curso-thumbnail-wrapper">
+            <img [src]="curso.thumbnail" [alt]="curso.titulo" class="curso-thumbnail">
+            <div class="play-overlay" (click)="assistirCurso(curso)">
+              <span class="an an-play-circle play-icon"></span>
+            </div>
+            <!-- Badge de progresso concluído -->
+            @if (curso.progresso === 100) {
+              <div class="badge-concluido">
+                <span class="an an-check"></span> Concluído
+              </div>
+            }
+          </div>
+
+          <!-- Nível e categoria -->
+          <div class="po-row po-mt-2 po-mb-1">
+            <div class="po-md-12">
+              <po-tag
+                [p-value]="curso.nivel"
+                [p-type]="curso.nivelTipo"
+                class="po-mr-1">
+              </po-tag>
+              @for (tag of curso.tags; track tag) {
+                <po-tag
+                  [p-value]="tag"
+                  class="po-mr-1">
+                </po-tag>
+              }
+            </div>
+          </div>
+
+          <!-- Instrutor e avaliação -->
+          <div class="curso-meta po-mt-1">
+            <div class="instrutor">
+              <span class="an an-user-circle po-mr-1"></span>
+              <span>{{ curso.instrutor }}</span>
+            </div>
+            <div class="avaliacao">
+              <span class="estrelas">{{ getEstrelas(curso.avaliacao) }}</span>
+              <span class="avaliacao-nota"> {{ curso.avaliacao }}</span>
+              <span class="alunos"> · {{ formatarAlunos(curso.alunos) }} alunos</span>
+            </div>
+          </div>
+
+          <!-- Info: duração e aulas -->
+          <div class="curso-info po-mt-1">
+            <span class="info-item">
+              <span class="an an-clock po-mr-1"></span>{{ curso.duracao }}
+            </span>
+            <span class="info-item po-ml-2">
+              <span class="an an-film po-mr-1"></span>{{ curso.aulas }} aulas
+            </span>
+          </div>
+
+          <!-- Barra de progresso -->
+          <div class="po-mt-2">
+            <po-progress
+              [p-value]="curso.progresso"
+              [p-text]="getProgressoLabel(curso.progresso)">
+            </po-progress>
+          </div>
+
+        </po-widget>
+      </div>
+    }
+  </div>
+
+  @if (cursosFiltrados.length === 0) {
+    <div class="sem-cursos">
+      <span class="an an-graduation-cap sem-cursos-icon"></span>
+      <p>Nenhum curso encontrado para esta categoria.</p>
+    </div>
+  }
+
+</po-page-default>
+
+<!-- Modal de Vídeo -->
+<po-modal
+  #modalVideo
+  [p-title]="cursoSelecionado?.titulo || ''"
+  p-size="xl"
+  [p-primary-action]="acaoAssistir">
+
+  @if (cursoSelecionado) {
+    <div class="modal-video-container">
+      <iframe
+        [src]="videoUrlSafe"
+        class="modal-video-iframe"
+        frameborder="0"
+        allowfullscreen
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+      </iframe>
+    </div>
+
+    <div class="modal-curso-info po-mt-3">
+      <po-divider p-label="Sobre o Curso"></po-divider>
+
+      <div class="po-row">
+        <div class="po-md-8 po-sm-12">
+          <p class="curso-descricao">{{ cursoSelecionado.descricao }}</p>
+        </div>
+        <div class="po-md-4 po-sm-12">
+          <div class="curso-detalhes">
+            <div class="detalhe-item">
+              <span class="an an-user po-mr-2"></span>
+              <strong>Instrutor:</strong> {{ cursoSelecionado.instrutor }}
+            </div>
+            <div class="detalhe-item po-mt-1">
+              <span class="an an-clock po-mr-2"></span>
+              <strong>Duração:</strong> {{ cursoSelecionado.duracao }}
+            </div>
+            <div class="detalhe-item po-mt-1">
+              <span class="an an-film po-mr-2"></span>
+              <strong>Aulas:</strong> {{ cursoSelecionado.aulas }}
+            </div>
+            <div class="detalhe-item po-mt-1">
+              <span class="an an-users po-mr-2"></span>
+              <strong>Alunos:</strong> {{ formatarAlunos(cursoSelecionado.alunos) }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="po-mt-2">
+        <po-progress
+          [p-value]="cursoSelecionado.progresso"
+          [p-text]="getProgressoLabel(cursoSelecionado.progresso)">
+        </po-progress>
+      </div>
+    </div>
+  }
+
+</po-modal>
