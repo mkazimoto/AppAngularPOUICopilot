@@ -21,6 +21,7 @@ export class App {
     { label: 'Cursos Online', link: '/cursos', icon: 'an an-graduation-cap' },
     { label: 'Imóveis', link: '/imoveis', icon: 'an an-building' },
     { label: 'Kanban', link: '/kanban', icon: 'an an-kanban' },
+    { label: 'Workflow', link: '/workflow', icon: 'an an-git-branch' },
   ];
 
 

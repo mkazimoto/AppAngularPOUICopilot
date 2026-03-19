@@ -1,0 +1,174 @@
+<po-page-default p-title="Workflow — Aprovação de Pedido">
+
+  <!-- Toolbar de ações -->
+  <div class="wf-toolbar">
+    <po-button
+      p-label="Avançar Etapa"
+      p-icon="an an-arrow-right"
+      p-kind="primary"
+      (p-click)="advanceWorkflow()">
+    </po-button>
+    <po-button
+      p-label="Reiniciar"
+      p-icon="an an-arrows-counter-clockwise"
+      (p-click)="resetWorkflow()">
+    </po-button>
+  </div>
+
+  <po-divider p-label="Legenda de Entidades"></po-divider>
+
+  <!-- Legenda -->
+  <div class="wf-legend">
+    <div class="wf-legend-item">
+      <div class="wf-node wf-node--start wf-node--sm">
+        <span class="an an-play-circle"></span>
+      </div>
+      <span>Início</span>
+    </div>
+    <div class="wf-legend-item">
+      <div class="wf-node wf-node--action wf-node--sm">
+        <span class="an an-lightning"></span>
+      </div>
+      <span>Ação</span>
+    </div>
+    <div class="wf-legend-item">
+      <div class="wf-node wf-node--decision wf-node--sm">
+        <span class="an an-git-fork"></span>
+      </div>
+      <span>Decisão</span>
+    </div>
+    <div class="wf-legend-item">
+      <div class="wf-node wf-node--end wf-node--sm">
+        <span class="an an-stop-circle"></span>
+      </div>
+      <span>Fim</span>
+    </div>
+  </div>
+
+  <po-divider p-label="Diagrama do Processo"></po-divider>
+
+  <!-- Diagrama principal -->
+  <div class="wf-canvas">
+
+    <!-- Fluxo principal: linha horizontal -->
+    <div class="wf-flow wf-flow--main">
+      <ng-container *ngFor="let node of mainFlow; let last = last">
+
+        <!-- Nó -->
+        <div
+          class="wf-node-wrapper"
+          (click)="openNodeDetail(node)"
+          [class.wf-node-wrapper--active]="isActive(node.id)">
+
+          <div
+            [class]="'wf-node wf-node--' + node.type"
+            [class.wf-node--active]="isActive(node.id)"
+            [class.wf-node--done]="node.status === 'done'">
+            <span [class]="getNodeIcon(node.type)"></span>
+          </div>
+
+          <div class="wf-node-label">
+            <span class="wf-node-title">{{ node.label }}</span>
+            <po-tag
+              [p-value]="getStatusLabel(node.status)"
+              [p-type]="getStatusTagType(node.status)"
+              p-inverse="false">
+            </po-tag>
+          </div>
+        </div>
+
+        <!-- Seta de conexão (exceto após o último nó) -->
+        <div *ngIf="!last" class="wf-arrow-h">
+          <!-- Bifurcação na decisão: Sim / Não -->
+          <div *ngIf="node.type === 'decision'" class="wf-decision-labels">
+            <span class="wf-decision-yes">Sim</span>
+          </div>
+          <div class="wf-arrow-line"></div>
+          <div class="wf-arrow-head"></div>
+        </div>
+
+      </ng-container>
+    </div>
+
+    <!-- Desvio: "Não" na decisão → Solicitar Reposição → volta à decisão -->
+    <div class="wf-branch">
+      <!-- Linha vertical descendo da decisão -->
+      <div class="wf-branch-start">
+        <span class="wf-decision-no">Não</span>
+        <div class="wf-arrow-v"></div>
+      </div>
+
+      <!-- Nó de reposição -->
+      <ng-container *ngFor="let node of branchFlow">
+        <div
+          class="wf-node-wrapper"
+          (click)="openNodeDetail(node)"
+          [class.wf-node-wrapper--active]="isActive(node.id)">
+          <div
+            [class]="'wf-node wf-node--' + node.type"
+            [class.wf-node--active]="isActive(node.id)"
+            [class.wf-node--done]="node.status === 'done'">
+            <span [class]="getNodeIcon(node.type)"></span>
+          </div>
+          <div class="wf-node-label">
+            <span class="wf-node-title">{{ node.label }}</span>
+            <po-tag
+              [p-value]="getStatusLabel(node.status)"
+              [p-type]="getStatusTagType(node.status)">
+            </po-tag>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Linha voltando para a decisão -->
+      <div class="wf-branch-return">
+        <div class="wf-arrow-v"></div>
+        <span class="wf-branch-return-label">Retorna</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal de detalhes do nó -->
+  <po-modal
+    #nodeModal
+    [p-title]="selectedNode?.label || ''"
+    [p-primary-action]="modalConfirmAction"
+    p-size="sm">
+
+    <div *ngIf="selectedNode" class="wf-modal-content">
+
+      <div class="wf-modal-type">
+        <div [class]="'wf-node wf-node--' + selectedNode.type + ' wf-node--lg'">
+          <span [class]="getNodeIcon(selectedNode.type)"></span>
+        </div>
+        <div>
+          <strong>Tipo:</strong> {{ getNodeTypeLabel(selectedNode.type) }}<br>
+          <strong>ID:</strong> {{ selectedNode.id }}
+        </div>
+      </div>
+
+      <po-divider></po-divider>
+
+      <p>{{ selectedNode.description }}</p>
+
+      <div class="wf-modal-status">
+        <strong>Status:</strong>
+        <po-tag
+          [p-value]="getStatusLabel(selectedNode.status)"
+          [p-type]="getStatusTagType(selectedNode.status)">
+        </po-tag>
+      </div>
+
+      <div *ngIf="selectedNode.connections.length > 0" class="wf-modal-connections">
+        <strong>Conecta a:</strong>
+        <ul>
+          <li *ngFor="let conn of selectedNode.connections">{{ conn }}</li>
+        </ul>
+      </div>
+
+    </div>
+
+  </po-modal>
+
+</po-page-default>

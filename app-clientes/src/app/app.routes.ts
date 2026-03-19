@@ -9,6 +9,7 @@ import { Kanban } from './kanban/kanban';
 import { Passagens } from './passagens/passagens';
 import { Pets } from './pets/pets';
 import { Produtos } from './produtos/produtos';
+import { Workflow } from './workflow/workflow';
 
 export const routes: Routes = [
   { path: 'dashboard', component: Dashboard },
@@ -22,5 +23,6 @@ export const routes: Routes = [
   { path: 'cursos', component: Cursos },
   { path: 'imoveis', component: Imoveis },
   { path: 'kanban', component: Kanban },
+  { path: 'workflow', component: Workflow },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 ];
