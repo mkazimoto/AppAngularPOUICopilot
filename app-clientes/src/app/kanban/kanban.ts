@@ -1,17 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { Component, ViewChild } from '@angular/core';
 import {
-    PoAvatarModule,
-    PoBadgeModule,
-    PoButtonModule,
-    PoDividerModule,
-    PoInfoModule,
-    PoModalAction,
-    PoModalComponent,
-    PoModalModule,
-    PoPageModule,
-    PoTagModule,
-    PoTagType,
+  PoAvatarModule,
+  PoBadgeModule,
+  PoButtonModule,
+  PoDividerModule,
+  PoInfoModule,
+  PoModalAction,
+  PoModalComponent,
+  PoModalModule,
+  PoPageModule,
+  PoProgressModule,
+  PoProgressStatus,
+  PoTagModule,
+  PoTagType,
 } from '@po-ui/ng-components';
 
 export interface KanbanTask {
@@ -26,6 +28,7 @@ export interface KanbanTask {
   dueDate?: string;
   tags?: string[];
   effort?: string;
+  progress: number;
 }
 
 export interface KanbanColumn {
@@ -36,7 +39,7 @@ export interface KanbanColumn {
 
 @Component({
   selector: 'app-kanban',
-  imports: [CommonModule, PoPageModule, PoAvatarModule, PoTagModule, PoButtonModule, PoBadgeModule, PoModalModule, PoInfoModule, PoDividerModule],
+  imports: [CommonModule, PoPageModule, PoAvatarModule, PoTagModule, PoButtonModule, PoBadgeModule, PoModalModule, PoInfoModule, PoDividerModule, PoProgressModule],
   templateUrl: './kanban.html',
   styleUrl: './kanban.css',
 })
@@ -44,6 +47,7 @@ export class Kanban {
   @ViewChild('detailModal') detailModal!: PoModalComponent;
 
   readonly PoTagType = PoTagType;
+  readonly PoProgressStatus = PoProgressStatus;
 
   columns: KanbanColumn[] = [
     { id: 'todo', title: 'A Fazer', badgeStatus: 'disabled' },
@@ -68,6 +72,7 @@ export class Kanban {
       dueDate: '28/03/2026',
       effort: '8h',
       tags: ['frontend', 'segurança'],
+      progress: 0,
     },
     {
       id: 2,
@@ -81,6 +86,7 @@ export class Kanban {
       dueDate: '02/04/2026',
       effort: '5h',
       tags: ['backend', 'performance'],
+      progress: 0,
     },
     {
       id: 3,
@@ -94,6 +100,7 @@ export class Kanban {
       dueDate: '10/04/2026',
       effort: '3h',
       tags: ['design', 'css'],
+      progress: 0,
     },
     {
       id: 4,
@@ -107,6 +114,7 @@ export class Kanban {
       dueDate: '22/03/2026',
       effort: '6h',
       tags: ['frontend', 'responsivo'],
+      progress: 60,
     },
     {
       id: 5,
@@ -120,6 +128,7 @@ export class Kanban {
       dueDate: '25/03/2026',
       effort: '12h',
       tags: ['backend', 'pagamento'],
+      progress: 45,
     },
     {
       id: 6,
@@ -133,6 +142,7 @@ export class Kanban {
       dueDate: '30/03/2026',
       effort: '4h',
       tags: ['mobile', 'firebase'],
+      progress: 30,
     },
     {
       id: 7,
@@ -146,6 +156,7 @@ export class Kanban {
       dueDate: '21/03/2026',
       effort: '6h',
       tags: ['testes', 'qualidade'],
+      progress: 85,
     },
     {
       id: 8,
@@ -159,6 +170,7 @@ export class Kanban {
       dueDate: '20/03/2026',
       effort: '3h',
       tags: ['devops', 'ci-cd'],
+      progress: 90,
     },
     {
       id: 9,
@@ -172,6 +184,7 @@ export class Kanban {
       dueDate: '15/03/2026',
       effort: '4h',
       tags: ['documentação', 'api'],
+      progress: 100,
     },
     {
       id: 10,
@@ -185,6 +198,7 @@ export class Kanban {
       dueDate: '12/03/2026',
       effort: '2h',
       tags: ['performance', 'imagens'],
+      progress: 100,
     },
     {
       id: 11,
@@ -198,6 +212,7 @@ export class Kanban {
       dueDate: '10/03/2026',
       effort: '5h',
       tags: ['acessibilidade', 'ux'],
+      progress: 100,
     },
   ];
 
@@ -207,6 +222,10 @@ export class Kanban {
     label: 'Fechar',
     action: () => this.detailModal.close(),
   };
+
+  getProgressStatus(progress: number): PoProgressStatus {
+    return progress === 100 ? PoProgressStatus.Success : PoProgressStatus.Default;
+  }
 
   getColumnLabel(columnId: string): string {
     return this.columns.find(c => c.id === columnId)?.title ?? columnId;

@@ -114,6 +114,18 @@
   line-height: 1.4;
 }
 
+/* Barra de progresso */
+.kanban-card-progress {
+  margin-bottom: 0.625rem;
+}
+
+.kanban-card-progress-label {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--color-neutral-mid-60, #777);
+  margin-bottom: 0.25rem;
+}
+
 /* Rodapé */
 .kanban-card-footer {
   display: flex;

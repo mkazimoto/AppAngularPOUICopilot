@@ -44,6 +44,16 @@
           <!-- Descrição -->
           <p class="kanban-card-description">{{ task.description }}</p>
 
+          <!-- Barra de progresso -->
+          <div class="kanban-card-progress">
+            <span class="kanban-card-progress-label">Progresso: {{ task.progress }}%</span>
+            <po-progress
+              [p-value]="task.progress"
+              [p-status]="getProgressStatus(task.progress)"
+              p-disabled-cancel="true">
+            </po-progress>
+          </div>
+
           <!-- Rodapé: prioridade + ações -->
           <div class="kanban-card-footer">
             <po-tag
