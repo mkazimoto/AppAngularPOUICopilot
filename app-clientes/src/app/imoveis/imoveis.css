@@ -1,0 +1,126 @@
+.imoveis-destaque-slide {
+  margin-bottom: 1.5rem;
+}
+
+.imoveis-secao-titulo {
+  margin-bottom: 1rem;
+  color: var(--color-neutral-dark-80);
+}
+
+.imoveis-filtros {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.imoveis-grid {
+  margin-top: 0.5rem;
+}
+
+.imoveis-grid > div {
+  margin-bottom: 1.5rem;
+}
+
+/* Slide dentro do widget */
+.imovel-slide-wrapper {
+  margin: -1rem -1rem 0.75rem -1rem;
+  overflow: hidden;
+  border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
+}
+
+/* Tags */
+.imovel-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+/* Preço */
+.imovel-preco {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.75rem;
+}
+
+.imovel-preco-valor {
+  color: var(--color-action-default);
+  font-size: 1.25rem;
+}
+
+.imovel-condominio {
+  color: var(--color-neutral-mid-60);
+  font-size: 0.8rem;
+}
+
+/* Características */
+.imovel-caracteristicas {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--color-neutral-light-20);
+  border-bottom: 1px solid var(--color-neutral-light-20);
+}
+
+.imovel-feature {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--color-neutral-dark-70);
+}
+
+.imovel-feature i {
+  color: var(--color-action-default);
+}
+
+/* Localização */
+.imovel-localizacao {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  color: var(--color-neutral-mid-60);
+}
+
+.imovel-localizacao i {
+  color: var(--color-feedback-negative-base);
+}
+
+/* Modal */
+.imovel-modal-conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.imovel-modal-info {
+  margin-top: 0.5rem;
+}
+
+.imovel-modal-tags {
+  margin-top: 0.75rem;
+}
+
+.imovel-modal-preco {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  background: var(--color-brand-01-lightest);
+  border-radius: var(--border-radius-md);
+}
+
+.imovel-preco-modal {
+  color: var(--color-action-default);
+  font-size: 1.5rem;
+}
+
+.imovel-descricao {
+  line-height: 1.6;
+  color: var(--color-neutral-dark-70);
+}

@@ -1,0 +1,223 @@
+<po-page-default p-title="Imóveis à Venda e Aluguel">
+
+  <!-- Galeria de Destaques -->
+  <div class="imoveis-destaque-slide">
+    <h2 class="po-font-title-bold imoveis-secao-titulo">
+      <span class="an an-star"></span> Imóveis em Destaque
+    </h2>
+    <po-slide
+      [p-slides]="slidesDestaque"
+      [p-height]="420"
+      [p-interval]="5000">
+    </po-slide>
+  </div>
+
+  <po-divider p-label="Nosso Portfólio"></po-divider>
+
+  <!-- Filtros -->
+  <div class="imoveis-filtros">
+    <po-button
+      p-label="Todos"
+      [p-kind]="filtroAtivo === 'todos' ? 'primary' : 'secondary'"
+      (p-click)="setFiltro('todos')">
+    </po-button>
+    <po-button
+      p-label="Venda"
+      [p-kind]="filtroAtivo === 'venda' ? 'primary' : 'secondary'"
+      (p-click)="setFiltro('venda')">
+    </po-button>
+    <po-button
+      p-label="Aluguel"
+      [p-kind]="filtroAtivo === 'aluguel' ? 'primary' : 'secondary'"
+      (p-click)="setFiltro('aluguel')">
+    </po-button>
+    <po-button
+      p-label="Destaque"
+      [p-kind]="filtroAtivo === 'destaque' ? 'primary' : 'secondary'"
+      p-icon="an an-star"
+      (p-click)="setFiltro('destaque')">
+    </po-button>
+  </div>
+
+  <!-- Grid de Imóveis -->
+  <div class="po-row imoveis-grid">
+    <div class="po-sm-12 po-md-6 po-lg-4" *ngFor="let imovel of imoveisFiltrados">
+      <po-widget
+        [p-title]="imovel.titulo"
+        p-primary-label="Ver Detalhes"
+        (p-primary-action)="abrirDetalhes(imovel)">
+
+        <!-- Galeria de fotos do imóvel -->
+        <div class="imovel-slide-wrapper">
+          <po-slide
+            [p-slides]="getSlides(imovel)"
+            [p-height]="200"
+            [p-interval]="6000">
+          </po-slide>
+        </div>
+
+        <!-- Tags de tipo e status -->
+        <div class="imovel-tags">
+          <po-tag
+            [p-value]="imovel.tipoNegocio"
+            [p-type]="imovel.tipoNegocioTag">
+          </po-tag>
+          <po-tag
+            [p-value]="imovel.tipo"
+            [p-type]="PoTagType.Neutral">
+          </po-tag>
+          <po-tag
+            [p-value]="imovel.status"
+            [p-type]="imovel.statusTag">
+          </po-tag>
+        </div>
+
+        <!-- Preço -->
+        <div class="imovel-preco">
+          <span class="po-font-title-bold imovel-preco-valor">
+            {{ formatarPreco(imovel.preco, imovel.tipoNegocio) }}
+          </span>
+          <span *ngIf="imovel.condominio" class="po-font-text imovel-condominio">
+            + R$ {{ imovel.condominio.toLocaleString('pt-BR') }} cond.
+          </span>
+        </div>
+
+        <!-- Características -->
+        <div class="imovel-caracteristicas">
+          <span class="imovel-feature">
+            <i class="an an-bed"></i> {{ imovel.quartos }} quarto{{ imovel.quartos > 1 ? 's' : '' }}
+          </span>
+          <span class="imovel-feature">
+            <i class="an an-bathtub"></i> {{ imovel.banheiros }} ban.
+          </span>
+          <span class="imovel-feature">
+            <i class="an an-car"></i> {{ imovel.vagas }} vaga{{ imovel.vagas > 1 ? 's' : '' }}
+          </span>
+          <span class="imovel-feature">
+            <i class="an an-ruler"></i> {{ imovel.areaTotal }}m²
+          </span>
+        </div>
+
+        <!-- Localização -->
+        <div class="imovel-localizacao">
+          <i class="an an-map-pin"></i>
+          <span class="po-font-text-small">{{ imovel.bairro }}, {{ imovel.cidade }}</span>
+        </div>
+
+      </po-widget>
+    </div>
+  </div>
+
+  <!-- Modal de Detalhes -->
+  <po-modal
+    #modalImovel
+    [p-title]="imovelSelecionado?.titulo || ''"
+    p-size="xl"
+    [p-primary-action]="acaoPrimaria"
+    [p-secondary-action]="acaoSecundaria">
+
+    <div *ngIf="imovelSelecionado" class="imovel-modal-conteudo">
+
+      <!-- Galeria principal no modal -->
+      <po-slide
+        [p-slides]="getSlides(imovelSelecionado)"
+        [p-height]="380"
+        [p-interval]="0">
+      </po-slide>
+
+      <div class="imovel-modal-info">
+
+        <!-- Tags -->
+        <div class="imovel-tags imovel-modal-tags">
+          <po-tag
+            [p-value]="imovelSelecionado.tipoNegocio"
+            [p-type]="imovelSelecionado.tipoNegocioTag">
+          </po-tag>
+          <po-tag
+            [p-value]="imovelSelecionado.tipo"
+            [p-type]="PoTagType.Neutral">
+          </po-tag>
+          <po-tag
+            *ngIf="imovelSelecionado.destaque"
+            p-value="Destaque"
+            [p-type]="PoTagType.Warning">
+          </po-tag>
+        </div>
+
+        <!-- Preço destaque -->
+        <div class="imovel-modal-preco">
+          <span class="po-font-title-bold imovel-preco-modal">
+            {{ formatarPreco(imovelSelecionado.preco, imovelSelecionado.tipoNegocio) }}
+          </span>
+          <span *ngIf="imovelSelecionado.condominio" class="po-font-text">
+            Condomínio: R$ {{ imovelSelecionado.condominio.toLocaleString('pt-BR') }}/mês
+          </span>
+          <span *ngIf="imovelSelecionado.iptu" class="po-font-text">
+            IPTU: R$ {{ imovelSelecionado.iptu.toLocaleString('pt-BR') }}/mês
+          </span>
+        </div>
+
+        <po-divider p-label="Localização"></po-divider>
+
+        <div class="po-row">
+          <div class="po-sm-12 po-md-6">
+            <po-info
+              p-label="Endereço"
+              [p-value]="imovelSelecionado.endereco">
+            </po-info>
+          </div>
+          <div class="po-sm-12 po-md-3">
+            <po-info
+              p-label="Bairro"
+              [p-value]="imovelSelecionado.bairro">
+            </po-info>
+          </div>
+          <div class="po-sm-12 po-md-3">
+            <po-info
+              p-label="Cidade"
+              [p-value]="imovelSelecionado.cidade">
+            </po-info>
+          </div>
+        </div>
+
+        <po-divider p-label="Características"></po-divider>
+
+        <div class="po-row">
+          <div class="po-sm-6 po-md-3">
+            <po-info
+              p-label="Quartos"
+              [p-value]="imovelSelecionado.quartos.toString()">
+            </po-info>
+          </div>
+          <div class="po-sm-6 po-md-3">
+            <po-info
+              p-label="Banheiros"
+              [p-value]="imovelSelecionado.banheiros.toString()">
+            </po-info>
+          </div>
+          <div class="po-sm-6 po-md-3">
+            <po-info
+              p-label="Vagas"
+              [p-value]="imovelSelecionado.vagas.toString()">
+            </po-info>
+          </div>
+          <div class="po-sm-6 po-md-3">
+            <po-info
+              p-label="Área Total"
+              [p-value]="imovelSelecionado.areaTotal + ' m²'">
+            </po-info>
+          </div>
+        </div>
+
+        <po-divider p-label="Descrição"></po-divider>
+
+        <p class="po-font-text imovel-descricao">
+          {{ imovelSelecionado.descricao }}
+        </p>
+
+      </div>
+    </div>
+
+  </po-modal>
+
+</po-page-default>
