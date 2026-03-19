@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { Agendamento } from './agendamento/agendamento';
 import { Carros } from './carros/carros';
 import { ClienteEdit } from './clientes/cliente-edit/cliente-edit';
 import { Clientes } from './clientes/clientes';
@@ -26,5 +27,6 @@ export const routes: Routes = [
   { path: 'kanban', component: Kanban },
   { path: 'workflow', component: Workflow },
   { path: 'tarefas', component: Tarefas },
+  { path: 'agendamento', component: Agendamento },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 ];

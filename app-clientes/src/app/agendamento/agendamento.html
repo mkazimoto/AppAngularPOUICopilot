@@ -1,0 +1,206 @@
+<po-page-default p-title="Agendamento" [p-actions]="pageActions">
+
+  <!-- Navegação da semana -->
+  <div class="agenda-nav">
+    <po-button
+      p-icon="an an-caret-left"
+      p-kind="secondary"
+      p-tooltip="Semana anterior"
+      (p-click)="navAnterior()">
+    </po-button>
+
+    <span class="agenda-nav-label">{{ labelSemana }}</span>
+
+    <po-button
+      p-icon="an an-caret-right"
+      p-kind="secondary"
+      p-tooltip="Próxima semana"
+      (p-click)="navProxima()">
+    </po-button>
+
+    <po-button
+      p-label="Hoje"
+      p-kind="tertiary"
+      (p-click)="navegarParaHoje()">
+    </po-button>
+  </div>
+
+  <!-- Legenda -->
+  <div class="agenda-legenda">
+    <span class="legenda-item legenda-item--consulta">Consulta</span>
+    <span class="legenda-item legenda-item--reuniao">Reunião</span>
+    <span class="legenda-item legenda-item--servico">Serviço</span>
+    <span class="legenda-item legenda-item--entrevista">Entrevista</span>
+  </div>
+
+  <!-- Grade de agendamento -->
+  <div class="agenda-container">
+
+    <!-- Cabeçalho dos dias -->
+    <div class="agenda-header">
+      <div class="time-gutter"></div>
+      <div
+        *ngFor="let dia of dias"
+        class="day-header"
+        [class.day-header--hoje]="dia.isHoje">
+        <span class="day-header__name">{{ dia.diaSemana }}</span>
+        <span class="day-header__number" [class.day-header__number--hoje]="dia.isHoje">
+          {{ dia.numero }}
+        </span>
+        <span class="day-header__mes" *ngIf="dia.numero === 1 || dia === dias[0]">
+          {{ dia.mes }}/{{ dia.ano }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Corpo com scroll -->
+    <div class="agenda-scroll">
+
+      <!-- Coluna de horários -->
+      <div class="time-gutter-body">
+        <div *ngFor="let h of horarios" class="time-gutter-cell">
+          <span *ngIf="isHoraCheia(h)" class="time-gutter-label">{{ h }}</span>
+        </div>
+      </div>
+
+      <!-- Colunas dos dias -->
+      <div class="agenda-columns">
+        <div
+          *ngFor="let dia of dias"
+          class="day-column"
+          [class.day-column--hoje]="dia.isHoje">
+
+          <!-- Células de horário (clicáveis para novo agendamento) -->
+          <div
+            *ngFor="let h of horarios"
+            class="time-slot"
+            [class.time-slot--hora-cheia]="isHoraCheia(h)"
+            [class.time-slot--ocupado]="getAgendamentosNasCelula(dia.date, h)"
+            (click)="abrirNovoAgendamento(dia.date, h)"
+            title="Clique para agendar {{ h }}">
+          </div>
+
+          <!-- Blocos de agendamento (posicionados absolutamente) -->
+          <div
+            *ngFor="let ag of getAgendamentosDia(dia.date); trackBy: trackAgendamento"
+            class="appointment"
+            [ngClass]="'appointment--' + ag.tipo"
+            [style.top.px]="calcTop(ag.horaInicio)"
+            [style.height.px]="calcHeight(ag.horaInicio, ag.horaFim)"
+            [style.min-height.px]="48"
+            (click)="abrirEdicao(ag, $event)"
+            [title]="ag.titulo + ' — ' + ag.cliente + ' (' + ag.horaInicio + '–' + ag.horaFim + ')'">
+            <span class="appointment__time">{{ ag.horaInicio }}–{{ ag.horaFim }}</span>
+            <span class="appointment__title">{{ ag.titulo }}</span>
+            <span class="appointment__client">{{ ag.cliente }}</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal de agendamento -->
+  <po-modal
+    #modalAgendamento
+    [p-title]="titleModal"
+    p-size="sm"
+    [p-primary-action]="confirmAction"
+    [p-secondary-action]="cancelAction">
+
+    <form #agForm="ngForm">
+
+      <div class="po-row">
+        <div class="po-col-12">
+          <po-input
+            name="titulo"
+            p-name="titulo"
+            p-label="Título *"
+            p-placeholder="Ex.: Consulta Médica"
+            p-required
+            [ngModel]="formItem.titulo"
+            (ngModelChange)="formItem.titulo = $event">
+          </po-input>
+        </div>
+      </div>
+
+      <div class="po-row">
+        <div class="po-col-12">
+          <po-input
+            name="cliente"
+            p-name="cliente"
+            p-label="Cliente / Responsável"
+            p-placeholder="Ex.: João Silva"
+            [ngModel]="formItem.cliente"
+            (ngModelChange)="formItem.cliente = $event">
+          </po-input>
+        </div>
+      </div>
+
+      <div class="po-row">
+        <div class="po-col-sm-12 po-col-md-4">
+          <po-input
+            name="dia"
+            p-name="dia"
+            p-label="Data"
+            p-mask="9999-99-99"
+            p-placeholder="AAAA-MM-DD"
+            [ngModel]="formItem.dia"
+            (ngModelChange)="formItem.dia = $event">
+          </po-input>
+        </div>
+        <div class="po-col-sm-6 po-col-md-4">
+          <po-input
+            name="horaInicio"
+            p-name="horaInicio"
+            p-label="Hora Início *"
+            p-mask="99:99"
+            p-placeholder="HH:MM"
+            p-required
+            [ngModel]="formItem.horaInicio"
+            (ngModelChange)="formItem.horaInicio = $event">
+          </po-input>
+        </div>
+        <div class="po-col-sm-6 po-col-md-4">
+          <po-input
+            name="horaFim"
+            p-name="horaFim"
+            p-label="Hora Fim *"
+            p-mask="99:99"
+            p-placeholder="HH:MM"
+            p-required
+            [ngModel]="formItem.horaFim"
+            (ngModelChange)="formItem.horaFim = $event">
+          </po-input>
+        </div>
+      </div>
+
+      <div class="po-row">
+        <div class="po-col-12">
+          <po-select
+            name="tipo"
+            p-name="tipo"
+            p-label="Tipo"
+            [p-options]="tipoOptions"
+            [ngModel]="formItem.tipo"
+            (ngModelChange)="formItem.tipo = $event">
+          </po-select>
+        </div>
+      </div>
+
+      <!-- Ação de exclusão (apenas no modo edição) -->
+      <div *ngIf="idEditando" class="modal-delete-row">
+        <po-button
+          p-label="Excluir Agendamento"
+          p-kind="secondary"
+          p-icon="an an-trash"
+          (p-click)="excluir()">
+        </po-button>
+      </div>
+
+    </form>
+
+  </po-modal>
+
+</po-page-default>

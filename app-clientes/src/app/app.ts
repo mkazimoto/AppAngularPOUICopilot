@@ -23,6 +23,7 @@ export class App {
     { label: 'Kanban', link: '/kanban', icon: 'an an-kanban' },
     { label: 'Workflow', link: '/workflow', icon: 'an an-git-branch' },
     { label: 'Tarefas / Gantt', link: '/tarefas', icon: 'an an-calendar-check' },
+    { label: 'Agendamento', link: '/agendamento', icon: 'an an-calendar' },
   ];
 
 
