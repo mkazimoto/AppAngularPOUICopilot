@@ -8,6 +8,7 @@ import { Imoveis } from './imoveis/imoveis';
 import { Passagens } from './passagens/passagens';
 import { Pets } from './pets/pets';
 import { Produtos } from './produtos/produtos';
+import { Reservas } from './reservas/reservas';
 
 export const routes: Routes = [
   { path: 'dashboard', component: Dashboard },
@@ -20,5 +21,6 @@ export const routes: Routes = [
   { path: 'carros', component: Carros },
   { path: 'cursos', component: Cursos },
   { path: 'imoveis', component: Imoveis },
+  { path: 'reservas', component: Reservas },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 ];

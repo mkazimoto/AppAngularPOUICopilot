@@ -1,0 +1,320 @@
+<po-page-default p-title="Reservas de Hotel">
+
+  <!-- Slider de Destaques -->
+  <div class="reservas-destaque-slide">
+    <h2 class="po-font-title-bold reservas-secao-titulo">
+      <i class="an an-star-fill"></i> Hotéis em Destaque
+    </h2>
+    <po-slide
+      [p-slides]="slidesDestaque"
+      [p-height]="440"
+      [p-interval]="5000">
+    </po-slide>
+  </div>
+
+  <po-divider p-label="Explore Nossos Hotéis"></po-divider>
+
+  <!-- Filtros -->
+  <div class="reservas-filtros">
+    <po-button
+      p-label="Todos"
+      p-icon="an an-list"
+      [p-kind]="filtroAtivo === 'todos' ? 'primary' : 'secondary'"
+      (p-click)="setFiltro('todos')">
+    </po-button>
+    <po-button
+      p-label="Luxo"
+      p-icon="an an-crown"
+      [p-kind]="filtroAtivo === 'luxo' ? 'primary' : 'secondary'"
+      (p-click)="setFiltro('luxo')">
+    </po-button>
+    <po-button
+      p-label="Resorts"
+      p-icon="an an-umbrella"
+      [p-kind]="filtroAtivo === 'resort' ? 'primary' : 'secondary'"
+      (p-click)="setFiltro('resort')">
+    </po-button>
+    <po-button
+      p-label="Boutique"
+      p-icon="an an-flower"
+      [p-kind]="filtroAtivo === 'boutique' ? 'primary' : 'secondary'"
+      (p-click)="setFiltro('boutique')">
+    </po-button>
+    <po-button
+      p-label="Disponíveis"
+      p-icon="an an-check-circle"
+      [p-kind]="filtroAtivo === 'disponiveis' ? 'primary' : 'secondary'"
+      (p-click)="setFiltro('disponiveis')">
+    </po-button>
+    <po-button
+      p-label="Destaques"
+      p-icon="an an-star"
+      [p-kind]="filtroAtivo === 'destaque' ? 'primary' : 'secondary'"
+      (p-click)="setFiltro('destaque')">
+    </po-button>
+  </div>
+
+  <!-- Grid de Hotéis -->
+  <div class="po-row reservas-grid">
+    <div class="po-sm-12 po-md-6 po-lg-4" *ngFor="let hotel of hoteisFiltrados">
+      <po-widget
+        [p-title]="hotel.nome"
+        p-primary-label="Ver Detalhes"
+        (p-primary-action)="abrirDetalhes(hotel)">
+
+        <!-- Galeria de fotos -->
+        <div class="hotel-card-foto">
+          <div class="hotel-slide-wrapper">
+            <po-slide
+              [p-slides]="getSlides(hotel)"
+              [p-height]="220"
+              [p-interval]="7000">
+            </po-slide>
+          </div>
+          <!-- Badge de disponibilidade -->
+          <div class="hotel-disponibilidade" [class.indisponivel]="!hotel.disponivel">
+            <i [class]="hotel.disponivel ? 'an an-check-circle' : 'an an-x-circle'"></i>
+            {{ hotel.disponivel ? 'Disponível' : 'Esgotado' }}
+          </div>
+        </div>
+
+        <!-- Estrelas e avaliação -->
+        <div class="hotel-estrelas-row">
+          <div class="hotel-estrelas">
+            <i *ngFor="let e of getEstrelas(hotel.estrelas)" class="an an-star-fill star-icon"></i>
+          </div>
+          <span class="hotel-avaliacao">
+            <i class="an an-star-fill avaliacao-icone"></i>
+            {{ hotel.avaliacao }} ({{ hotel.totalAvaliacoes | number }})
+          </span>
+        </div>
+
+        <!-- Tags -->
+        <div class="hotel-tags">
+          <po-tag [p-value]="hotel.categoria" [p-type]="hotel.categoriaTag"></po-tag>
+          <po-tag [p-value]="hotel.cidade + '/' + hotel.estado" [p-type]="PoTagType.Neutral"></po-tag>
+        </div>
+
+        <!-- Preço -->
+        <div class="hotel-preco">
+          <span class="hotel-preco-label">A partir de</span>
+          <span class="hotel-preco-valor po-font-title-bold">
+            {{ formatarPreco(hotel.precoPorNoite) }}
+          </span>
+          <span class="hotel-preco-noite">/ noite</span>
+        </div>
+
+        <!-- Comodidades resumidas -->
+        <div class="hotel-comodidades">
+          <span *ngFor="let c of hotel.comodidades.slice(0, 4)" class="hotel-tag-comodidade">
+            {{ c }}
+          </span>
+          <span *ngIf="hotel.comodidades.length > 4" class="hotel-tag-mais">
+            +{{ hotel.comodidades.length - 4 }} mais
+          </span>
+        </div>
+
+      </po-widget>
+    </div>
+  </div>
+
+</po-page-default>
+
+<!-- Modal Detalhes do Hotel -->
+<po-modal
+  #modalHotel
+  p-title="Detalhes do Hotel"
+  [p-primary-action]="acaoVerDetalhes"
+  p-size="lg">
+
+  <ng-container *ngIf="hotelSelecionado">
+
+    <div class="modal-slide-wrapper">
+      <po-slide
+        [p-slides]="getSlides(hotelSelecionado)"
+        [p-height]="340"
+        [p-interval]="0">
+      </po-slide>
+    </div>
+
+    <po-divider [p-label]="hotelSelecionado.nome"></po-divider>
+
+    <div class="po-row">
+      <div class="po-col-6">
+        <po-info p-label="Localização" [p-value]="hotelSelecionado.cidade + ', ' + hotelSelecionado.estado + ' — ' + hotelSelecionado.pais"></po-info>
+      </div>
+      <div class="po-col-6">
+        <po-info
+          p-label="Preço por noite"
+          [p-value]="formatarPreco(hotelSelecionado.precoPorNoite)">
+        </po-info>
+      </div>
+    </div>
+
+    <div class="po-row">
+      <div class="po-col-4">
+        <po-info p-label="Categoria" [p-value]="hotelSelecionado.categoria"></po-info>
+      </div>
+      <div class="po-col-4">
+        <po-info p-label="Classificação" [p-value]="hotelSelecionado.estrelas + ' estrelas'"></po-info>
+      </div>
+      <div class="po-col-4">
+        <po-info
+          p-label="Avaliação"
+          [p-value]="hotelSelecionado.avaliacao + '/5.0 (' + hotelSelecionado.totalAvaliacoes + ' avaliações)'">
+        </po-info>
+      </div>
+    </div>
+
+    <po-divider p-label="Descrição"></po-divider>
+    <p class="modal-descricao po-font-text">{{ hotelSelecionado.descricao }}</p>
+
+    <po-divider p-label="Comodidades"></po-divider>
+    <div class="modal-comodidades">
+      <span *ngFor="let c of hotelSelecionado.comodidades" class="hotel-tag-comodidade hotel-tag-comodidade--lg">
+        <i class="an an-check"></i> {{ c }}
+      </span>
+    </div>
+
+    <div class="modal-reserva-btn" *ngIf="hotelSelecionado.disponivel">
+      <po-button
+        p-label="Fazer Reserva"
+        p-kind="primary"
+        p-icon="an an-calendar-check"
+        (p-click)="abrirReserva(hotelSelecionado)">
+      </po-button>
+    </div>
+    <div class="modal-indisponivel" *ngIf="!hotelSelecionado.disponivel">
+      <po-tag p-value="Esgotado — sem disponibilidade no momento" [p-type]="PoTagType.Danger"></po-tag>
+    </div>
+
+  </ng-container>
+
+</po-modal>
+
+<!-- Modal Reserva -->
+<po-modal
+  #modalReserva
+  p-title="Fazer Reserva"
+  [p-primary-action]="acaoConfirmarReserva"
+  [p-secondary-action]="acaoCancelarReserva"
+  p-size="lg">
+
+  <ng-container *ngIf="hotelSelecionado">
+
+    <div class="reserva-hotel-info">
+      <i class="an an-building reserva-hotel-icone"></i>
+      <div>
+        <div class="po-font-title-bold reserva-hotel-nome">{{ hotelSelecionado.nome }}</div>
+        <div class="po-font-text reserva-hotel-local">{{ hotelSelecionado.cidade }}, {{ hotelSelecionado.estado }}</div>
+      </div>
+    </div>
+
+    <po-divider p-label="Dados do Hóspede"></po-divider>
+
+    <div class="po-row">
+      <div class="po-col-12 po-md-6">
+        <po-input
+          p-label="Nome Completo *"
+          p-placeholder="Digite seu nome completo"
+          [(ngModel)]="reservaForm.nomeHospede"
+          p-required="true">
+        </po-input>
+      </div>
+      <div class="po-col-12 po-md-6">
+        <po-email
+          p-label="E-mail *"
+          p-placeholder="seu@email.com"
+          [(ngModel)]="reservaForm.email"
+          p-required="true">
+        </po-email>
+      </div>
+    </div>
+
+    <div class="po-row">
+      <div class="po-col-12 po-md-6">
+        <po-phone
+          p-label="Telefone"
+          p-placeholder="(00) 00000-0000"
+          [(ngModel)]="reservaForm.telefone"
+          p-mask="(99) 99999-9999">
+        </po-phone>
+      </div>
+      <div class="po-col-12 po-md-6">
+        <po-select
+          p-label="Tipo de Quarto"
+          p-name="tipoQuarto"
+          name="tipoQuarto"
+          [p-options]="tiposQuarto"
+          [ngModel]="reservaForm.tipoQuarto"
+          (ngModelChange)="reservaForm.tipoQuarto = $event">
+        </po-select>
+      </div>
+    </div>
+
+    <po-divider p-label="Período da Estadia"></po-divider>
+
+    <div class="po-row">
+      <div class="po-col-12 po-md-6">
+        <po-datepicker
+          p-label="Check-in *"
+          [(ngModel)]="reservaForm.checkIn"
+          p-required="true">
+        </po-datepicker>
+      </div>
+      <div class="po-col-12 po-md-6">
+        <po-datepicker
+          p-label="Check-out *"
+          [(ngModel)]="reservaForm.checkOut"
+          p-required="true">
+        </po-datepicker>
+      </div>
+    </div>
+
+    <div class="po-row">
+      <div class="po-col-12 po-md-6">
+        <po-number
+          p-label="Adultos"
+          [(ngModel)]="reservaForm.adultos"
+          [p-min]="1"
+          [p-max]="10">
+        </po-number>
+      </div>
+      <div class="po-col-12 po-md-6">
+        <po-number
+          p-label="Crianças"
+          [(ngModel)]="reservaForm.criancas"
+          [p-min]="0"
+          [p-max]="10">
+        </po-number>
+      </div>
+    </div>
+
+    <po-textarea
+      p-label="Observações"
+      p-placeholder="Pedidos especiais, necessidades de acessibilidade, horário estimado de chegada..."
+      [(ngModel)]="reservaForm.observacoes"
+      [p-rows]="3">
+    </po-textarea>
+
+    <!-- Resumo de valores -->
+    <div class="reserva-resumo" *ngIf="getTotalNoites() > 0">
+      <po-divider p-label="Resumo da Reserva"></po-divider>
+      <div class="reserva-resumo-linha">
+        <span>Diária:</span>
+        <span>{{ formatarPreco(hotelSelecionado.precoPorNoite) }}</span>
+      </div>
+      <div class="reserva-resumo-linha">
+        <span>Noites:</span>
+        <span>{{ getTotalNoites() }}</span>
+      </div>
+      <po-divider></po-divider>
+      <div class="reserva-resumo-linha reserva-resumo-total">
+        <span class="po-font-title-bold">Total Estimado:</span>
+        <span class="po-font-title-bold reserva-total-valor">{{ formatarPreco(getTotalEstimado()) }}</span>
+      </div>
+    </div>
+
+  </ng-container>
+
+</po-modal>
