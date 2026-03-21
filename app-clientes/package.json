@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:ghpages": "ng build --base-href /AppAngularPOUICopilot/",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
@@ -17,7 +18,7 @@
     "@angular/forms": "^21.2.0",
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
-    "@po-ui/ng-components": "^21.5.0",
+    "@po-ui/ng-components": "^21.6.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
