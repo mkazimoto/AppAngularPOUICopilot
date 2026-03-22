@@ -61,6 +61,8 @@
   fill: none;
   stroke: #94a3b8;
   stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
 }
 
 .conn-badge     { opacity: 0.92; }
@@ -408,6 +410,73 @@
 .icon-action   { color: #2563eb; }
 .icon-decision { color: #d97706; }
 .icon-end      { color: #dc2626; }
+
+/* ── Connecting mode banner ───────────────────────────────── */
+.wf-connect-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #eff6ff;
+  border: 1.5px solid #93c5fd;
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1d4ed8;
+  animation: menuSlide 0.15s ease;
+}
+
+.cancel-connect-btn {
+  background: #fff;
+  border: 1.5px solid #93c5fd;
+  border-radius: 6px;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.cancel-connect-btn:hover {
+  background: #dc2626;
+  color: #fff;
+  border-color: #dc2626;
+}
+
+/* ── Connect-target highlight ─────────────────────────────── */
+.wf-node.connect-target {
+  cursor: crosshair;
+  z-index: 30;
+}
+
+.wf-node.connect-target .node-body,
+.wf-node.connect-target .diamond {
+  outline: 2.5px dashed #2563eb;
+  outline-offset: 3px;
+  animation: pulse-outline 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse-outline {
+  0%, 100% { outline-color: #2563eb; box-shadow: 0 0 0 0 rgba(37,99,235,0.3); }
+  50%       { outline-color: #60a5fa; box-shadow: 0 0 0 6px rgba(37,99,235,0); }
+}
+
+/* ── Context menu separator & link item ──────────────────── */
+.ctx-sep {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 4px 0;
+}
+
+.ctx-item-link { color: #2563eb; }
+.ctx-item-link:hover { background: #eff6ff !important; }
+
+.icon-link { color: #2563eb; font-size: 16px; }
 
 /* ── Edit modal form ──────────────────────────────────────── */
 .edit-form {

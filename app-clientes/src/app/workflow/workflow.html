@@ -17,6 +17,17 @@
     <span class="wf-hint">Clique em <strong>+</strong> em qualquer nó para adicionar o próximo passo.</span>
   </div>
 
+  <!-- ── Connecting banner ── -->
+  <div *ngIf="connectingFromId" class="wf-connect-banner" (click)="$event.stopPropagation()">
+    <span>
+      ⟶ Clique em um nó existente para conectar
+      <ng-container *ngIf="connectingBranch">
+        — ramo <strong>{{ connectingBranch }}</strong>
+      </ng-container>
+    </span>
+    <button class="cancel-connect-btn" (click)="cancelConnect()">✕ Cancelar</button>
+  </div>
+
   <!-- ── Canvas ── -->
   <div class="wf-scroll" (click)="closeMenus()">
     <div class="wf-canvas" [style.width.px]="CANVAS_W" [style.height.px]="CANVAS_H">
@@ -56,8 +67,10 @@
       <div *ngFor="let node of nodes; trackBy: trackNode"
            class="wf-node"
            [class]="'wf-' + node.type"
+           [class.connect-target]="isConnectableTarget(node)"
            [style.left.px]="node.x"
-           [style.top.px]="node.y">
+           [style.top.px]="node.y"
+           (click)="onNodeClick(node, $event)">
 
         <!-- ─── START ─── -->
         <div *ngIf="node.type === 'start'" class="node-body body-start">
@@ -147,6 +160,12 @@
             <button class="ctx-item" (click)="addNode(node, 'end')">
               <span class="ctx-icon icon-end">⏹</span> Fim
             </button>
+            <ng-container *ngIf="hasConnectableTargets(node)">
+              <div class="ctx-sep"></div>
+              <button class="ctx-item ctx-item-link" (click)="startConnectExisting(node)">
+                <span class="ctx-icon icon-link">⟶</span> Conectar a existente
+              </button>
+            </ng-container>
           </div>
         </ng-container>
 
@@ -172,6 +191,12 @@
             <button class="ctx-item" (click)="addNode(node, 'end', 'Sim')">
               <span class="ctx-icon icon-end">⏹</span> Fim
             </button>
+            <ng-container *ngIf="hasConnectableTargets(node, 'Sim')">
+              <div class="ctx-sep"></div>
+              <button class="ctx-item ctx-item-link" (click)="startConnectExisting(node, 'Sim')">
+                <span class="ctx-icon icon-link">⟶</span> Conectar a existente
+              </button>
+            </ng-container>
           </div>
 
           <!-- Não branch (right) -->
@@ -193,6 +218,12 @@
             <button class="ctx-item" (click)="addNode(node, 'end', 'Não')">
               <span class="ctx-icon icon-end">⏹</span> Fim
             </button>
+            <ng-container *ngIf="hasConnectableTargets(node, 'Não')">
+              <div class="ctx-sep"></div>
+              <button class="ctx-item ctx-item-link" (click)="startConnectExisting(node, 'Não')">
+                <span class="ctx-icon icon-link">⟶</span> Conectar a existente
+              </button>
+            </ng-container>
           </div>
         </ng-container>
 
