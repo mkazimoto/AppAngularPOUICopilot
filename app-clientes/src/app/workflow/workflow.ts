@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   PoButtonModule,
@@ -33,7 +33,10 @@ export interface WfConnection {
   templateUrl: './workflow.html',
   styleUrl: './workflow.css',
 })
-export class Workflow {
+export class Workflow implements OnInit {
+  // ── Persistence ────────────────────────────────────
+  private readonly STORAGE_KEY = 'wf-editor-state';
+
   // ── Constants ──────────────────────────────────────
   readonly NODE_W = 180;
   readonly NODE_H = 60;
@@ -57,6 +60,27 @@ export class Workflow {
     { id: 'start-0', type: 'start', label: 'Início', x: this.INIT_X, y: this.INIT_Y },
   ];
   connections: WfConnection[] = [];
+
+  ngOnInit(): void {
+    try {
+      const raw = localStorage.getItem(this.STORAGE_KEY);
+      if (raw) {
+        const { nodes, connections } = JSON.parse(raw) as { nodes: WfNode[]; connections: WfConnection[] };
+        if (Array.isArray(nodes) && nodes.length) {
+          this.nodes = nodes;
+          this.connections = Array.isArray(connections) ? connections : [];
+        }
+      }
+    } catch {
+      // corrupted data — keep defaults
+    }
+
+    this.centerStartNode();
+  }
+
+  private saveState(): void {
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify({ nodes: this.nodes, connections: this.connections }));
+  }
   activeMenu: string | null = null;
   selectedNode: WfNode | null = null;
   editingLabel = '';
@@ -280,6 +304,7 @@ export class Workflow {
     }];
     this.connectingFromId = null;
     this.connectingBranch = undefined;
+    this.saveState();
   }
 
   cancelConnect(): void {
@@ -313,6 +338,9 @@ export class Workflow {
 
   @HostListener('document:mouseup')
   onDocumentMouseUp(): void {
+    if (this.dragNode && this.dragMoved) {
+      this.saveState();
+    }
     this.dragNode = null;
     this.draggingNodeId = null;
   }
@@ -350,6 +378,7 @@ export class Workflow {
     this.nodes = [...this.nodes, { id, type, label: labels[type], x, y }];
     this.connections = [...this.connections, { fromId: fromNode.id, toId: id, branch }];
     this.activeMenu = null;
+    this.saveState();
   }
 
   openEdit(node: WfNode): void {
@@ -363,6 +392,7 @@ export class Workflow {
       this.nodes = this.nodes.map(n =>
         n.id === this.selectedNode!.id ? { ...n, label: this.editingLabel } : n
       );
+      this.saveState();
     }
     this.editModal.close();
   }
@@ -376,6 +406,7 @@ export class Workflow {
     this.connections = this.connections.filter(
       c => !toDelete.has(c.fromId) && !toDelete.has(c.toId)
     );
+    this.saveState();
   }
 
   private overlapsAny(x: number, y: number, type: NodeType): boolean {
@@ -420,6 +451,7 @@ export class Workflow {
     this.nodes = [{ id: 'start-0', type: 'start', label: 'Início', x: this.INIT_X, y: this.INIT_Y }];
     this.connections = [];
     this.activeMenu = null;
+    this.saveState();
   }
 
   zoomIn(): void {
