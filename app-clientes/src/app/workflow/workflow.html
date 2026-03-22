@@ -19,12 +19,6 @@
       <span class="zoom-label" (click)="resetZoom()" title="Resetar zoom">{{ zoomPercent }}%</span>
       <button class="zoom-btn" title="Aumentar zoom" [disabled]="zoomLevel >= ZOOM_MAX" (click)="zoomIn()">+</button>
     </div>
-    <div class="wf-legend">
-      <span class="legend-pill legend-start">▶ Início</span>
-      <span class="legend-pill legend-action">⚡ Ação</span>
-      <span class="legend-pill legend-decision">◆ Decisão</span>
-      <span class="legend-pill legend-end">⏹ Fim</span>
-    </div>
     <span class="wf-hint">Clique em <strong>+</strong> em qualquer nó para adicionar o próximo passo.</span>
   </div>
 
