@@ -116,14 +116,20 @@ export class Workflow {
   arrowTo(conn: WfConnection): { x: number; y: number } {
     const to = this.getNode(conn.toId);
     if (!to) return { x: 0, y: 0 };
-    return { x: to.x + this.nodeWidth(to) / 2, y: to.y };
+    const siblings = this.connections.filter(c => c.toId === conn.toId);
+    const idx = siblings.indexOf(conn);
+    const offset = siblings.length > 1 ? (idx - (siblings.length - 1) / 2) * 22 : 0;
+    return { x: to.x + this.nodeWidth(to) / 2 + offset, y: to.y };
   }
 
   connectionPath(conn: WfConnection): string {
     const f = this.arrowFrom(conn);
     const t = this.arrowTo(conn);
     if (this.pathNeedsRouting(f, t, [conn.fromId, conn.toId])) {
-      return this.routedPath(f, t);
+      const lane = this.connections.filter(c => this.pathNeedsRouting(
+        this.arrowFrom(c), this.arrowTo(c), [c.fromId, c.toId]
+      )).indexOf(conn);
+      return this.routedPath(f, t, lane);
     }
     const cpY = (f.y + t.y) / 2;
     return `M ${f.x} ${f.y} C ${f.x} ${cpY}, ${t.x} ${cpY}, ${t.x} ${t.y}`;
@@ -171,14 +177,17 @@ export class Workflow {
 
   private routedPath(
     f: { x: number; y: number },
-    t: { x: number; y: number }
+    t: { x: number; y: number },
+    lane = 0
   ): string {
     const MARGIN = 64;
+    const LANE_STEP = 28;
     const EXIT = 36;
     const goRight = t.y <= f.y || t.x >= f.x;
-    const sideX = goRight
+    const baseX = goRight
       ? Math.max(...this.nodes.map(n => n.x + (n.type === 'decision' ? this.DEC_W : this.NODE_W))) + MARGIN
       : Math.min(...this.nodes.map(n => n.x)) - MARGIN;
+    const sideX = goRight ? baseX + lane * LANE_STEP : baseX - lane * LANE_STEP;
     return [
       `M ${f.x} ${f.y}`,
       `L ${f.x} ${f.y + EXIT}`,
