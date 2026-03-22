@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild } from '@angular/core';
+import { Component, HostListener, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   PoButtonModule,
@@ -63,6 +63,15 @@ export class Workflow {
   connectingFromId: string | null = null;
   connectingBranch: string | undefined = undefined;
 
+  // ── Drag state ─────────────────────────────────────
+  draggingNodeId: string | null = null;
+  private dragNode: WfNode | null = null;
+  private dragStartPageX = 0;
+  private dragStartPageY = 0;
+  private dragNodeOrigX = 0;
+  private dragNodeOrigY = 0;
+  private dragMoved = false;
+
   @ViewChild('editModal') editModal!: PoModalComponent;
 
   primaryAction: PoModalAction = {
@@ -123,79 +132,100 @@ export class Workflow {
   }
 
   connectionPath(conn: WfConnection): string {
-    const f = this.arrowFrom(conn);
-    const t = this.arrowTo(conn);
-    if (this.pathNeedsRouting(f, t, [conn.fromId, conn.toId])) {
-      const lane = this.connections.filter(c => this.pathNeedsRouting(
-        this.arrowFrom(c), this.arrowTo(c), [c.fromId, c.toId]
-      )).indexOf(conn);
-      return this.routedPath(f, t, lane);
-    }
-    const cpY = (f.y + t.y) / 2;
-    return `M ${f.x} ${f.y} C ${f.x} ${cpY}, ${t.x} ${cpY}, ${t.x} ${t.y}`;
+    return this.buildRoute(conn).path;
   }
 
   connectionLabelX(conn: WfConnection): number {
-    const f = this.arrowFrom(conn);
-    const t = this.arrowTo(conn);
-    if (this.pathNeedsRouting(f, t, [conn.fromId, conn.toId])) return f.x;
-    return (f.x + t.x) / 2;
+    return this.buildRoute(conn).lx;
   }
 
   connectionLabelY(conn: WfConnection): number {
+    return this.buildRoute(conn).ly - 6;
+  }
+
+  // ── Orthogonal router ──────────────────────────────
+
+  private readonly ROUTE_PAD = 14;
+
+  /** True if horizontal segment at y between x1..x2 is clear of obstacles. */
+  private segH(y: number, x1: number, x2: number, excl: string[]): boolean {
+    const xL = Math.min(x1, x2);
+    const xR = Math.max(x1, x2);
+    return !this.nodes.some(n => {
+      if (excl.includes(n.id)) return false;
+      const p = this.ROUTE_PAD;
+      return xR > n.x - p && xL < n.x + this.nodeWidth(n) + p &&
+             y  > n.y - p && y  < n.y + this.nodeHeight(n) + p;
+    });
+  }
+
+  /** True if vertical segment at x between y1..y2 is clear of obstacles. */
+  private segV(x: number, y1: number, y2: number, excl: string[]): boolean {
+    const yT = Math.min(y1, y2);
+    const yB = Math.max(y1, y2);
+    return !this.nodes.some(n => {
+      if (excl.includes(n.id)) return false;
+      const p = this.ROUTE_PAD;
+      return x  > n.x - p && x  < n.x + this.nodeWidth(n) + p &&
+             yB > n.y - p && yT < n.y + this.nodeHeight(n) + p;
+    });
+  }
+
+  private buildRoute(conn: WfConnection): { path: string; lx: number; ly: number } {
     const f = this.arrowFrom(conn);
     const t = this.arrowTo(conn);
-    if (this.pathNeedsRouting(f, t, [conn.fromId, conn.toId])) return f.y + 30;
-    return (f.y + t.y) / 2 - 6;
-  }
+    const excl = [conn.fromId, conn.toId];
+    const obstacles = this.nodes.filter(n => !excl.includes(n.id));
 
-  private pathNeedsRouting(
-    f: { x: number; y: number },
-    t: { x: number; y: number },
-    excludeIds: string[]
-  ): boolean {
-    const cpY = (f.y + t.y) / 2;
-    const PAD = 10;
-    const SAMPLES = 16;
-    for (let i = 1; i < SAMPLES; i++) {
-      const tt = i / SAMPLES;
-      const mt = 1 - tt;
-      const px = mt*mt*mt*f.x + 3*mt*mt*tt*f.x + 3*mt*tt*tt*t.x + tt*tt*tt*t.x;
-      const py = mt*mt*mt*f.y + 3*mt*mt*tt*cpY + 3*mt*tt*tt*cpY + tt*tt*tt*t.y;
-      for (const n of this.nodes) {
-        if (excludeIds.includes(n.id)) continue;
-        const nw = n.type === 'decision' ? this.DEC_W : this.NODE_W;
-        const nh = n.type === 'decision' ? this.DEC_H : this.NODE_H;
-        if (px > n.x - PAD && px < n.x + nw + PAD &&
-            py > n.y - PAD && py < n.y + nh + PAD) {
-          return true;
-        }
+    // Candidate Y levels: midpoint + gaps around every obstacle
+    const midY = (f.y + t.y) / 2;
+    const ys = new Set<number>([midY]);
+    for (const n of obstacles) {
+      ys.add(n.y - this.ROUTE_PAD * 2);
+      ys.add(n.y + this.nodeHeight(n) + this.ROUTE_PAD * 2);
+    }
+    // Sort ascending by distance from midY so we try the shortest path first
+    const sorted = [...ys].sort((a, b) => Math.abs(a - midY) - Math.abs(b - midY));
+
+    // Try 3-segment elbow: down to elbowY → horizontal → down to t
+    for (const ey of sorted) {
+      if (this.segV(f.x, f.y, ey, excl) &&
+          this.segH(ey, f.x, t.x, excl) &&
+          this.segV(t.x, ey, t.y, excl)) {
+        return {
+          path: `M ${f.x} ${f.y} L ${f.x} ${ey} L ${t.x} ${ey} L ${t.x} ${t.y}`,
+          lx: (f.x + t.x) / 2,
+          ly: ey,
+        };
       }
     }
-    return false;
-  }
 
-  private routedPath(
-    f: { x: number; y: number },
-    t: { x: number; y: number },
-    lane = 0
-  ): string {
-    const MARGIN = 64;
-    const LANE_STEP = 28;
-    const EXIT = 36;
-    const goRight = t.y <= f.y || t.x >= f.x;
-    const baseX = goRight
-      ? Math.max(...this.nodes.map(n => n.x + (n.type === 'decision' ? this.DEC_W : this.NODE_W))) + MARGIN
-      : Math.min(...this.nodes.map(n => n.x)) - MARGIN;
-    const sideX = goRight ? baseX + lane * LANE_STEP : baseX - lane * LANE_STEP;
-    return [
-      `M ${f.x} ${f.y}`,
-      `L ${f.x} ${f.y + EXIT}`,
-      `L ${sideX} ${f.y + EXIT}`,
-      `L ${sideX} ${t.y - EXIT}`,
-      `L ${t.x} ${t.y - EXIT}`,
-      `L ${t.x} ${t.y}`,
-    ].join(' ');
+    // 5-segment side detour: exit down → go to clear side lane → enter from side
+    const EXIT = 32;
+    const LANE = 28;
+    const laneIdx = this.connections.indexOf(conn);
+    const goRight = t.x >= f.x;
+    const sideBase = obstacles.length > 0
+      ? (goRight
+          ? Math.max(...obstacles.map(n => n.x + this.nodeWidth(n))) + 50
+          : Math.min(...obstacles.map(n => n.x)) - 50)
+      : (goRight ? Math.max(f.x, t.x) + 80 : Math.min(f.x, t.x) - 80);
+    const sideX = goRight
+      ? sideBase + laneIdx * LANE
+      : sideBase - laneIdx * LANE;
+
+    return {
+      path: [
+        `M ${f.x} ${f.y}`,
+        `L ${f.x} ${f.y + EXIT}`,
+        `L ${sideX} ${f.y + EXIT}`,
+        `L ${sideX} ${t.y - EXIT}`,
+        `L ${t.x} ${t.y - EXIT}`,
+        `L ${t.x} ${t.y}`,
+      ].join(' '),
+      lx: sideX,
+      ly: (f.y + t.y) / 2,
+    };
   }
 
   // ── Actions ────────────────────────────────────────
@@ -250,7 +280,41 @@ export class Workflow {
     this.connectingBranch = undefined;
   }
 
+  onNodeMouseDown(event: MouseEvent, node: WfNode): void {
+    if (this.connectingFromId) return;
+    if ((event.target as HTMLElement).closest('button')) return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragNode = node;
+    this.dragStartPageX = event.clientX;
+    this.dragStartPageY = event.clientY;
+    this.dragNodeOrigX = node.x;
+    this.dragNodeOrigY = node.y;
+    this.draggingNodeId = node.id;
+    this.dragMoved = false;
+  }
+
+  @HostListener('document:mousemove', ['$event'])
+  onDocumentMouseMove(event: MouseEvent): void {
+    if (!this.dragNode) return;
+    const dx = event.clientX - this.dragStartPageX;
+    const dy = event.clientY - this.dragStartPageY;
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) this.dragMoved = true;
+    this.dragNode.x = Math.max(0, Math.min(this.CANVAS_W - this.nodeWidth(this.dragNode), this.dragNodeOrigX + dx));
+    this.dragNode.y = Math.max(0, Math.min(this.CANVAS_H - this.nodeHeight(this.dragNode), this.dragNodeOrigY + dy));
+  }
+
+  @HostListener('document:mouseup')
+  onDocumentMouseUp(): void {
+    this.dragNode = null;
+    this.draggingNodeId = null;
+  }
+
   onNodeClick(node: WfNode, event: MouseEvent): void {
+    if (this.dragMoved) {
+      this.dragMoved = false;
+      return;
+    }
     if (this.connectingFromId) {
       event.stopPropagation();
       this.connectToExisting(node);

@@ -68,8 +68,10 @@
            class="wf-node"
            [class]="'wf-' + node.type"
            [class.connect-target]="isConnectableTarget(node)"
+           [class.dragging]="draggingNodeId === node.id"
            [style.left.px]="node.x"
            [style.top.px]="node.y"
+           (mousedown)="onNodeMouseDown($event, node)"
            (click)="onNodeClick(node, $event)">
 
         <!-- ─── START ─── -->
