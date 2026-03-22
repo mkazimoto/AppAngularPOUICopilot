@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
     PoButtonModule,
@@ -70,6 +70,12 @@ export class Agendamento implements OnInit {
   idEditando: number | null = null;
   draggingId: number | null = null;
   dragOverSlot: { dia: string; hora: string } | null = null;
+
+  resizingId: number | null = null;
+  resizeType: 'start' | 'end' | null = null;
+  private resizeStartY = 0;
+  private resizeOrigInicio = '';
+  private resizeOrigFim = '';
 
   formItem: AgendamentoForm = this.criarFormVazio();
 
@@ -264,6 +270,10 @@ export class Agendamento implements OnInit {
   }
 
   onDragStart(ag: AgendamentoItem, event: DragEvent): void {
+    if (this.resizingId !== null) {
+      event.preventDefault();
+      return;
+    }
     this.draggingId = ag.id;
     event.dataTransfer?.setData('text/plain', String(ag.id));
     event.dataTransfer!.effectAllowed = 'move';
@@ -306,6 +316,48 @@ export class Agendamento implements OnInit {
     return this.dragOverSlot?.dia === dia && this.dragOverSlot?.hora === hora;
   }
 
+  onResizeStart(ag: AgendamentoItem, type: 'start' | 'end', event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.resizingId = ag.id;
+    this.resizeType = type;
+    this.resizeStartY = event.clientY;
+    this.resizeOrigInicio = ag.horaInicio;
+    this.resizeOrigFim = ag.horaFim;
+  }
+
+  @HostListener('document:mousemove', ['$event'])
+  onResizeMove(event: MouseEvent): void {
+    if (this.resizingId === null || this.resizeType === null) return;
+    const deltaY = event.clientY - this.resizeStartY;
+    const snappedMin = Math.round(deltaY / this.SLOT_HEIGHT) * 30;
+    this.agendamentos = this.agendamentos.map(a => {
+      if (a.id !== this.resizingId) return a;
+      if (this.resizeType === 'end') {
+        const newFimMin = Math.max(
+          this.timeToMinutes(this.resizeOrigInicio) + 30,
+          Math.min(this.timeToMinutes(this.resizeOrigFim) + snappedMin, 20 * 60)
+        );
+        return { ...a, horaFim: this.minutesToTime(newFimMin) };
+      } else {
+        const newInicioMin = Math.max(
+          this.HORA_INICIO * 60,
+          Math.min(this.timeToMinutes(this.resizeOrigInicio) + snappedMin, this.timeToMinutes(this.resizeOrigFim) - 30)
+        );
+        return { ...a, horaInicio: this.minutesToTime(newInicioMin) };
+      }
+    });
+  }
+
+  @HostListener('document:mouseup')
+  onResizeEnd(): void {
+    if (this.resizingId !== null) {
+      this.notification.success('Agendamento redimensionado!');
+    }
+    this.resizingId = null;
+    this.resizeType = null;
+  }
+
   labelTipo(tipo: string): string {
     const opt = this.tipoOptions.find(o => o.value === tipo);
     return opt ? String(opt.label) : tipo;
@@ -342,6 +394,12 @@ export class Agendamento implements OnInit {
     const total = this.timeToMinutes(time) + minutes;
     const h = Math.min(Math.floor(total / 60), 20);
     const m = total % 60;
+    return `${this.pad(h)}:${this.pad(m)}`;
+  }
+
+  private minutesToTime(totalMin: number): string {
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
     return `${this.pad(h)}:${this.pad(m)}`;
   }
 

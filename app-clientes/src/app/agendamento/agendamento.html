@@ -97,10 +97,21 @@
             (dragstart)="onDragStart(ag, $event)"
             (dragend)="onDragEnd()"
             (click)="abrirEdicao(ag, $event)"
+            [class.appointment--resizing]="ag.id === resizingId"
             [title]="ag.titulo + ' — ' + ag.cliente + ' (' + ag.horaInicio + '–' + ag.horaFim + ')'">
+            <!-- Handle de redimensionamento — início -->
+            <div
+              class="resize-handle resize-handle--top"
+              (mousedown)="onResizeStart(ag, 'start', $event)"
+              title="Arrastar para ajustar horário de início"></div>
             <span class="appointment__time">{{ ag.horaInicio }}–{{ ag.horaFim }}</span>
             <span class="appointment__title">{{ ag.titulo }}</span>
             <span class="appointment__client">{{ ag.cliente }}</span>
+            <!-- Handle de redimensionamento — fim -->
+            <div
+              class="resize-handle resize-handle--bottom"
+              (mousedown)="onResizeStart(ag, 'end', $event)"
+              title="Arrastar para ajustar horário de fim"></div>
           </div>
 
         </div>
