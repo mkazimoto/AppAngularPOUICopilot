@@ -8,6 +8,17 @@
       p-icon="an an-trash"
       (p-click)="clearWorkflow()">
     </po-button>
+    <po-button
+      p-label="Centralizar"
+      p-kind="secondary"
+      p-icon="an an-crosshair"
+      (p-click)="centerStartNode()">
+    </po-button>
+    <div class="wf-zoom-controls">
+      <button class="zoom-btn" title="Reduzir zoom" [disabled]="zoomLevel <= ZOOM_MIN" (click)="zoomOut()">−</button>
+      <span class="zoom-label" (click)="resetZoom()" title="Resetar zoom">{{ zoomPercent }}%</span>
+      <button class="zoom-btn" title="Aumentar zoom" [disabled]="zoomLevel >= ZOOM_MAX" (click)="zoomIn()">+</button>
+    </div>
     <div class="wf-legend">
       <span class="legend-pill legend-start">▶ Início</span>
       <span class="legend-pill legend-action">⚡ Ação</span>
@@ -29,8 +40,15 @@
   </div>
 
   <!-- ── Canvas ── -->
-  <div class="wf-scroll" (click)="closeMenus()">
-    <div class="wf-canvas" [style.width.px]="CANVAS_W" [style.height.px]="CANVAS_H">
+  <div class="wf-scroll" #scrollContainer (click)="closeMenus()">
+    <div class="wf-canvas-outer"
+         [style.width.px]="CANVAS_W * zoomLevel"
+         [style.height.px]="CANVAS_H * zoomLevel">
+    <div class="wf-canvas"
+         [style.width.px]="CANVAS_W"
+         [style.height.px]="CANVAS_H"
+         [style.transform]="'scale(' + zoomLevel + ')'"
+         [style.transformOrigin]="'0 0'">
 
       <!-- SVG layer: arrows -->
       <svg class="wf-svg" [attr.width]="CANVAS_W" [attr.height]="CANVAS_H">
@@ -231,6 +249,7 @@
 
       </div><!-- /node -->
     </div><!-- /canvas -->
+    </div><!-- /canvas-outer -->
   </div><!-- /scroll -->
 
   <!-- ── Edit Modal ── -->

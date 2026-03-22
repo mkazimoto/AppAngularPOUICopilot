@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   PoButtonModule,
@@ -63,6 +63,12 @@ export class Workflow {
   connectingFromId: string | null = null;
   connectingBranch: string | undefined = undefined;
 
+  // ── Zoom ───────────────────────────────────────────
+  zoomLevel = 1;
+  readonly ZOOM_MIN = 0.3;
+  readonly ZOOM_MAX = 2;
+  readonly ZOOM_STEP = 0.15;
+
   // ── Drag state ─────────────────────────────────────
   draggingNodeId: string | null = null;
   private dragNode: WfNode | null = null;
@@ -73,6 +79,7 @@ export class Workflow {
   private dragMoved = false;
 
   @ViewChild('editModal') editModal!: PoModalComponent;
+  @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
 
   primaryAction: PoModalAction = {
     label: 'Salvar',
@@ -413,5 +420,31 @@ export class Workflow {
     this.nodes = [{ id: 'start-0', type: 'start', label: 'Início', x: this.INIT_X, y: this.INIT_Y }];
     this.connections = [];
     this.activeMenu = null;
+  }
+
+  zoomIn(): void {
+    this.zoomLevel = Math.min(this.ZOOM_MAX, +(this.zoomLevel + this.ZOOM_STEP).toFixed(2));
+  }
+
+  zoomOut(): void {
+    this.zoomLevel = Math.max(this.ZOOM_MIN, +(this.zoomLevel - this.ZOOM_STEP).toFixed(2));
+  }
+
+  resetZoom(): void {
+    this.zoomLevel = 1;
+  }
+
+  centerStartNode(): void {
+    const start = this.nodes.find(n => n.type === 'start');
+    if (!start || !this.scrollContainer) return;
+    const el = this.scrollContainer.nativeElement;
+    const nodeCX = (start.x + this.NODE_W / 2) * this.zoomLevel;
+    const nodeCY = (start.y + this.NODE_H / 2) * this.zoomLevel;
+    el.scrollLeft = nodeCX - el.clientWidth / 2;
+    el.scrollTop = nodeCY - el.clientHeight / 2;
+  }
+
+  get zoomPercent(): number {
+    return Math.round(this.zoomLevel * 100);
   }
 }

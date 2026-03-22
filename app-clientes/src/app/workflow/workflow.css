@@ -33,6 +33,64 @@
   margin-left: auto;
 }
 
+/* ── Zoom controls ────────────────────────────────────────── */
+.wf-zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 2px 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.zoom-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+  padding: 0;
+}
+
+.zoom-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  color: #2563eb;
+}
+
+.zoom-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.zoom-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  min-width: 38px;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.zoom-label:hover {
+  background: #f1f5f9;
+  color: #2563eb;
+}
+
 /* ── Scroll container ─────────────────────────────────────── */
 .wf-scroll {
   overflow: auto;
@@ -45,8 +103,15 @@
   cursor: default;
 }
 
-.wf-canvas {
+.wf-canvas-outer {
   position: relative;
+  flex-shrink: 0;
+}
+
+.wf-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 /* ── SVG connections ──────────────────────────────────────── */
