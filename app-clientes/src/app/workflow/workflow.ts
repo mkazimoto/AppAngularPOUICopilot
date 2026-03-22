@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { Component, HostListener, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   PoButtonModule,
@@ -33,7 +33,7 @@ export interface WfConnection {
   templateUrl: './workflow.html',
   styleUrl: './workflow.css',
 })
-export class Workflow implements AfterViewInit {
+export class Workflow {
   // ── Constants ──────────────────────────────────────
   readonly NODE_W = 180;
   readonly NODE_H = 60;
@@ -45,12 +45,6 @@ export class Workflow implements AfterViewInit {
   readonly CANVAS_H = 1800;
   readonly INIT_X = 1110; // start node x (center at 1200)
   readonly INIT_Y = 40;
-
-  // ── Zoom ───────────────────────────────────────────
-  readonly ZOOM_STEP = 0.1;
-  readonly ZOOM_MIN = 0.25;
-  readonly ZOOM_MAX = 2.0;
-  zoomLevel = 1.0;
 
   // Diamond geometry (80×80 square rotated 45°, centered at node (90,60)):
   // corner-to-center = √(40²+40²) ≈ 56.57
@@ -79,7 +73,6 @@ export class Workflow implements AfterViewInit {
   private dragMoved = false;
 
   @ViewChild('editModal') editModal!: PoModalComponent;
-  @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
 
   primaryAction: PoModalAction = {
     label: 'Salvar',
@@ -92,48 +85,6 @@ export class Workflow implements AfterViewInit {
   };
 
   // ── Helpers ────────────────────────────────────────
-
-  ngAfterViewInit(): void {
-    this.loadWorkflow();
-    this.centerStartNode();
-  }
-
-  private centerStartNode(): void {
-    const el = this.scrollContainer?.nativeElement;
-    if (!el) return;
-    const startNode = this.nodes[0];
-    const nodeCenterX = (startNode.x + this.NODE_W / 2) * this.zoomLevel;
-    const nodeCenterY = (startNode.y + this.NODE_H / 2) * this.zoomLevel;
-    el.scrollLeft = nodeCenterX - el.clientWidth / 2;
-    el.scrollTop = Math.max(0, nodeCenterY - el.clientHeight / 3);
-  }
-
-  // ── Zoom ───────────────────────────────────────────
-
-  get zoomPercent(): string {
-    return Math.round(this.zoomLevel * 100) + '%';
-  }
-
-  zoomIn(): void {
-    this.zoomLevel = Math.min(this.ZOOM_MAX, Math.round((this.zoomLevel + this.ZOOM_STEP) * 10) / 10);
-  }
-
-  zoomOut(): void {
-    this.zoomLevel = Math.max(this.ZOOM_MIN, Math.round((this.zoomLevel - this.ZOOM_STEP) * 10) / 10);
-  }
-
-  resetZoom(): void {
-    this.zoomLevel = 1.0;
-    setTimeout(() => this.centerStartNode(), 0);
-  }
-
-  @HostListener('document:wheel', ['$event'])
-  onWheel(event: WheelEvent): void {
-    if (!event.ctrlKey) return;
-    event.preventDefault();
-    if (event.deltaY < 0) this.zoomIn();
-    else this.zoomOut();
-  }
 
   nodeWidth(node: WfNode): number {
     return node.type === 'decision' ? this.DEC_W : this.NODE_W;
@@ -349,8 +300,8 @@ export class Workflow implements AfterViewInit {
     const dx = event.clientX - this.dragStartPageX;
     const dy = event.clientY - this.dragStartPageY;
     if (Math.abs(dx) > 3 || Math.abs(dy) > 3) this.dragMoved = true;
-    this.dragNode.x = Math.max(0, Math.min(this.CANVAS_W - this.nodeWidth(this.dragNode), this.dragNodeOrigX + dx / this.zoomLevel));
-    this.dragNode.y = Math.max(0, Math.min(this.CANVAS_H - this.nodeHeight(this.dragNode), this.dragNodeOrigY + dy / this.zoomLevel));
+    this.dragNode.x = Math.max(0, Math.min(this.CANVAS_W - this.nodeWidth(this.dragNode), this.dragNodeOrigX + dx));
+    this.dragNode.y = Math.max(0, Math.min(this.CANVAS_H - this.nodeHeight(this.dragNode), this.dragNodeOrigY + dy));
   }
 
   @HostListener('document:mouseup')
@@ -462,37 +413,5 @@ export class Workflow implements AfterViewInit {
     this.nodes = [{ id: 'start-0', type: 'start', label: 'Início', x: this.INIT_X, y: this.INIT_Y }];
     this.connections = [];
     this.activeMenu = null;
-  }
-
-  // ── Persistência JSON / sessionStorage ────────────────
-  readonly STORAGE_KEY = 'wf_workflow_v1';
-  saveMessage: string | null = null;
-
-  saveWorkflow(): void {
-    const data = JSON.stringify({ nodes: this.nodes, connections: this.connections });
-    localStorage.setItem(this.STORAGE_KEY, data);
-    this.saveMessage = 'Workflow salvo!';
-    setTimeout(() => (this.saveMessage = null), 2500);
-  }
-
-  loadWorkflow(): void {
-    const raw = localStorage.getItem(this.STORAGE_KEY);
-    if (!raw) {
-      this.saveMessage = 'Nenhum workflow salvo encontrado.';
-      setTimeout(() => (this.saveMessage = null), 2500);
-      return;
-    }
-    try {
-      const data = JSON.parse(raw) as { nodes: WfNode[]; connections: WfConnection[] };
-      this.nodes = data.nodes ?? this.nodes;
-      this.connections = data.connections ?? [];
-      this.activeMenu = null;
-      this.saveMessage = 'Workflow carregado!';
-      setTimeout(() => (this.saveMessage = null), 2500);
-      setTimeout(() => this.centerStartNode(), 0);
-    } catch {
-      this.saveMessage = 'Erro ao carregar: JSON inválido.';
-      setTimeout(() => (this.saveMessage = null), 2500);
-    }
   }
 }

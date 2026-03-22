@@ -33,58 +33,6 @@
   margin-left: auto;
 }
 
-/* ── Zoom controls ────────────────────────────────────────── */
-.wf-zoom-controls {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  padding: 3px 8px;
-}
-
-.zoom-btn {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: 1.5px solid #cbd5e1;
-  background: #fff;
-  color: #334155;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  line-height: 1;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-}
-
-.zoom-btn:hover:not(:disabled) {
-  background: #2563eb;
-  border-color: #2563eb;
-  color: #fff;
-}
-
-.zoom-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-.zoom-reset {
-  font-size: 14px;
-}
-
-.zoom-label {
-  font-size: 12px;
-  font-weight: 700;
-  color: #475569;
-  min-width: 38px;
-  text-align: center;
-}
-
 /* ── Scroll container ─────────────────────────────────────── */
 .wf-scroll {
   overflow: auto;
@@ -99,12 +47,6 @@
 
 .wf-canvas {
   position: relative;
-  transform-origin: 0 0;
-}
-
-.wf-zoom-wrapper {
-  position: relative;
-  flex-shrink: 0;
 }
 
 /* ── SVG connections ──────────────────────────────────────── */
@@ -472,22 +414,6 @@
 .icon-action   { color: #2563eb; }
 .icon-decision { color: #d97706; }
 .icon-end      { color: #dc2626; }
-
-/* ── Save feedback banner ─────────────────────────────────── */
-.wf-save-banner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f0fdf4;
-  border: 1.5px solid #86efac;
-  border-radius: 8px;
-  padding: 8px 16px;
-  margin-bottom: 10px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #15803d;
-  animation: menuSlide 0.15s ease;
-}
 
 /* ── Connecting mode banner ───────────────────────────────── */
 .wf-connect-banner {
