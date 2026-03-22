@@ -139,6 +139,26 @@
   gap: 0.25rem;
 }
 
+/* Ícone de anexos */
+.kanban-card-attachments {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: var(--color-neutral-mid-60, #777);
+  font-size: 0.75rem;
+  margin-left: auto;
+  margin-right: 0.25rem;
+}
+
+.kanban-card-attachments-icon {
+  font-size: 0.85rem;
+}
+
+.kanban-card-attachments-count {
+  font-weight: 600;
+  line-height: 1;
+}
+
 /* Estado vazio */
 .kanban-empty {
   display: flex;
@@ -192,4 +212,81 @@
 .detail-no-tags {
   font-size: 0.85rem;
   color: var(--color-neutral-mid-60, #aaa);
+}
+
+/* Lista de anexos no modal de detalhes */
+.detail-attachments {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.25rem 0 0.5rem;
+}
+
+.detail-attachment-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: 6px;
+  background: var(--color-neutral-light-05, #f8f8f8);
+  border: 1px solid var(--color-neutral-light-20, #e8e8e8);
+}
+
+.detail-attachment-icon {
+  font-size: 1rem;
+  color: var(--color-brand-01-dark, #3456b5);
+  flex-shrink: 0;
+}
+
+.detail-attachment-name {
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--color-neutral-dark-80, #333);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Modal de pré-visualização */
+.attachment-preview-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.attachment-preview-img {
+  max-width: 100%;
+  max-height: 480px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  object-fit: contain;
+}
+
+.attachment-preview-other {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.attachment-preview-file-icon {
+  font-size: 3rem;
+  color: var(--color-brand-01-dark, #3456b5);
+  opacity: 0.7;
+}
+
+.attachment-preview-filename {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-neutral-dark-80, #333);
+  margin: 0;
+}
+
+.attachment-preview-hint {
+  font-size: 0.85rem;
+  color: var(--color-neutral-mid-60, #777);
+  margin: 0;
 }

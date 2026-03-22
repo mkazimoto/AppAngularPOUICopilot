@@ -61,27 +61,17 @@
               [p-type]="task.priorityType">
             </po-tag>
 
+            <span *ngIf="task.attachmentFiles?.length" class="kanban-card-attachments">
+              <span class="an an-paperclip kanban-card-attachments-icon"></span>
+              <span class="kanban-card-attachments-count">{{ task.attachmentFiles?.length }}</span>
+            </span>
+
             <div class="kanban-card-actions">
-              <po-button
-                p-icon="an an-eye"
-                p-kind="tertiary"
-                p-aria-label="Ver detalhes"
-                (p-click)="openDetail(task)">
-              </po-button>
-              <po-button
-                *ngIf="!isFirstColumn(column.id)"
-                p-icon="an an-arrow-left"
-                p-kind="tertiary"
-                p-aria-label="Mover para coluna anterior"
-                (p-click)="moveTask(task, 'back')">
-              </po-button>
-              <po-button
-                *ngIf="!isLastColumn(column.id)"
-                p-icon="an an-arrow-right"
-                p-kind="tertiary"
-                p-aria-label="Mover para próxima coluna"
-                (p-click)="moveTask(task, 'forward')">
-              </po-button>
+              <po-dropdown
+                p-label="Ações"
+                p-size="small"
+                [p-actions]="getCardActions(task, column.id)">
+              </po-dropdown>
             </div>
           </div>
 
@@ -178,6 +168,53 @@
           [p-type]="PoTagType.Info">
         </po-tag>
         <span *ngIf="!selectedTask.tags?.length" class="detail-no-tags">Sem tags</span>
+      </div>
+
+      <ng-container *ngIf="selectedTask.attachmentFiles?.length">
+        <po-divider p-label="Anexos"></po-divider>
+
+        <div class="detail-attachments">
+          <div *ngFor="let file of selectedTask.attachmentFiles" class="detail-attachment-item">
+            <span [class]="getAttachmentIcon(file.type) + ' detail-attachment-icon'" [title]="file.type"></span>
+            <span class="detail-attachment-name">{{ file.name }}</span>
+            <po-button
+              p-label="Visualizar"
+              p-kind="tertiary"
+              p-size="small"
+              p-icon="an an-eye"
+              (p-click)="previewAttachment(file)">
+            </po-button>
+          </div>
+        </div>
+      </ng-container>
+
+    </ng-container>
+
+  </po-modal>
+
+  <!-- Modal de pré-visualização de anexo -->
+  <po-modal
+    #previewModal
+    [p-title]="selectedAttachment?.name || 'Visualizar Anexo'"
+    p-size="lg"
+    [p-primary-action]="previewCloseAction">
+
+    <ng-container *ngIf="selectedAttachment">
+
+      <div *ngIf="selectedAttachment.type === 'image'" class="attachment-preview-image">
+        <img [src]="selectedAttachment.url" [alt]="selectedAttachment.name" class="attachment-preview-img" />
+      </div>
+
+      <div *ngIf="selectedAttachment.type !== 'image'" class="attachment-preview-other">
+        <span [class]="getAttachmentIcon(selectedAttachment.type) + ' attachment-preview-file-icon'"></span>
+        <p class="attachment-preview-filename">{{ selectedAttachment.name }}</p>
+        <p class="attachment-preview-hint">Visualização inline não disponível para este tipo de arquivo.</p>
+        <po-button
+          p-label="Abrir arquivo"
+          p-kind="primary"
+          p-icon="an an-arrow-square-out"
+          (p-click)="openAttachment(selectedAttachment)">
+        </po-button>
       </div>
 
     </ng-container>

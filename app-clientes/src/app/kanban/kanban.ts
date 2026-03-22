@@ -5,6 +5,8 @@ import {
   PoBadgeModule,
   PoButtonModule,
   PoDividerModule,
+  PoDropdownAction,
+  PoDropdownModule,
   PoInfoModule,
   PoModalAction,
   PoModalComponent,
@@ -15,6 +17,14 @@ import {
   PoTagModule,
   PoTagType,
 } from '@po-ui/ng-components';
+
+export type AttachmentType = 'image' | 'pdf' | 'doc' | 'spreadsheet' | 'text' | 'code';
+
+export interface KanbanAttachment {
+  name: string;
+  type: AttachmentType;
+  url: string;
+}
 
 export interface KanbanTask {
   id: number;
@@ -29,6 +39,7 @@ export interface KanbanTask {
   tags?: string[];
   effort?: string;
   progress: number;
+  attachmentFiles?: KanbanAttachment[];
 }
 
 export interface KanbanColumn {
@@ -39,12 +50,13 @@ export interface KanbanColumn {
 
 @Component({
   selector: 'app-kanban',
-  imports: [CommonModule, PoPageModule, PoAvatarModule, PoTagModule, PoButtonModule, PoBadgeModule, PoModalModule, PoInfoModule, PoDividerModule, PoProgressModule],
+  imports: [CommonModule, PoPageModule, PoAvatarModule, PoTagModule, PoButtonModule, PoBadgeModule, PoModalModule, PoInfoModule, PoDividerModule, PoProgressModule, PoDropdownModule],
   templateUrl: './kanban.html',
   styleUrl: './kanban.css',
 })
 export class Kanban {
   @ViewChild('detailModal') detailModal!: PoModalComponent;
+  @ViewChild('previewModal') previewModal!: PoModalComponent;
 
   readonly PoTagType = PoTagType;
   readonly PoProgressStatus = PoProgressStatus;
@@ -73,6 +85,11 @@ export class Kanban {
       effort: '8h',
       tags: ['frontend', 'segurança'],
       progress: 0,
+      attachmentFiles: [
+        { name: 'mockup-login.png', type: 'image', url: 'https://picsum.photos/seed/login/800/500' },
+        { name: 'requisitos.pdf', type: 'pdf', url: '#' },
+        { name: 'fluxo-autenticacao.png', type: 'image', url: 'https://picsum.photos/seed/authflow/800/500' },
+      ],
     },
     {
       id: 2,
@@ -87,6 +104,9 @@ export class Kanban {
       effort: '5h',
       tags: ['backend', 'performance'],
       progress: 0,
+      attachmentFiles: [
+        { name: 'analise-queries.pdf', type: 'pdf', url: '#' },
+      ],
     },
     {
       id: 3,
@@ -115,6 +135,13 @@ export class Kanban {
       effort: '6h',
       tags: ['frontend', 'responsivo'],
       progress: 60,
+      attachmentFiles: [
+        { name: 'wireframe-mobile.png', type: 'image', url: 'https://picsum.photos/seed/mobile/800/500' },
+        { name: 'wireframe-tablet.png', type: 'image', url: 'https://picsum.photos/seed/tablet/800/500' },
+        { name: 'wireframe-desktop.png', type: 'image', url: 'https://picsum.photos/seed/desktop/800/500' },
+        { name: 'feedback-cliente.pdf', type: 'pdf', url: '#' },
+        { name: 'notas-revisao.txt', type: 'text', url: '#' },
+      ],
     },
     {
       id: 5,
@@ -129,6 +156,10 @@ export class Kanban {
       effort: '12h',
       tags: ['backend', 'pagamento'],
       progress: 45,
+      attachmentFiles: [
+        { name: 'pagseguro-api-docs.pdf', type: 'pdf', url: '#' },
+        { name: 'stripe-config.json', type: 'code', url: '#' },
+      ],
     },
     {
       id: 6,
@@ -157,6 +188,12 @@ export class Kanban {
       effort: '6h',
       tags: ['testes', 'qualidade'],
       progress: 85,
+      attachmentFiles: [
+        { name: 'relatorio-testes.pdf', type: 'pdf', url: '#' },
+        { name: 'cobertura-codigo.png', type: 'image', url: 'https://picsum.photos/seed/coverage/800/500' },
+        { name: 'plano-testes.xlsx', type: 'spreadsheet', url: '#' },
+        { name: 'bugs-encontrados.csv', type: 'text', url: '#' },
+      ],
     },
     {
       id: 8,
@@ -171,6 +208,15 @@ export class Kanban {
       effort: '3h',
       tags: ['devops', 'ci-cd'],
       progress: 90,
+      attachmentFiles: [
+        { name: 'pipeline.yml', type: 'code', url: '#' },
+        { name: 'server-config.json', type: 'code', url: '#' },
+        { name: 'ssl-certificado.pdf', type: 'pdf', url: '#' },
+        { name: 'deploy-log.txt', type: 'text', url: '#' },
+        { name: 'rollback-plan.pdf', type: 'pdf', url: '#' },
+        { name: 'monitoramento.png', type: 'image', url: 'https://picsum.photos/seed/monitor/800/500' },
+        { name: 'checklist-deploy.pdf', type: 'pdf', url: '#' },
+      ],
     },
     {
       id: 9,
@@ -185,6 +231,10 @@ export class Kanban {
       effort: '4h',
       tags: ['documentação', 'api'],
       progress: 100,
+      attachmentFiles: [
+        { name: 'swagger.json', type: 'code', url: '#' },
+        { name: 'changelog.md', type: 'text', url: '#' },
+      ],
     },
     {
       id: 10,
@@ -217,10 +267,16 @@ export class Kanban {
   ];
 
   selectedTask: KanbanTask | null = null;
+  selectedAttachment: KanbanAttachment | null = null;
 
   modalCloseAction: PoModalAction = {
     label: 'Fechar',
     action: () => this.detailModal.close(),
+  };
+
+  previewCloseAction: PoModalAction = {
+    label: 'Fechar',
+    action: () => this.previewModal.close(),
   };
 
   getProgressStatus(progress: number): PoProgressStatus {
@@ -300,5 +356,61 @@ export class Kanban {
 
   isLastColumn(columnId: string): boolean {
     return this.columns[this.columns.length - 1].id === columnId;
+  }
+
+  getCardActions(task: KanbanTask, columnId: string): PoDropdownAction[] {
+    const actions: PoDropdownAction[] = [
+      { label: 'Ver Detalhes', icon: 'an an-eye', action: () => this.openDetail(task) },
+    ];
+
+    switch (columnId) {
+      case 'todo':
+        actions.push({ label: 'Iniciar Tarefa', icon: 'an an-play', action: () => this.moveTask(task, 'forward') });
+        break;
+      case 'doing':
+        actions.push(
+          { label: 'Pausar Tarefa', icon: 'an an-pause', action: () => this.moveTask(task, 'back') },
+          { label: 'Enviar para Revisão', icon: 'an an-check', action: () => this.moveTask(task, 'forward') },
+        );
+        break;
+      case 'review':
+        actions.push(
+          { label: 'Retornar ao Progresso', icon: 'an an-arrow-left', action: () => this.moveTask(task, 'back') },
+          { label: 'Aprovar e Concluir', icon: 'an an-check-circle', action: () => this.moveTask(task, 'forward') },
+        );
+        break;
+      case 'done':
+        actions.push({ label: 'Reabrir Tarefa', icon: 'an an-arrow-arc-left', action: () => this.moveTask(task, 'back') });
+        break;
+    }
+
+    actions.push({ label: 'Excluir Tarefa', icon: 'an an-trash', action: () => this.deleteTask(task) });
+
+    return actions;
+  }
+
+  deleteTask(task: KanbanTask): void {
+    this.tasks = this.tasks.filter(t => t.id !== task.id);
+  }
+
+  previewAttachment(file: KanbanAttachment): void {
+    this.selectedAttachment = file;
+    this.previewModal.open();
+  }
+
+  openAttachment(file: KanbanAttachment): void {
+    window.open(file.url, '_blank');
+  }
+
+  getAttachmentIcon(type: AttachmentType): string {
+    const icons: Record<AttachmentType, string> = {
+      image: 'an an-image',
+      pdf: 'an an-file',
+      doc: 'an an-file-text',
+      spreadsheet: 'an an-table',
+      text: 'an an-file-text',
+      code: 'an an-code',
+    };
+    return icons[type] ?? 'an an-file';
   }
 }
