@@ -1,174 +1,222 @@
-<po-page-default p-title="Workflow — Aprovação de Pedido">
+<po-page-default p-title="Editor de Workflow">
 
-  <!-- Toolbar de ações -->
+  <!-- ── Toolbar ── -->
   <div class="wf-toolbar">
     <po-button
-      p-label="Avançar Etapa"
-      p-icon="an an-arrow-right"
-      p-kind="primary"
-      (p-click)="advanceWorkflow()">
+      p-label="Limpar Tudo"
+      p-kind="secondary"
+      p-icon="an an-trash"
+      (p-click)="clearWorkflow()">
     </po-button>
-    <po-button
-      p-label="Reiniciar"
-      p-icon="an an-arrows-counter-clockwise"
-      (p-click)="resetWorkflow()">
-    </po-button>
+    <div class="wf-legend">
+      <span class="legend-pill legend-start">▶ Início</span>
+      <span class="legend-pill legend-action">⚡ Ação</span>
+      <span class="legend-pill legend-decision">◆ Decisão</span>
+      <span class="legend-pill legend-end">⏹ Fim</span>
+    </div>
+    <span class="wf-hint">Clique em <strong>+</strong> em qualquer nó para adicionar o próximo passo.</span>
   </div>
 
-  <po-divider p-label="Legenda de Entidades"></po-divider>
+  <!-- ── Canvas ── -->
+  <div class="wf-scroll" (click)="closeMenus()">
+    <div class="wf-canvas" [style.width.px]="CANVAS_W" [style.height.px]="CANVAS_H">
 
-  <!-- Legenda -->
-  <div class="wf-legend">
-    <div class="wf-legend-item">
-      <div class="wf-node wf-node--start wf-node--sm">
-        <span class="an an-play-circle"></span>
-      </div>
-      <span>Início</span>
-    </div>
-    <div class="wf-legend-item">
-      <div class="wf-node wf-node--action wf-node--sm">
-        <span class="an an-lightning"></span>
-      </div>
-      <span>Ação</span>
-    </div>
-    <div class="wf-legend-item">
-      <div class="wf-node wf-node--decision wf-node--sm">
-        <span class="an an-git-fork"></span>
-      </div>
-      <span>Decisão</span>
-    </div>
-    <div class="wf-legend-item">
-      <div class="wf-node wf-node--end wf-node--sm">
-        <span class="an an-stop-circle"></span>
-      </div>
-      <span>Fim</span>
-    </div>
-  </div>
+      <!-- SVG layer: arrows -->
+      <svg class="wf-svg" [attr.width]="CANVAS_W" [attr.height]="CANVAS_H">
+        <defs>
+          <marker id="wf-arrow" markerWidth="12" markerHeight="8"
+                  refX="10" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+            <polygon points="0 0, 12 4, 0 8" fill="#94a3b8"/>
+          </marker>
+        </defs>
 
-  <po-divider p-label="Diagrama do Processo"></po-divider>
+        <g *ngFor="let conn of connections; trackBy: trackConn">
+          <path
+            [attr.d]="connectionPath(conn)"
+            class="wf-conn-line"
+            marker-end="url(#wf-arrow)"/>
+          <!-- Branch label badge -->
+          <rect *ngIf="conn.branch"
+                [attr.x]="connectionLabelX(conn) - 18"
+                [attr.y]="connectionLabelY(conn) - 10"
+                width="38" height="20" rx="10"
+                [class]="'conn-badge conn-badge-' + (conn.branch === 'Sim' ? 'sim' : 'nao')"/>
+          <text *ngIf="conn.branch"
+                [attr.x]="connectionLabelX(conn)"
+                [attr.y]="connectionLabelY(conn) + 5"
+                class="wf-conn-label"
+                [class.label-sim]="conn.branch === 'Sim'"
+                [class.label-nao]="conn.branch === 'Não'">
+            {{ conn.branch }}
+          </text>
+        </g>
+      </svg>
 
-  <!-- Diagrama principal -->
-  <div class="wf-canvas">
+      <!-- ── Nodes ── -->
+      <div *ngFor="let node of nodes; trackBy: trackNode"
+           class="wf-node"
+           [class]="'wf-' + node.type"
+           [style.left.px]="node.x"
+           [style.top.px]="node.y">
 
-    <!-- Fluxo principal: linha horizontal -->
-    <div class="wf-flow wf-flow--main">
-      <ng-container *ngFor="let node of mainFlow; let last = last">
-
-        <!-- Nó -->
-        <div
-          class="wf-node-wrapper"
-          (click)="openNodeDetail(node)"
-          [class.wf-node-wrapper--active]="isActive(node.id)">
-
-          <div
-            [class]="'wf-node wf-node--' + node.type"
-            [class.wf-node--active]="isActive(node.id)"
-            [class.wf-node--done]="node.status === 'done'">
-            <span [class]="getNodeIcon(node.type)"></span>
-          </div>
-
-          <div class="wf-node-label">
-            <span class="wf-node-title">{{ node.label }}</span>
-            <po-tag
-              [p-value]="getStatusLabel(node.status)"
-              [p-type]="getStatusTagType(node.status)"
-              p-inverse="false">
-            </po-tag>
+        <!-- ─── START ─── -->
+        <div *ngIf="node.type === 'start'" class="node-body body-start">
+          <span class="ni">▶</span>
+          <span class="nl" [title]="node.label">{{ node.label }}</span>
+          <div class="node-ctrl">
+            <button class="ctrl-btn"
+                    title="Editar rótulo"
+                    (click)="openEdit(node); $event.stopPropagation()">
+              <i class="an an-pencil"></i>
+            </button>
           </div>
         </div>
 
-        <!-- Seta de conexão (exceto após o último nó) -->
-        <div *ngIf="!last" class="wf-arrow-h">
-          <!-- Bifurcação na decisão: Sim / Não -->
-          <div *ngIf="node.type === 'decision'" class="wf-decision-labels">
-            <span class="wf-decision-yes">Sim</span>
-          </div>
-          <div class="wf-arrow-line"></div>
-          <div class="wf-arrow-head"></div>
-        </div>
-
-      </ng-container>
-    </div>
-
-    <!-- Desvio: "Não" na decisão → Solicitar Reposição → volta à decisão -->
-    <div class="wf-branch">
-      <!-- Linha vertical descendo da decisão -->
-      <div class="wf-branch-start">
-        <span class="wf-decision-no">Não</span>
-        <div class="wf-arrow-v"></div>
-      </div>
-
-      <!-- Nó de reposição -->
-      <ng-container *ngFor="let node of branchFlow">
-        <div
-          class="wf-node-wrapper"
-          (click)="openNodeDetail(node)"
-          [class.wf-node-wrapper--active]="isActive(node.id)">
-          <div
-            [class]="'wf-node wf-node--' + node.type"
-            [class.wf-node--active]="isActive(node.id)"
-            [class.wf-node--done]="node.status === 'done'">
-            <span [class]="getNodeIcon(node.type)"></span>
-          </div>
-          <div class="wf-node-label">
-            <span class="wf-node-title">{{ node.label }}</span>
-            <po-tag
-              [p-value]="getStatusLabel(node.status)"
-              [p-type]="getStatusTagType(node.status)">
-            </po-tag>
+        <!-- ─── ACTION ─── -->
+        <div *ngIf="node.type === 'action'" class="node-body body-action">
+          <span class="ni">⚡</span>
+          <span class="nl" [title]="node.label">{{ node.label }}</span>
+          <div class="node-ctrl">
+            <button class="ctrl-btn"
+                    title="Editar rótulo"
+                    (click)="openEdit(node); $event.stopPropagation()">
+              <i class="an an-pencil"></i>
+            </button>
+            <button class="ctrl-btn ctrl-del"
+                    title="Excluir nó e descendentes"
+                    (click)="deleteNode(node.id); $event.stopPropagation()">
+              <i class="an an-x"></i>
+            </button>
           </div>
         </div>
-      </ng-container>
 
-      <!-- Linha voltando para a decisão -->
-      <div class="wf-branch-return">
-        <div class="wf-arrow-v"></div>
-        <span class="wf-branch-return-label">Retorna</span>
-      </div>
-    </div>
+        <!-- ─── END ─── -->
+        <div *ngIf="node.type === 'end'" class="node-body body-end">
+          <span class="ni">⏹</span>
+          <span class="nl" [title]="node.label">{{ node.label }}</span>
+          <div class="node-ctrl">
+            <button class="ctrl-btn"
+                    title="Editar rótulo"
+                    (click)="openEdit(node); $event.stopPropagation()">
+              <i class="an an-pencil"></i>
+            </button>
+            <button class="ctrl-btn ctrl-del"
+                    title="Excluir nó"
+                    (click)="deleteNode(node.id); $event.stopPropagation()">
+              <i class="an an-x"></i>
+            </button>
+          </div>
+        </div>
 
-  </div>
+        <!-- ─── DECISION ─── -->
+        <div *ngIf="node.type === 'decision'" class="node-body body-decision">
+          <div class="diamond">
+            <span class="diamond-label" [title]="node.label">{{ node.label }}</span>
+          </div>
+          <div class="node-ctrl dec-ctrl">
+            <button class="ctrl-btn"
+                    title="Editar rótulo"
+                    (click)="openEdit(node); $event.stopPropagation()">
+              <i class="an an-pencil"></i>
+            </button>
+            <button class="ctrl-btn ctrl-del"
+                    title="Excluir nó e descendentes"
+                    (click)="deleteNode(node.id); $event.stopPropagation()">
+              <i class="an an-x"></i>
+            </button>
+          </div>
+        </div>
 
-  <!-- Modal de detalhes do nó -->
+        <!-- ── Add buttons — START / ACTION ── -->
+        <ng-container *ngIf="node.type === 'start' || node.type === 'action'">
+          <button *ngIf="!hasConnection(node.id)"
+                  class="btn-plus btn-plus-bottom"
+                  title="Adicionar próximo passo"
+                  (click)="showMenu($event, node.id)">+</button>
+
+          <div *ngIf="isMenuOpen(node.id)"
+               class="ctx-menu ctx-bottom"
+               (click)="$event.stopPropagation()">
+            <div class="ctx-title">Adicionar próximo:</div>
+            <button class="ctx-item" (click)="addNode(node, 'action')">
+              <span class="ctx-icon icon-action">⚡</span> Ação
+            </button>
+            <button class="ctx-item" (click)="addNode(node, 'decision')">
+              <span class="ctx-icon icon-decision">◆</span> Decisão
+            </button>
+            <button class="ctx-item" (click)="addNode(node, 'end')">
+              <span class="ctx-icon icon-end">⏹</span> Fim
+            </button>
+          </div>
+        </ng-container>
+
+        <!-- ── Add buttons — DECISION ── -->
+        <ng-container *ngIf="node.type === 'decision'">
+
+          <!-- Sim branch (left) -->
+          <button *ngIf="!hasConnection(node.id, 'Sim')"
+                  class="btn-plus btn-plus-branch btn-plus-sim"
+                  title="Adicionar ramo Sim"
+                  (click)="showMenu($event, node.id, 'Sim')">+ Sim</button>
+
+          <div *ngIf="isMenuOpen(node.id, 'Sim')"
+               class="ctx-menu ctx-sim"
+               (click)="$event.stopPropagation()">
+            <div class="ctx-title">Ramo <span class="badge-sim">Sim</span>:</div>
+            <button class="ctx-item" (click)="addNode(node, 'action', 'Sim')">
+              <span class="ctx-icon icon-action">⚡</span> Ação
+            </button>
+            <button class="ctx-item" (click)="addNode(node, 'decision', 'Sim')">
+              <span class="ctx-icon icon-decision">◆</span> Decisão
+            </button>
+            <button class="ctx-item" (click)="addNode(node, 'end', 'Sim')">
+              <span class="ctx-icon icon-end">⏹</span> Fim
+            </button>
+          </div>
+
+          <!-- Não branch (right) -->
+          <button *ngIf="!hasConnection(node.id, 'Não')"
+                  class="btn-plus btn-plus-branch btn-plus-nao"
+                  title="Adicionar ramo Não"
+                  (click)="showMenu($event, node.id, 'Não')">+ Não</button>
+
+          <div *ngIf="isMenuOpen(node.id, 'Não')"
+               class="ctx-menu ctx-nao"
+               (click)="$event.stopPropagation()">
+            <div class="ctx-title">Ramo <span class="badge-nao">Não</span>:</div>
+            <button class="ctx-item" (click)="addNode(node, 'action', 'Não')">
+              <span class="ctx-icon icon-action">⚡</span> Ação
+            </button>
+            <button class="ctx-item" (click)="addNode(node, 'decision', 'Não')">
+              <span class="ctx-icon icon-decision">◆</span> Decisão
+            </button>
+            <button class="ctx-item" (click)="addNode(node, 'end', 'Não')">
+              <span class="ctx-icon icon-end">⏹</span> Fim
+            </button>
+          </div>
+        </ng-container>
+
+      </div><!-- /node -->
+    </div><!-- /canvas -->
+  </div><!-- /scroll -->
+
+  <!-- ── Edit Modal ── -->
   <po-modal
-    #nodeModal
-    [p-title]="selectedNode?.label || ''"
-    [p-primary-action]="modalConfirmAction"
-    p-size="sm">
-
-    <div *ngIf="selectedNode" class="wf-modal-content">
-
-      <div class="wf-modal-type">
-        <div [class]="'wf-node wf-node--' + selectedNode.type + ' wf-node--lg'">
-          <span [class]="getNodeIcon(selectedNode.type)"></span>
-        </div>
-        <div>
-          <strong>Tipo:</strong> {{ getNodeTypeLabel(selectedNode.type) }}<br>
-          <strong>ID:</strong> {{ selectedNode.id }}
-        </div>
-      </div>
-
-      <po-divider></po-divider>
-
-      <p>{{ selectedNode.description }}</p>
-
-      <div class="wf-modal-status">
-        <strong>Status:</strong>
-        <po-tag
-          [p-value]="getStatusLabel(selectedNode.status)"
-          [p-type]="getStatusTagType(selectedNode.status)">
-        </po-tag>
-      </div>
-
-      <div *ngIf="selectedNode.connections.length > 0" class="wf-modal-connections">
-        <strong>Conecta a:</strong>
-        <ul>
-          <li *ngFor="let conn of selectedNode.connections">{{ conn }}</li>
-        </ul>
-      </div>
-
+    #editModal
+    p-title="Editar Nó"
+    p-size="sm"
+    [p-primary-action]="primaryAction"
+    [p-secondary-action]="secondaryAction">
+    <div *ngIf="selectedNode" class="edit-form">
+      <po-input
+        name="wfLabel"
+        p-name="wfLabel"
+        p-label="Rótulo do nó"
+        [(ngModel)]="editingLabel"
+        p-placeholder="Ex: Validar dados"
+        p-max-length="60">
+      </po-input>
     </div>
-
   </po-modal>
 
 </po-page-default>

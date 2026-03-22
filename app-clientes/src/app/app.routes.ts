@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { Agendamento } from './agendamento/agendamento';
 import { Carros } from './carros/carros';
+import { Workflow } from './workflow/workflow';
 import { ClienteEdit } from './clientes/cliente-edit/cliente-edit';
 import { Clientes } from './clientes/clientes';
 import { Cursos } from './cursos/cursos';
@@ -11,7 +12,6 @@ import { Passagens } from './passagens/passagens';
 import { Pets } from './pets/pets';
 import { Produtos } from './produtos/produtos';
 import { Tarefas } from './tarefas/tarefas';
-import { Workflow } from './workflow/workflow';
 
 export const routes: Routes = [
   { path: 'dashboard', component: Dashboard },
@@ -25,8 +25,8 @@ export const routes: Routes = [
   { path: 'cursos', component: Cursos },
   { path: 'imoveis', component: Imoveis },
   { path: 'kanban', component: Kanban },
-  { path: 'workflow', component: Workflow },
   { path: 'tarefas', component: Tarefas },
   { path: 'agendamento', component: Agendamento },
+  { path: 'workflow', component: Workflow },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 ];
