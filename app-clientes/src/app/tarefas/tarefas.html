@@ -55,11 +55,18 @@
           <!-- Barra da tarefa -->
           <div
             class="gantt-bar"
+            [class.gantt-bar-dragging]="dragTaskId === t.id"
+            [class.gantt-bar-resizing]="resizeTaskId === t.id"
             [ngStyle]="getBarStyle(t)"
             [title]="t.titulo + ' — ' + t.dataInicio + ' a ' + t.dataFim + ' (' + t.progresso + '% concluído)'"
+            (mousedown)="onBarMouseDown($event, t)"
           >
+            <!-- Handle de redimensionamento esquerdo -->
+            <div class="gantt-resize-handle gantt-resize-left" (mousedown)="onResizeMouseDown($event, t, 'left')"></div>
             <div class="gantt-bar-fill" [style.width.%]="t.progresso"></div>
             <span class="gantt-bar-label">{{ t.progresso > 0 ? (t.progresso + '%') : t.titulo }}</span>
+            <!-- Handle de redimensionamento direito -->
+            <div class="gantt-resize-handle gantt-resize-right" (mousedown)="onResizeMouseDown($event, t, 'right')"></div>
           </div>
         </div>
       </div>

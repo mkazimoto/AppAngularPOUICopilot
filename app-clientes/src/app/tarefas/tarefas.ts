@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import {
     PoContainerModule,
     PoDividerModule,
@@ -41,6 +41,22 @@ export class Tarefas {
   readonly totalDays = 92;
   /** Hoje: 19/03/2026 = dia 18 a partir de 01/03 */
   readonly todayDay = 18;
+
+  // --- Drag state ---
+  dragTaskId: number | null = null;
+  private dragStartX = 0;
+  private dragInitialStartDay = 0;
+  private dragContainerWidth = 0;
+
+  // --- Resize state ---
+  resizeTaskId: number | null = null;
+  resizeEdge: 'left' | 'right' | null = null;
+  private resizeStartX = 0;
+  private resizeInitialStartDay = 0;
+  private resizeInitialDuration = 0;
+  private resizeContainerWidth = 0;
+
+  private readonly projectStart = new Date(2026, 2, 1); // 01/03/2026
 
   readonly ganttMonths = [
     { label: 'Março 2026', widthPct: (31 / 92) * 100 },
@@ -196,5 +212,80 @@ export class Tarefas {
       width: `${(t.duration / this.totalDays) * 100}%`,
       backgroundColor: t.barColor,
     };
+  }
+
+  /** Inicia o arrastar da barra */
+  onBarMouseDown(event: MouseEvent, tarefa: Tarefa): void {
+    event.preventDefault();
+    const containerEl = (event.currentTarget as HTMLElement).parentElement!;
+    this.dragTaskId = tarefa.id;
+    this.dragStartX = event.clientX;
+    this.dragInitialStartDay = tarefa.startDay;
+    this.dragContainerWidth = containerEl.clientWidth;
+    document.body.style.cursor = 'grabbing';
+    document.body.style.userSelect = 'none';
+  }
+
+  @HostListener('document:mousemove', ['$event'])
+  onMouseMove(event: MouseEvent): void {
+    if (this.dragTaskId !== null) {
+      const dayWidth = this.dragContainerWidth / this.totalDays;
+      const deltaDays = Math.round((event.clientX - this.dragStartX) / dayWidth);
+      const tarefa = this.tarefas.find(t => t.id === this.dragTaskId)!;
+      const newStart = Math.max(0, Math.min(this.totalDays - tarefa.duration, this.dragInitialStartDay + deltaDays));
+      tarefa.startDay = newStart;
+      this.updateDatesFromDays(tarefa);
+    }
+    if (this.resizeTaskId !== null) {
+      const dayWidth = this.resizeContainerWidth / this.totalDays;
+      const deltaDays = Math.round((event.clientX - this.resizeStartX) / dayWidth);
+      const tarefa = this.tarefas.find(t => t.id === this.resizeTaskId)!;
+      if (this.resizeEdge === 'right') {
+        tarefa.duration = Math.max(1, Math.min(this.totalDays - tarefa.startDay, this.resizeInitialDuration + deltaDays));
+        this.updateDatesFromDays(tarefa);
+      } else {
+        const newStart = Math.max(0, Math.min(this.resizeInitialStartDay + this.resizeInitialDuration - 1, this.resizeInitialStartDay + deltaDays));
+        tarefa.duration = this.resizeInitialDuration - (newStart - this.resizeInitialStartDay);
+        tarefa.startDay = newStart;
+        this.updateDatesFromDays(tarefa);
+      }
+    }
+  }
+
+  @HostListener('document:mouseup')
+  onMouseUp(): void {
+    this.dragTaskId = null;
+    this.resizeTaskId = null;
+    this.resizeEdge = null;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  }
+
+  /** Inicia redimensionamento pelo handle esquerdo ou direito */
+  onResizeMouseDown(event: MouseEvent, tarefa: Tarefa, edge: 'left' | 'right'): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const containerEl = (event.currentTarget as HTMLElement).closest('.gantt-cell-bar') as HTMLElement;
+    this.resizeTaskId = tarefa.id;
+    this.resizeEdge = edge;
+    this.resizeStartX = event.clientX;
+    this.resizeInitialStartDay = tarefa.startDay;
+    this.resizeInitialDuration = tarefa.duration;
+    this.resizeContainerWidth = containerEl.clientWidth;
+    document.body.style.cursor = 'ew-resize';
+    document.body.style.userSelect = 'none';
+  }
+
+  private updateDatesFromDays(tarefa: Tarefa): void {
+    const start = new Date(this.projectStart);
+    start.setDate(start.getDate() + tarefa.startDay);
+    const end = new Date(start);
+    end.setDate(end.getDate() + tarefa.duration - 1);
+    tarefa.dataInicio = this.formatDate(start);
+    tarefa.dataFim = this.formatDate(end);
+  }
+
+  private formatDate(d: Date): string {
+    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
   }
 }
