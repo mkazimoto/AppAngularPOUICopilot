@@ -1,1 +1,18 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Remove border/outline from po-dropdown trigger button in kanban cards */
+.kanban-card-actions .po-dropdown-button,
+.kanban-card-actions po-dropdown button,
+.kanban-card-actions .po-button {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Hide the default chevron icon inside the kanban card dropdown */
+.kanban-card-actions po-dropdown .po-icon-arrow-down,
+.kanban-card-actions po-dropdown [class*="an-chevron"],
+.kanban-card-actions po-dropdown [class*="an-caret"] {
+  display: none !important;
+}
