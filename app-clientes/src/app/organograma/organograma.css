@@ -1,0 +1,304 @@
+/* ── Toolbar ─────────────────────────────────────────────────────────────── */
+.og-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0 16px;
+  flex-wrap: wrap;
+}
+
+.og-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  flex: 1;
+}
+
+.og-legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.og-legend-label {
+  font-size: 11px;
+  color: #475569;
+  margin-right: 4px;
+}
+
+.og-hint {
+  font-size: 12px;
+  color: #94a3b8;
+  min-width: 180px;
+  text-align: right;
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────────── */
+.og-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 80px 24px;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.og-empty-icon {
+  font-size: 48px;
+  opacity: 0.35;
+}
+
+.og-empty p {
+  font-size: 15px;
+  margin: 0;
+}
+
+/* ── Scroll container ────────────────────────────────────────────────────── */
+.og-scroll {
+  overflow: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  max-height: calc(100vh - 260px);
+  min-height: 480px;
+}
+
+.og-canvas {
+  position: relative;
+}
+
+/* ── SVG connections ─────────────────────────────────────────────────────── */
+.og-svg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.og-conn {
+  fill: none;
+  stroke: #cbd5e1;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* ── Node card ───────────────────────────────────────────────────────────── */
+.og-node {
+  position: absolute;
+  width: 210px;
+  background: #ffffff;
+  border-radius: 10px;
+  /* full border with thicker left accent */
+  border: 1px solid #e2e8f0;
+  border-left-width: 4px;
+  border-left-color: #cbd5e1; /* overridden inline per node */
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+  cursor: default;
+}
+
+.og-node:hover {
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.13);
+  transform: translateY(-2px);
+  z-index: 10;
+}
+
+/* Avatar circle with initials */
+.og-avatar {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  overflow: hidden;
+  border: 2px solid rgba(255,255,255,0.6);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+}
+
+.og-avatar.og-avatar-img-wrap {
+  border: 2px solid #e2e8f0;
+}
+
+.og-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+/* Text info area */
+.og-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.og-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.og-role {
+  font-size: 11px;
+  color: #475569;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.og-dept {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Hover action buttons ────────────────────────────────────────────────── */
+.og-actions {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: none;
+  flex-direction: row;
+  gap: 3px;
+}
+
+.og-node:hover .og-actions {
+  display: flex;
+}
+
+.og-btn {
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: filter 0.15s;
+}
+
+.og-btn:hover {
+  filter: brightness(0.88);
+}
+
+.og-btn-add  { background: #dcfce7; color: #16a34a; }
+.og-btn-edit { background: #dbeafe; color: #1d4ed8; }
+.og-btn-del  { background: #fee2e2; color: #dc2626; }
+
+/* ── Modal photo section ─────────────────────────────────────────────────── */
+.og-photo-section {
+  margin-top: 16px;
+}
+
+.og-photo-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.og-form-preview {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+.og-form-preview-img {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #e2e8f0;
+  display: block;
+}
+
+.og-btn-rm-photo {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.og-photo-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.og-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.og-upload-btn:hover {
+  background: #e2e8f0;
+}
+
+.og-url-input {
+  flex: 1;
+  min-width: 150px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #334155;
+  outline: none;
+}
+
+.og-url-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99,102,241,0.15);
+}

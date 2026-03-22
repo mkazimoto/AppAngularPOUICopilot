@@ -1,0 +1,162 @@
+<po-page-default p-title="Editor de Organograma">
+
+  <!-- ── Toolbar ── -->
+  <div class="og-toolbar">
+    <po-button
+      p-label="Adicionar Raiz"
+      p-icon="an an-plus"
+      p-kind="primary"
+      [p-disabled]="hasRoot"
+      (p-click)="openAddModal(null)">
+    </po-button>
+    <po-button
+      p-label="Limpar Tudo"
+      p-icon="an an-trash"
+      p-kind="secondary"
+      (p-click)="clearAll()">
+    </po-button>
+
+    <!-- Department legend -->
+    <div class="og-legend">
+      <ng-container *ngFor="let opt of deptOptions">
+        <span class="og-legend-dot" [style.background]="getColor(opt.value)"></span>
+        <span class="og-legend-label">{{ opt.label }}</span>
+      </ng-container>
+    </div>
+
+    <span class="og-hint">
+      Passe o mouse sobre um card para
+      <strong>adicionar</strong>, <strong>editar</strong> ou <strong>remover</strong>.
+    </span>
+  </div>
+
+  <!-- ── Empty state ── -->
+  <div *ngIf="nodes.length === 0" class="og-empty">
+    <i class="an an-users og-empty-icon"></i>
+    <p>Nenhum cargo cadastrado.</p>
+    <po-button p-label="Criar CEO" p-kind="primary" p-icon="an an-plus" (p-click)="openAddModal(null)"></po-button>
+  </div>
+
+  <!-- ── Canvas ── -->
+  <div *ngIf="nodes.length > 0" class="og-scroll">
+    <div class="og-canvas" [style.width.px]="canvasW" [style.height.px]="canvasH">
+
+      <!-- SVG layer: bezier connections -->
+      <svg class="og-svg" [attr.width]="canvasW" [attr.height]="canvasH">
+        <ng-container *ngFor="let node of nodes; trackBy: trackNode">
+          <path
+            *ngFor="let child of getChildren(node.id)"
+            [attr.d]="connectionPath(node.id, child.id)"
+            class="og-conn" />
+        </ng-container>
+      </svg>
+
+      <!-- Node cards -->
+      <div
+        *ngFor="let node of nodes; trackBy: trackNode"
+        class="og-node"
+        [style.left.px]="nodePos(node.id).x"
+        [style.top.px]="nodePos(node.id).y"
+        [style.border-left-color]="getColor(node.department)">
+
+        <!-- Avatar: photo or initials -->
+        <div class="og-avatar" [style.background]="node.photo ? 'transparent' : getColor(node.department)"
+             [class.og-avatar-img-wrap]="!!node.photo">
+          <img *ngIf="node.photo" [src]="node.photo" [alt]="node.name" class="og-avatar-img">
+          <span *ngIf="!node.photo">{{ getInitials(node.name) }}</span>
+        </div>
+
+        <!-- Name / Role / Department -->
+        <div class="og-info">
+          <span class="og-name" [title]="node.name">{{ node.name }}</span>
+          <span class="og-role" [title]="node.role">{{ node.role }}</span>
+          <span class="og-dept" [style.color]="getColor(node.department)">{{ node.department }}</span>
+        </div>
+
+        <!-- Hover action buttons -->
+        <div class="og-actions">
+          <button
+            class="og-btn og-btn-add"
+            title="Adicionar subordinado"
+            (click)="openAddModal(node.id); $event.stopPropagation()">
+            <i class="an an-plus"></i>
+          </button>
+          <button
+            class="og-btn og-btn-edit"
+            title="Editar cargo"
+            (click)="openEditModal(node, $event)">
+            <i class="an an-pencil-simple"></i>
+          </button>
+          <button
+            *ngIf="node.parentId !== null"
+            class="og-btn og-btn-del"
+            title="Remover (e subordinados)"
+            (click)="deleteNode(node.id, $event)">
+            <i class="an an-trash"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Add / Edit Modal ── -->
+  <po-modal
+    #nodeModal
+    [p-title]="modalTitle"
+    [p-primary-action]="primaryAction"
+    [p-secondary-action]="secondaryAction"
+    p-size="sm">
+
+    <po-input
+      p-label="Nome Completo"
+      p-placeholder="Ex: Maria Silva"
+      p-required
+      [(ngModel)]="formName">
+    </po-input>
+
+    <po-input
+      p-label="Cargo / Função"
+      p-placeholder="Ex: Gerente de TI"
+      p-required
+      [(ngModel)]="formRole">
+    </po-input>
+
+    <po-select
+      p-label="Departamento"
+      [p-options]="deptOptions"
+      [ngModel]="formDepartment"
+      (ngModelChange)="formDepartment = $event">
+    </po-select>
+
+    <!-- Photo section -->
+    <div class="og-photo-section">
+      <label class="og-photo-label">Foto</label>
+
+      <!-- Preview -->
+      <div *ngIf="formPhoto" class="og-form-preview">
+        <img [src]="formPhoto" alt="Preview" class="og-form-preview-img">
+        <button type="button" class="og-btn-rm-photo" title="Remover foto" (click)="removePhoto()">
+          <i class="an an-x"></i>
+        </button>
+      </div>
+
+      <!-- Upload + URL row -->
+      <div class="og-photo-inputs">
+        <label class="og-upload-btn">
+          <i class="an an-camera"></i>
+          {{ formPhoto ? 'Trocar arquivo' : 'Upload' }}
+          <input type="file" accept="image/*" style="display:none" (change)="onPhotoFileChange($event)">
+        </label>
+        <input
+          class="og-url-input"
+          type="url"
+          placeholder="ou cole uma URL de imagem"
+          [value]="formPhoto.startsWith('http') ? formPhoto : ''"
+          (input)="formPhoto = $any($event.target).value">
+      </div>
+    </div>
+
+  </po-modal>
+
+</po-page-default>
