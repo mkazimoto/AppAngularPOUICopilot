@@ -198,6 +198,12 @@
   border-bottom-color: var(--color-neutral-light-20);
 }
 
+.time-slot--drag-over {
+  background: rgba(25, 118, 210, 0.18) !important;
+  border: 2px dashed #1976d2;
+  box-sizing: border-box;
+}
+
 /* ============================================================
    Blocos de agendamento (posicionamento absoluto)
    ============================================================ */
@@ -207,10 +213,10 @@
   right: 3px;
   border-radius: 5px;
   padding: 4px 6px;
-  cursor: pointer;
+  cursor: grab;
   overflow: hidden;
   z-index: 2;
-  transition: filter 0.12s, box-shadow 0.12s;
+  transition: filter 0.12s, box-shadow 0.12s, opacity 0.12s;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
   display: flex;
   flex-direction: column;
@@ -221,6 +227,12 @@
   filter: brightness(0.9);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
   z-index: 3;
+}
+
+.appointment--dragging {
+  opacity: 0.35;
+  cursor: grabbing;
+  box-shadow: none;
 }
 
 .appointment__time {

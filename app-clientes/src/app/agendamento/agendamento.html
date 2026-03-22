@@ -70,13 +70,17 @@
           class="day-column"
           [class.day-column--hoje]="dia.isHoje">
 
-          <!-- Células de horário (clicáveis para novo agendamento) -->
+          <!-- Células de horário (clicáveis para novo agendamento / drop zone) -->
           <div
             *ngFor="let h of horarios"
             class="time-slot"
             [class.time-slot--hora-cheia]="isHoraCheia(h)"
             [class.time-slot--ocupado]="getAgendamentosNasCelula(dia.date, h)"
+            [class.time-slot--drag-over]="isDragOver(dia.date, h)"
             (click)="abrirNovoAgendamento(dia.date, h)"
+            (dragover)="onDragOver(dia.date, h, $event)"
+            (dragleave)="onDragLeave()"
+            (drop)="onDrop(dia.date, h, $event)"
             title="Clique para agendar {{ h }}">
           </div>
 
@@ -85,9 +89,13 @@
             *ngFor="let ag of getAgendamentosDia(dia.date); trackBy: trackAgendamento"
             class="appointment"
             [ngClass]="'appointment--' + ag.tipo"
+            [class.appointment--dragging]="ag.id === draggingId"
             [style.top.px]="calcTop(ag.horaInicio)"
             [style.height.px]="calcHeight(ag.horaInicio, ag.horaFim)"
             [style.min-height.px]="48"
+            draggable="true"
+            (dragstart)="onDragStart(ag, $event)"
+            (dragend)="onDragEnd()"
             (click)="abrirEdicao(ag, $event)"
             [title]="ag.titulo + ' — ' + ag.cliente + ' (' + ag.horaInicio + '–' + ag.horaFim + ')'">
             <span class="appointment__time">{{ ag.horaInicio }}–{{ ag.horaFim }}</span>

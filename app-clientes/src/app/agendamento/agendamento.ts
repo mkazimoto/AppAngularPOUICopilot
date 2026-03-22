@@ -68,6 +68,8 @@ export class Agendamento implements OnInit {
   agendamentos: AgendamentoItem[] = [];
 
   idEditando: number | null = null;
+  draggingId: number | null = null;
+  dragOverSlot: { dia: string; hora: string } | null = null;
 
   formItem: AgendamentoForm = this.criarFormVazio();
 
@@ -259,6 +261,49 @@ export class Agendamento implements OnInit {
 
   trackAgendamento(_: number, ag: AgendamentoItem): number {
     return ag.id;
+  }
+
+  onDragStart(ag: AgendamentoItem, event: DragEvent): void {
+    this.draggingId = ag.id;
+    event.dataTransfer?.setData('text/plain', String(ag.id));
+    event.dataTransfer!.effectAllowed = 'move';
+  }
+
+  onDragEnd(): void {
+    this.draggingId = null;
+    this.dragOverSlot = null;
+  }
+
+  onDragOver(dia: string, hora: string, event: DragEvent): void {
+    event.preventDefault();
+    event.dataTransfer!.dropEffect = 'move';
+    this.dragOverSlot = { dia, hora };
+  }
+
+  onDragLeave(): void {
+    this.dragOverSlot = null;
+  }
+
+  onDrop(dia: string, hora: string, event: DragEvent): void {
+    event.preventDefault();
+    this.dragOverSlot = null;
+    if (this.draggingId === null) return;
+
+    const ag = this.agendamentos.find(a => a.id === this.draggingId);
+    if (!ag) return;
+
+    const duration = this.timeToMinutes(ag.horaFim) - this.timeToMinutes(ag.horaInicio);
+    const novoFim = this.addMinutes(hora, duration);
+
+    this.agendamentos = this.agendamentos.map(a =>
+      a.id === this.draggingId ? { ...a, dia, horaInicio: hora, horaFim: novoFim } : a
+    );
+    this.draggingId = null;
+    this.notification.success('Agendamento movido!');
+  }
+
+  isDragOver(dia: string, hora: string): boolean {
+    return this.dragOverSlot?.dia === dia && this.dragOverSlot?.hora === hora;
   }
 
   labelTipo(tipo: string): string {
