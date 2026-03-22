@@ -94,9 +94,8 @@ export class Workflow implements AfterViewInit {
   // ── Helpers ────────────────────────────────────────
 
   ngAfterViewInit(): void {
-    this.centerStartNode();
-
     this.loadWorkflow();
+    this.centerStartNode();
   }
 
   private centerStartNode(): void {
@@ -471,13 +470,13 @@ export class Workflow implements AfterViewInit {
 
   saveWorkflow(): void {
     const data = JSON.stringify({ nodes: this.nodes, connections: this.connections });
-    sessionStorage.setItem(this.STORAGE_KEY, data);
+    localStorage.setItem(this.STORAGE_KEY, data);
     this.saveMessage = 'Workflow salvo!';
     setTimeout(() => (this.saveMessage = null), 2500);
   }
 
   loadWorkflow(): void {
-    const raw = sessionStorage.getItem(this.STORAGE_KEY);
+    const raw = localStorage.getItem(this.STORAGE_KEY);
     if (!raw) {
       this.saveMessage = 'Nenhum workflow salvo encontrado.';
       setTimeout(() => (this.saveMessage = null), 2500);
