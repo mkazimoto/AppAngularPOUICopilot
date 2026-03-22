@@ -8,6 +8,18 @@
       p-icon="an an-trash"
       (p-click)="clearWorkflow()">
     </po-button>
+    <po-button
+      p-label="Salvar"
+      p-kind="primary"
+      p-icon="an an-floppy-disk"
+      (p-click)="saveWorkflow()">
+    </po-button>
+    <po-button
+      p-label="Carregar"
+      p-kind="secondary"
+      p-icon="an an-upload"
+      (p-click)="loadWorkflow()">
+    </po-button>
     <div class="wf-legend">
       <span class="legend-pill legend-start">▶ Início</span>
       <span class="legend-pill legend-action">⚡ Ação</span>
@@ -15,6 +27,17 @@
       <span class="legend-pill legend-end">⏹ Fim</span>
     </div>
     <span class="wf-hint">Clique em <strong>+</strong> em qualquer nó para adicionar o próximo passo.</span>
+    <div class="wf-zoom-controls">
+      <button class="zoom-btn" (click)="zoomOut()" [disabled]="zoomLevel <= ZOOM_MIN" title="Diminuir zoom">−</button>
+      <span class="zoom-label">{{ zoomPercent }}</span>
+      <button class="zoom-btn" (click)="zoomIn()" [disabled]="zoomLevel >= ZOOM_MAX" title="Aumentar zoom">+</button>
+      <button class="zoom-btn zoom-reset" (click)="resetZoom()" title="Resetar zoom">⟳</button>
+    </div>
+  </div>
+
+  <!-- ── Save feedback banner ── -->
+  <div *ngIf="saveMessage" class="wf-save-banner">
+    {{ saveMessage }}
   </div>
 
   <!-- ── Connecting banner ── -->
@@ -29,8 +52,15 @@
   </div>
 
   <!-- ── Canvas ── -->
-  <div class="wf-scroll" (click)="closeMenus()">
-    <div class="wf-canvas" [style.width.px]="CANVAS_W" [style.height.px]="CANVAS_H">
+  <div class="wf-scroll" #scrollContainer (click)="closeMenus()">
+    <div class="wf-zoom-wrapper"
+         [style.width.px]="CANVAS_W * zoomLevel"
+         [style.height.px]="CANVAS_H * zoomLevel">
+    <div class="wf-canvas"
+         [style.width.px]="CANVAS_W"
+         [style.height.px]="CANVAS_H"
+         [style.transform]="'scale(' + zoomLevel + ')'"
+         [style.transformOrigin]="'0 0'">
 
       <!-- SVG layer: arrows -->
       <svg class="wf-svg" [attr.width]="CANVAS_W" [attr.height]="CANVAS_H">
@@ -231,6 +261,7 @@
 
       </div><!-- /node -->
     </div><!-- /canvas -->
+    </div><!-- /zoom-wrapper -->
   </div><!-- /scroll -->
 
   <!-- ── Edit Modal ── -->
