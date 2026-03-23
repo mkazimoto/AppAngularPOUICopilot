@@ -9,4 +9,4 @@ Regras:
 - gerar código Angular
 - usar componentes PO-UI
 - seguir propriedades p-*
-- se houver erros, corrigir e fazer o build novamente
+- faça o build com `ng serve` e, se houver erros, depurar, corrigir e fazer o build novamente
