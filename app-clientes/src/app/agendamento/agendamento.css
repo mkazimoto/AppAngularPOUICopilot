@@ -56,8 +56,22 @@
   overflow: hidden;
   background: var(--color-neutral-light-00);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  min-width: 600px;
 }
 
+/* Responsividade para celular */
+@media (max-width: 600px) {
+  .agenda-container {
+    min-width: 300vw;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .agenda-header,
+  .agenda-scroll {
+    max-width: 300vw;
+    overflow-x: auto;
+  }
+}
 /* ============================================================
    Cabeçalho dos dias
    ============================================================ */
