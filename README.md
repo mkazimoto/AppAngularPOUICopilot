@@ -5,17 +5,17 @@
 
 ## Estrutura
 
-AppAngularPOUICoplit/
-├── .github/                     # Configurações do GitHub (actions, templates)
-| ├── copilot-instructions.md    # Instruções do Copilot
+/AppAngularPOUICoplit/
+├── .github/ # Configurações do GitHub (actions, templates)
+| ├── copilot-instructions.md # Instruções do Copilot
 | ├── prompts/
-| | └── po-ui.prompt.md          # Prompt do PO-UI
-│ └── workflows/                 # Pipelines de CI/CD
-|   └── deploy.yml               # Configuração de publicação do App no Git Pages
+| | └── po-ui.prompt.md # Prompt do PO-UI
+│ └── workflows/ # Pipelines de CI/CD
+|   └── deploy.yml # Configuração de publicação do App no Git Pages
 ├── ai/
-│ └── po-ui-components-index.md  # Arquivo de índice da documentação local do PO-UI
+│ └── po-ui-components-index.md # Arquivo de índice da documentação local do PO-UI
 └── docs/
-  └── po-ui/                     # Documentação local do PO-UI
+  └── po-ui/ # Documentação local do PO-UI
 
 ## Configuração do Copilot
 - Utiliza um RAG local (base de conhecimento) da documentação do PO-UI.
