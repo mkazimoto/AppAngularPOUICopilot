@@ -47,9 +47,11 @@
         <span class="day-header__number" [class.day-header__number--hoje]="dia.isHoje">
           {{ dia.numero }}
         </span>
-        <span class="day-header__mes" *ngIf="dia.numero === 1 || dia === dias[0]">
-          {{ dia.mes }}/{{ dia.ano }}
-        </span>
+        @if (dia.numero === 1 || dia === dias[0]) {
+          <span class="day-header__mes">
+            {{ dia.mes }}/{{ dia.ano }}
+          </span>
+        }
       </div>
     </div>
 
@@ -59,7 +61,9 @@
       <!-- Coluna de horários -->
       <div class="time-gutter-body">
         <div *ngFor="let h of horarios" class="time-gutter-cell">
-          <span *ngIf="isHoraCheia(h)" class="time-gutter-label">{{ h }}</span>
+          @if (isHoraCheia(h)) {
+            <span class="time-gutter-label">{{ h }}</span>
+          }
         </div>
       </div>
 
@@ -209,14 +213,16 @@
       </div>
 
       <!-- Ação de exclusão (apenas no modo edição) -->
-      <div *ngIf="idEditando" class="modal-delete-row">
-        <po-button
-          p-label="Excluir Agendamento"
-          p-kind="secondary"
-          p-icon="an an-trash"
-          (p-click)="excluir()">
-        </po-button>
-      </div>
+      @if (idEditando) {
+        <div class="modal-delete-row">
+          <po-button
+            p-label="Excluir Agendamento"
+            p-kind="secondary"
+            p-icon="an an-trash"
+            (p-click)="excluir()">
+          </po-button>
+        </div>
+      }
 
     </form>
 

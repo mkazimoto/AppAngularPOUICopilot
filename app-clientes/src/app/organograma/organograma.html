@@ -31,14 +31,17 @@
   </div>
 
   <!-- ── Empty state ── -->
-  <div *ngIf="nodes.length === 0" class="og-empty">
-    <i class="an an-users og-empty-icon"></i>
-    <p>Nenhum cargo cadastrado.</p>
-    <po-button p-label="Criar CEO" p-kind="primary" p-icon="an an-plus" (p-click)="openAddModal(null)"></po-button>
-  </div>
+  @if (nodes.length === 0) {
+    <div class="og-empty">
+      <i class="an an-users og-empty-icon"></i>
+      <p>Nenhum cargo cadastrado.</p>
+      <po-button p-label="Criar CEO" p-kind="primary" p-icon="an an-plus" (p-click)="openAddModal(null)"></po-button>
+    </div>
+  }
 
   <!-- ── Canvas ── -->
-  <div *ngIf="nodes.length > 0" class="og-scroll">
+  @if (nodes.length > 0) {
+  <div class="og-scroll">
     <div class="og-canvas" [style.width.px]="canvasW" [style.height.px]="canvasH">
 
       <!-- SVG layer: bezier connections -->
@@ -62,8 +65,11 @@
         <!-- Avatar: photo or initials -->
         <div class="og-avatar" [style.background]="node.photo ? 'transparent' : getColor(node.department)"
              [class.og-avatar-img-wrap]="!!node.photo">
-          <img *ngIf="node.photo" [src]="node.photo" [alt]="node.name" class="og-avatar-img">
-          <span *ngIf="!node.photo">{{ getInitials(node.name) }}</span>
+          @if (node.photo) {
+            <img [src]="node.photo" [alt]="node.name" class="og-avatar-img">
+          } @else {
+            <span>{{ getInitials(node.name) }}</span>
+          }
         </div>
 
         <!-- Name / Role / Department -->
@@ -87,18 +93,20 @@
             (click)="openEditModal(node, $event)">
             <i class="an an-pencil-simple"></i>
           </button>
-          <button
-            *ngIf="node.parentId !== null"
-            class="og-btn og-btn-del"
-            title="Remover (e subordinados)"
-            (click)="deleteNode(node.id, $event)">
-            <i class="an an-trash"></i>
-          </button>
+          @if (node.parentId !== null) {
+            <button
+              class="og-btn og-btn-del"
+              title="Remover (e subordinados)"
+              (click)="deleteNode(node.id, $event)">
+              <i class="an an-trash"></i>
+            </button>
+          }
         </div>
 
       </div>
     </div>
   </div>
+  }
 
   <!-- ── Add / Edit Modal ── -->
   <po-modal
@@ -134,12 +142,14 @@
       <label class="og-photo-label">Foto</label>
 
       <!-- Preview -->
-      <div *ngIf="formPhoto" class="og-form-preview">
-        <img [src]="formPhoto" alt="Preview" class="og-form-preview-img">
-        <button type="button" class="og-btn-rm-photo" title="Remover foto" (click)="removePhoto()">
-          <i class="an an-x"></i>
-        </button>
-      </div>
+      @if (formPhoto) {
+        <div class="og-form-preview">
+          <img [src]="formPhoto" alt="Preview" class="og-form-preview-img">
+          <button type="button" class="og-btn-rm-photo" title="Remover foto" (click)="removePhoto()">
+            <i class="an an-x"></i>
+          </button>
+        </div>
+      }
 
       <!-- Upload + URL row -->
       <div class="og-photo-inputs">

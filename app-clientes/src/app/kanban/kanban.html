@@ -61,10 +61,12 @@
               [p-type]="task.priorityType">
             </po-tag>
 
-            <span *ngIf="task.attachmentFiles?.length" class="kanban-card-attachments">
-              <span class="an an-paperclip kanban-card-attachments-icon"></span>
-              <span class="kanban-card-attachments-count">{{ task.attachmentFiles?.length }}</span>
-            </span>
+            @if (task.attachmentFiles?.length) {
+              <span class="kanban-card-attachments">
+                <span class="an an-paperclip kanban-card-attachments-icon"></span>
+                <span class="kanban-card-attachments-count">{{ task.attachmentFiles?.length }}</span>
+              </span>
+            }
 
             <div class="kanban-card-actions">
               <po-dropdown
@@ -78,10 +80,12 @@
         </div>
 
         <!-- Estado vazio -->
-        <div *ngIf="getTasksByColumn(column.id).length === 0" class="kanban-empty">
-          <span class="an an-tray kanban-empty-icon"></span>
-          <span>Nenhuma tarefa</span>
-        </div>
+        @if (getTasksByColumn(column.id).length === 0) {
+          <div class="kanban-empty">
+            <span class="an an-tray kanban-empty-icon"></span>
+            <span>Nenhuma tarefa</span>
+          </div>
+        }
 
       </div>
     </div>
@@ -95,7 +99,7 @@
     p-size="md"
     [p-primary-action]="modalCloseAction">
 
-    <ng-container *ngIf="selectedTask">
+    @if (selectedTask) {
 
       <!-- Perfil do responsável -->
       <div class="detail-profile">
@@ -167,10 +171,12 @@
           [p-value]="tag"
           [p-type]="PoTagType.Info">
         </po-tag>
-        <span *ngIf="!selectedTask.tags?.length" class="detail-no-tags">Sem tags</span>
+        @if (!selectedTask.tags?.length) {
+          <span class="detail-no-tags">Sem tags</span>
+        }
       </div>
 
-      <ng-container *ngIf="selectedTask.attachmentFiles?.length">
+      @if (selectedTask.attachmentFiles?.length) {
         <po-divider p-label="Anexos"></po-divider>
 
         <div class="detail-attachments">
@@ -186,9 +192,9 @@
             </po-button>
           </div>
         </div>
-      </ng-container>
+      }
 
-    </ng-container>
+    }
 
   </po-modal>
 
@@ -199,25 +205,27 @@
     p-size="lg"
     [p-primary-action]="previewCloseAction">
 
-    <ng-container *ngIf="selectedAttachment">
+    @if (selectedAttachment) {
 
-      <div *ngIf="selectedAttachment.type === 'image'" class="attachment-preview-image">
-        <img [src]="selectedAttachment.url" [alt]="selectedAttachment.name" class="attachment-preview-img" />
-      </div>
+      @if (selectedAttachment.type === 'image') {
+        <div class="attachment-preview-image">
+          <img [src]="selectedAttachment.url" [alt]="selectedAttachment.name" class="attachment-preview-img" />
+        </div>
+      } @else {
+        <div class="attachment-preview-other">
+          <span [class]="getAttachmentIcon(selectedAttachment.type) + ' attachment-preview-file-icon'"></span>
+          <p class="attachment-preview-filename">{{ selectedAttachment.name }}</p>
+          <p class="attachment-preview-hint">Visualização inline não disponível para este tipo de arquivo.</p>
+          <po-button
+            p-label="Abrir arquivo"
+            p-kind="primary"
+            p-icon="an an-arrow-square-out"
+            (p-click)="openAttachment(selectedAttachment)">
+          </po-button>
+        </div>
+      }
 
-      <div *ngIf="selectedAttachment.type !== 'image'" class="attachment-preview-other">
-        <span [class]="getAttachmentIcon(selectedAttachment.type) + ' attachment-preview-file-icon'"></span>
-        <p class="attachment-preview-filename">{{ selectedAttachment.name }}</p>
-        <p class="attachment-preview-hint">Visualização inline não disponível para este tipo de arquivo.</p>
-        <po-button
-          p-label="Abrir arquivo"
-          p-kind="primary"
-          p-icon="an an-arrow-square-out"
-          (p-click)="openAttachment(selectedAttachment)">
-        </po-button>
-      </div>
-
-    </ng-container>
+    }
 
   </po-modal>
 

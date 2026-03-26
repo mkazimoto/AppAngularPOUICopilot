@@ -23,15 +23,17 @@
   </div>
 
   <!-- ── Connecting banner ── -->
-  <div *ngIf="connectingFromId" class="wf-connect-banner" (click)="$event.stopPropagation()">
-    <span>
-      ⟶ Clique em um nó existente para conectar
-      <ng-container *ngIf="connectingBranch">
-        — ramo <strong>{{ connectingBranch }}</strong>
-      </ng-container>
-    </span>
-    <button class="cancel-connect-btn" (click)="cancelConnect()">✕ Cancelar</button>
-  </div>
+  @if (connectingFromId) {
+    <div class="wf-connect-banner" (click)="$event.stopPropagation()">
+      <span>
+        ⟶ Clique em um nó existente para conectar
+        @if (connectingBranch) {
+          — ramo <strong>{{ connectingBranch }}</strong>
+        }
+      </span>
+      <button class="cancel-connect-btn" (click)="cancelConnect()">&#x2715; Cancelar</button>
+    </div>
+  }
 
   <!-- ── Canvas ── -->
   <div class="wf-scroll" #scrollContainer (click)="closeMenus()">
@@ -59,19 +61,21 @@
             class="wf-conn-line"
             marker-end="url(#wf-arrow)"/>
           <!-- Branch label badge -->
-          <rect *ngIf="conn.branch"
-                [attr.x]="connectionLabelX(conn) - 18"
-                [attr.y]="connectionLabelY(conn) - 10"
-                width="38" height="20" rx="10"
-                [class]="'conn-badge conn-badge-' + (conn.branch === 'Sim' ? 'sim' : 'nao')"/>
-          <text *ngIf="conn.branch"
-                [attr.x]="connectionLabelX(conn)"
-                [attr.y]="connectionLabelY(conn) + 5"
-                class="wf-conn-label"
-                [class.label-sim]="conn.branch === 'Sim'"
-                [class.label-nao]="conn.branch === 'Não'">
-            {{ conn.branch }}
-          </text>
+          @if (conn.branch) {
+            <rect
+                  [attr.x]="connectionLabelX(conn) - 18"
+                  [attr.y]="connectionLabelY(conn) - 10"
+                  width="38" height="20" rx="10"
+                  [class]="'conn-badge conn-badge-' + (conn.branch === 'Sim' ? 'sim' : 'nao')"/>
+            <text
+                  [attr.x]="connectionLabelX(conn)"
+                  [attr.y]="connectionLabelY(conn) + 5"
+                  class="wf-conn-label"
+                  [class.label-sim]="conn.branch === 'Sim'"
+                  [class.label-nao]="conn.branch === 'Não'">
+              {{ conn.branch }}
+            </text>
+          }
         </g>
       </svg>
 
@@ -87,159 +91,179 @@
            (click)="onNodeClick(node, $event)">
 
         <!-- ─── START ─── -->
-        <div *ngIf="node.type === 'start'" class="node-body body-start">
-          <span class="ni">▶</span>
-          <span class="nl" [title]="node.label">{{ node.label }}</span>
-          <div class="node-ctrl">
-            <button class="ctrl-btn"
-                    title="Editar rótulo"
-                    (click)="openEdit(node); $event.stopPropagation()">
-              <i class="an an-pencil"></i>
-            </button>
+        @if (node.type === 'start') {
+          <div class="node-body body-start">
+            <span class="ni">▶</span>
+            <span class="nl" [title]="node.label">{{ node.label }}</span>
+            <div class="node-ctrl">
+              <button class="ctrl-btn"
+                      title="Editar rótulo"
+                      (click)="openEdit(node); $event.stopPropagation()">
+                <i class="an an-pencil"></i>
+              </button>
+            </div>
           </div>
-        </div>
+        }
 
         <!-- ─── ACTION ─── -->
-        <div *ngIf="node.type === 'action'" class="node-body body-action">
-          <span class="ni">⚡</span>
-          <span class="nl" [title]="node.label">{{ node.label }}</span>
-          <div class="node-ctrl">
-            <button class="ctrl-btn"
-                    title="Editar rótulo"
-                    (click)="openEdit(node); $event.stopPropagation()">
-              <i class="an an-pencil"></i>
-            </button>
-            <button class="ctrl-btn ctrl-del"
-                    title="Excluir nó e descendentes"
-                    (click)="deleteNode(node.id); $event.stopPropagation()">
-              <i class="an an-x"></i>
-            </button>
+        @if (node.type === 'action') {
+          <div class="node-body body-action">
+            <span class="ni">⚡</span>
+            <span class="nl" [title]="node.label">{{ node.label }}</span>
+            <div class="node-ctrl">
+              <button class="ctrl-btn"
+                      title="Editar rótulo"
+                      (click)="openEdit(node); $event.stopPropagation()">
+                <i class="an an-pencil"></i>
+              </button>
+              <button class="ctrl-btn ctrl-del"
+                      title="Excluir nó e descendentes"
+                      (click)="deleteNode(node.id); $event.stopPropagation()">
+                <i class="an an-x"></i>
+              </button>
+            </div>
           </div>
-        </div>
+        }
 
         <!-- ─── END ─── -->
-        <div *ngIf="node.type === 'end'" class="node-body body-end">
-          <span class="ni">⏹</span>
-          <span class="nl" [title]="node.label">{{ node.label }}</span>
-          <div class="node-ctrl">
-            <button class="ctrl-btn"
-                    title="Editar rótulo"
-                    (click)="openEdit(node); $event.stopPropagation()">
-              <i class="an an-pencil"></i>
-            </button>
-            <button class="ctrl-btn ctrl-del"
-                    title="Excluir nó"
-                    (click)="deleteNode(node.id); $event.stopPropagation()">
-              <i class="an an-x"></i>
-            </button>
+        @if (node.type === 'end') {
+          <div class="node-body body-end">
+            <span class="ni">⏹</span>
+            <span class="nl" [title]="node.label">{{ node.label }}</span>
+            <div class="node-ctrl">
+              <button class="ctrl-btn"
+                      title="Editar rótulo"
+                      (click)="openEdit(node); $event.stopPropagation()">
+                <i class="an an-pencil"></i>
+              </button>
+              <button class="ctrl-btn ctrl-del"
+                      title="Excluir nó"
+                      (click)="deleteNode(node.id); $event.stopPropagation()">
+                <i class="an an-x"></i>
+              </button>
+            </div>
           </div>
-        </div>
+        }
 
         <!-- ─── DECISION ─── -->
-        <div *ngIf="node.type === 'decision'" class="node-body body-decision">
-          <div class="diamond">
-            <span class="diamond-label" [title]="node.label">{{ node.label }}</span>
+        @if (node.type === 'decision') {
+          <div class="node-body body-decision">
+            <div class="diamond">
+              <span class="diamond-label" [title]="node.label">{{ node.label }}</span>
+            </div>
+            <div class="node-ctrl dec-ctrl">
+              <button class="ctrl-btn"
+                      title="Editar rótulo"
+                      (click)="openEdit(node); $event.stopPropagation()">
+                <i class="an an-pencil"></i>
+              </button>
+              <button class="ctrl-btn ctrl-del"
+                      title="Excluir nó e descendentes"
+                      (click)="deleteNode(node.id); $event.stopPropagation()">
+                <i class="an an-x"></i>
+              </button>
+            </div>
           </div>
-          <div class="node-ctrl dec-ctrl">
-            <button class="ctrl-btn"
-                    title="Editar rótulo"
-                    (click)="openEdit(node); $event.stopPropagation()">
-              <i class="an an-pencil"></i>
-            </button>
-            <button class="ctrl-btn ctrl-del"
-                    title="Excluir nó e descendentes"
-                    (click)="deleteNode(node.id); $event.stopPropagation()">
-              <i class="an an-x"></i>
-            </button>
-          </div>
-        </div>
+        }
 
         <!-- ── Add buttons — START / ACTION ── -->
-        <ng-container *ngIf="node.type === 'start' || node.type === 'action'">
-          <button *ngIf="!hasConnection(node.id)"
-                  class="btn-plus btn-plus-bottom"
-                  title="Adicionar próximo passo"
-                  (click)="showMenu($event, node.id)">+</button>
+        @if (node.type === 'start' || node.type === 'action') {
+          @if (!hasConnection(node.id)) {
+            <button
+                    class="btn-plus btn-plus-bottom"
+                    title="Adicionar próximo passo"
+                    (click)="showMenu($event, node.id)">+</button>
+          }
 
-          <div *ngIf="isMenuOpen(node.id)"
-               class="ctx-menu ctx-bottom"
-               (click)="$event.stopPropagation()">
-            <div class="ctx-title">Adicionar próximo:</div>
-            <button class="ctx-item" (click)="addNode(node, 'action')">
-              <span class="ctx-icon icon-action">⚡</span> Ação
-            </button>
-            <button class="ctx-item" (click)="addNode(node, 'decision')">
-              <span class="ctx-icon icon-decision">◆</span> Decisão
-            </button>
-            <button class="ctx-item" (click)="addNode(node, 'end')">
-              <span class="ctx-icon icon-end">⏹</span> Fim
-            </button>
-            <ng-container *ngIf="hasConnectableTargets(node)">
-              <div class="ctx-sep"></div>
-              <button class="ctx-item ctx-item-link" (click)="startConnectExisting(node)">
-                <span class="ctx-icon icon-link">⟶</span> Conectar a existente
+          @if (isMenuOpen(node.id)) {
+            <div
+                 class="ctx-menu ctx-bottom"
+                 (click)="$event.stopPropagation()">
+              <div class="ctx-title">Adicionar próximo:</div>
+              <button class="ctx-item" (click)="addNode(node, 'action')">
+                <span class="ctx-icon icon-action">⚡</span> Ação
               </button>
-            </ng-container>
-          </div>
-        </ng-container>
+              <button class="ctx-item" (click)="addNode(node, 'decision')">
+                <span class="ctx-icon icon-decision">◆</span> Decisão
+              </button>
+              <button class="ctx-item" (click)="addNode(node, 'end')">
+                <span class="ctx-icon icon-end">⏹</span> Fim
+              </button>
+              @if (hasConnectableTargets(node)) {
+                <div class="ctx-sep"></div>
+                <button class="ctx-item ctx-item-link" (click)="startConnectExisting(node)">
+                  <span class="ctx-icon icon-link">⟶</span> Conectar a existente
+                </button>
+              }
+            </div>
+          }
+        }
 
         <!-- ── Add buttons — DECISION ── -->
-        <ng-container *ngIf="node.type === 'decision'">
+        @if (node.type === 'decision') {
 
           <!-- Sim branch (left) -->
-          <button *ngIf="!hasConnection(node.id, 'Sim')"
-                  class="btn-plus btn-plus-branch btn-plus-sim"
-                  title="Adicionar ramo Sim"
-                  (click)="showMenu($event, node.id, 'Sim')">+ Sim</button>
+          @if (!hasConnection(node.id, 'Sim')) {
+            <button
+                    class="btn-plus btn-plus-branch btn-plus-sim"
+                    title="Adicionar ramo Sim"
+                    (click)="showMenu($event, node.id, 'Sim')">+ Sim</button>
+          }
 
-          <div *ngIf="isMenuOpen(node.id, 'Sim')"
-               class="ctx-menu ctx-sim"
-               (click)="$event.stopPropagation()">
-            <div class="ctx-title">Ramo <span class="badge-sim">Sim</span>:</div>
-            <button class="ctx-item" (click)="addNode(node, 'action', 'Sim')">
-              <span class="ctx-icon icon-action">⚡</span> Ação
-            </button>
-            <button class="ctx-item" (click)="addNode(node, 'decision', 'Sim')">
-              <span class="ctx-icon icon-decision">◆</span> Decisão
-            </button>
-            <button class="ctx-item" (click)="addNode(node, 'end', 'Sim')">
-              <span class="ctx-icon icon-end">⏹</span> Fim
-            </button>
-            <ng-container *ngIf="hasConnectableTargets(node, 'Sim')">
-              <div class="ctx-sep"></div>
-              <button class="ctx-item ctx-item-link" (click)="startConnectExisting(node, 'Sim')">
-                <span class="ctx-icon icon-link">⟶</span> Conectar a existente
+          @if (isMenuOpen(node.id, 'Sim')) {
+            <div
+                 class="ctx-menu ctx-sim"
+                 (click)="$event.stopPropagation()">
+              <div class="ctx-title">Ramo <span class="badge-sim">Sim</span>:</div>
+              <button class="ctx-item" (click)="addNode(node, 'action', 'Sim')">
+                <span class="ctx-icon icon-action">⚡</span> Ação
               </button>
-            </ng-container>
-          </div>
+              <button class="ctx-item" (click)="addNode(node, 'decision', 'Sim')">
+                <span class="ctx-icon icon-decision">◆</span> Decisão
+              </button>
+              <button class="ctx-item" (click)="addNode(node, 'end', 'Sim')">
+                <span class="ctx-icon icon-end">⏹</span> Fim
+              </button>
+              @if (hasConnectableTargets(node, 'Sim')) {
+                <div class="ctx-sep"></div>
+                <button class="ctx-item ctx-item-link" (click)="startConnectExisting(node, 'Sim')">
+                  <span class="ctx-icon icon-link">⟶</span> Conectar a existente
+                </button>
+              }
+            </div>
+          }
 
           <!-- Não branch (right) -->
-          <button *ngIf="!hasConnection(node.id, 'Não')"
-                  class="btn-plus btn-plus-branch btn-plus-nao"
-                  title="Adicionar ramo Não"
-                  (click)="showMenu($event, node.id, 'Não')">+ Não</button>
+          @if (!hasConnection(node.id, 'Não')) {
+            <button
+                    class="btn-plus btn-plus-branch btn-plus-nao"
+                    title="Adicionar ramo Não"
+                    (click)="showMenu($event, node.id, 'Não')">+ Não</button>
+          }
 
-          <div *ngIf="isMenuOpen(node.id, 'Não')"
-               class="ctx-menu ctx-nao"
-               (click)="$event.stopPropagation()">
-            <div class="ctx-title">Ramo <span class="badge-nao">Não</span>:</div>
-            <button class="ctx-item" (click)="addNode(node, 'action', 'Não')">
-              <span class="ctx-icon icon-action">⚡</span> Ação
-            </button>
-            <button class="ctx-item" (click)="addNode(node, 'decision', 'Não')">
-              <span class="ctx-icon icon-decision">◆</span> Decisão
-            </button>
-            <button class="ctx-item" (click)="addNode(node, 'end', 'Não')">
-              <span class="ctx-icon icon-end">⏹</span> Fim
-            </button>
-            <ng-container *ngIf="hasConnectableTargets(node, 'Não')">
-              <div class="ctx-sep"></div>
-              <button class="ctx-item ctx-item-link" (click)="startConnectExisting(node, 'Não')">
-                <span class="ctx-icon icon-link">⟶</span> Conectar a existente
+          @if (isMenuOpen(node.id, 'Não')) {
+            <div
+                 class="ctx-menu ctx-nao"
+                 (click)="$event.stopPropagation()">
+              <div class="ctx-title">Ramo <span class="badge-nao">Não</span>:</div>
+              <button class="ctx-item" (click)="addNode(node, 'action', 'Não')">
+                <span class="ctx-icon icon-action">⚡</span> Ação
               </button>
-            </ng-container>
-          </div>
-        </ng-container>
+              <button class="ctx-item" (click)="addNode(node, 'decision', 'Não')">
+                <span class="ctx-icon icon-decision">◆</span> Decisão
+              </button>
+              <button class="ctx-item" (click)="addNode(node, 'end', 'Não')">
+                <span class="ctx-icon icon-end">⏹</span> Fim
+              </button>
+              @if (hasConnectableTargets(node, 'Não')) {
+                <div class="ctx-sep"></div>
+                <button class="ctx-item ctx-item-link" (click)="startConnectExisting(node, 'Não')">
+                  <span class="ctx-icon icon-link">⟶</span> Conectar a existente
+                </button>
+              }
+            </div>
+          }
+        }
 
       </div><!-- /node -->
     </div><!-- /canvas -->
@@ -253,16 +277,18 @@
     p-size="sm"
     [p-primary-action]="primaryAction"
     [p-secondary-action]="secondaryAction">
-    <div *ngIf="selectedNode" class="edit-form">
-      <po-input
-        name="wfLabel"
-        p-name="wfLabel"
-        p-label="Rótulo do nó"
-        [(ngModel)]="editingLabel"
-        p-placeholder="Ex: Validar dados"
-        p-max-length="60">
-      </po-input>
-    </div>
+    @if (selectedNode) {
+      <div class="edit-form">
+        <po-input
+          name="wfLabel"
+          p-name="wfLabel"
+          p-label="Rótulo do nó"
+          [(ngModel)]="editingLabel"
+          p-placeholder="Ex: Validar dados"
+          p-max-length="60">
+        </po-input>
+      </div>
+    }
   </po-modal>
 
 </po-page-default>

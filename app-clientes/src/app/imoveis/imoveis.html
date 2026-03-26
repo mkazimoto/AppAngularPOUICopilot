@@ -77,9 +77,11 @@
           <span class="po-font-title-bold imovel-preco-valor">
             {{ formatarPreco(imovel.preco, imovel.tipoNegocio) }}
           </span>
-          <span *ngIf="imovel.condominio" class="po-font-text imovel-condominio">
-            + R$ {{ imovel.condominio.toLocaleString('pt-BR') }} cond.
-          </span>
+          @if (imovel.condominio) {
+            <span class="po-font-text imovel-condominio">
+              + R$ {{ imovel.condominio.toLocaleString('pt-BR') }} cond.
+            </span>
+          }
         </div>
 
         <!-- Características -->
@@ -116,7 +118,8 @@
     [p-primary-action]="acaoPrimaria"
     [p-secondary-action]="acaoSecundaria">
 
-    <div *ngIf="imovelSelecionado" class="imovel-modal-conteudo">
+    @if (imovelSelecionado) {
+    <div class="imovel-modal-conteudo">
 
       <!-- Galeria principal no modal -->
       <po-slide
@@ -137,11 +140,12 @@
             [p-value]="imovelSelecionado.tipo"
             [p-type]="PoTagType.Neutral">
           </po-tag>
-          <po-tag
-            *ngIf="imovelSelecionado.destaque"
-            p-value="Destaque"
-            [p-type]="PoTagType.Warning">
-          </po-tag>
+          @if (imovelSelecionado.destaque) {
+            <po-tag
+              p-value="Destaque"
+              [p-type]="PoTagType.Warning">
+            </po-tag>
+          }
         </div>
 
         <!-- Preço destaque -->
@@ -149,12 +153,16 @@
           <span class="po-font-title-bold imovel-preco-modal">
             {{ formatarPreco(imovelSelecionado.preco, imovelSelecionado.tipoNegocio) }}
           </span>
-          <span *ngIf="imovelSelecionado.condominio" class="po-font-text">
-            Condomínio: R$ {{ imovelSelecionado.condominio.toLocaleString('pt-BR') }}/mês
-          </span>
-          <span *ngIf="imovelSelecionado.iptu" class="po-font-text">
-            IPTU: R$ {{ imovelSelecionado.iptu.toLocaleString('pt-BR') }}/mês
-          </span>
+          @if (imovelSelecionado.condominio) {
+            <span class="po-font-text">
+              Condomínio: R$ {{ imovelSelecionado.condominio.toLocaleString('pt-BR') }}/mês
+            </span>
+          }
+          @if (imovelSelecionado.iptu) {
+            <span class="po-font-text">
+              IPTU: R$ {{ imovelSelecionado.iptu.toLocaleString('pt-BR') }}/mês
+            </span>
+          }
         </div>
 
         <po-divider p-label="Localização"></po-divider>
@@ -217,6 +225,7 @@
 
       </div>
     </div>
+    }
 
   </po-modal>
 
