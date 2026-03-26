@@ -39,8 +39,8 @@
     <!-- Cabeçalho dos dias -->
     <div class="agenda-header">
       <div class="time-gutter"></div>
+      @for (dia of dias; track dia) {
       <div
-        *ngFor="let dia of dias"
         class="day-header"
         [class.day-header--hoje]="dia.isHoje">
         <span class="day-header__name">{{ dia.diaSemana }}</span>
@@ -53,6 +53,7 @@
           </span>
         }
       </div>
+      }
     </div>
 
     <!-- Corpo com scroll -->
@@ -60,23 +61,25 @@
 
       <!-- Coluna de horários -->
       <div class="time-gutter-body">
-        <div *ngFor="let h of horarios" class="time-gutter-cell">
+        @for (h of horarios; track h) {
+        <div class="time-gutter-cell">
           @if (isHoraCheia(h)) {
             <span class="time-gutter-label">{{ h }}</span>
           }
         </div>
+        }
       </div>
 
       <!-- Colunas dos dias -->
       <div class="agenda-columns">
+        @for (dia of dias; track dia) {
         <div
-          *ngFor="let dia of dias"
           class="day-column"
           [class.day-column--hoje]="dia.isHoje">
 
           <!-- Células de horário (clicáveis para novo agendamento / drop zone) -->
+          @for (h of horarios; track h) {
           <div
-            *ngFor="let h of horarios"
             class="time-slot"
             [class.time-slot--hora-cheia]="isHoraCheia(h)"
             [class.time-slot--ocupado]="getAgendamentosNasCelula(dia.date, h)"
@@ -87,10 +90,11 @@
             (drop)="onDrop(dia.date, h, $event)"
             title="Clique para agendar {{ h }}">
           </div>
+          }
 
           <!-- Blocos de agendamento (posicionados absolutamente) -->
+          @for (ag of getAgendamentosDia(dia.date); track trackAgendamento($index, ag)) {
           <div
-            *ngFor="let ag of getAgendamentosDia(dia.date); trackBy: trackAgendamento"
             class="appointment"
             [ngClass]="'appointment--' + ag.tipo"
             [class.appointment--dragging]="ag.id === draggingId"
@@ -117,8 +121,10 @@
               (mousedown)="onResizeStart(ag, 'end', $event)"
               title="Arrastar para ajustar horário de fim"></div>
           </div>
+          }
 
         </div>
+        }
       </div>
 
     </div>
