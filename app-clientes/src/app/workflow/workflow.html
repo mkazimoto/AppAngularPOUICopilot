@@ -55,7 +55,8 @@
           </marker>
         </defs>
 
-        <g *ngFor="let conn of connections; trackBy: trackConn">
+        @for (conn of connections; track trackConn($index, conn)) {
+        <g>
           <path
             [attr.d]="connectionPath(conn)"
             class="wf-conn-line"
@@ -76,11 +77,11 @@
               {{ conn.branch }}
             </text>
           }
-        </g>
-      </svg>
+        </g>        }      </svg>
 
       <!-- ── Nodes ── -->
-      <div *ngFor="let node of nodes; trackBy: trackNode"
+      @for (node of nodes; track trackNode($index, node)) {
+      <div
            class="wf-node"
            [class]="'wf-' + node.type"
            [class.connect-target]="isConnectableTarget(node)"
@@ -266,6 +267,7 @@
         }
 
       </div><!-- /node -->
+      }<!-- /@for nodes -->
     </div><!-- /canvas -->
     </div><!-- /canvas-outer -->
   </div><!-- /scroll -->

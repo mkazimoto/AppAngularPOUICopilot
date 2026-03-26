@@ -18,10 +18,10 @@
 
     <!-- Department legend -->
     <div class="og-legend">
-      <ng-container *ngFor="let opt of deptOptions">
+      @for (opt of deptOptions; track opt) {
         <span class="og-legend-dot" [style.background]="getColor(opt.value)"></span>
         <span class="og-legend-label">{{ opt.label }}</span>
-      </ng-container>
+      }
     </div>
 
     <span class="og-hint">
@@ -46,17 +46,18 @@
 
       <!-- SVG layer: bezier connections -->
       <svg class="og-svg" [attr.width]="canvasW" [attr.height]="canvasH">
-        <ng-container *ngFor="let node of nodes; trackBy: trackNode">
-          <path
-            *ngFor="let child of getChildren(node.id)"
-            [attr.d]="connectionPath(node.id, child.id)"
-            class="og-conn" />
-        </ng-container>
+        @for (node of nodes; track trackNode($index, node)) {
+          @for (child of getChildren(node.id); track child) {
+            <path
+              [attr.d]="connectionPath(node.id, child.id)"
+              class="og-conn" />
+          }
+        }
       </svg>
 
       <!-- Node cards -->
+      @for (node of nodes; track trackNode($index, node)) {
       <div
-        *ngFor="let node of nodes; trackBy: trackNode"
         class="og-node"
         [style.left.px]="nodePos(node.id).x"
         [style.top.px]="nodePos(node.id).y"
@@ -104,6 +105,7 @@
         </div>
 
       </div>
+      }
     </div>
   </div>
   }

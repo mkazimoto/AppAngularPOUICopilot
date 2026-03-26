@@ -2,7 +2,8 @@
 
   <div class="kanban-board">
 
-    <div *ngFor="let column of columns" class="kanban-column">
+    @for (column of columns; track column) {
+    <div class="kanban-column">
 
       <!-- Cabeçalho da coluna -->
       <div class="kanban-column-header">
@@ -21,8 +22,8 @@
         (dragover)="onDragOver($event, column.id)"
         (dragleave)="onDragLeave(column.id)"
         (drop)="onDrop(column.id)">
+        @for (task of getTasksByColumn(column.id); track task) {
         <div
-          *ngFor="let task of getTasksByColumn(column.id)"
           class="kanban-card"
           draggable="true"
           [class.kanban-card--dragging]="isDragging(task)"
@@ -78,6 +79,7 @@
           </div>
 
         </div>
+        }
 
         <!-- Estado vazio -->
         @if (getTasksByColumn(column.id).length === 0) {
@@ -89,6 +91,7 @@
 
       </div>
     </div>
+    }
 
   </div>
 
@@ -166,11 +169,12 @@
       <po-divider p-label="Tags"></po-divider>
 
       <div class="detail-tags">
+        @for (tag of selectedTask.tags; track tag) {
         <po-tag
-          *ngFor="let tag of selectedTask.tags"
           [p-value]="tag"
           [p-type]="PoTagType.Info">
         </po-tag>
+        }
         @if (!selectedTask.tags?.length) {
           <span class="detail-no-tags">Sem tags</span>
         }
@@ -180,7 +184,8 @@
         <po-divider p-label="Anexos"></po-divider>
 
         <div class="detail-attachments">
-          <div *ngFor="let file of selectedTask.attachmentFiles" class="detail-attachment-item">
+          @for (file of selectedTask.attachmentFiles; track file) {
+          <div class="detail-attachment-item">
             <span [class]="getAttachmentIcon(file.type) + ' detail-attachment-icon'" [title]="file.type"></span>
             <span class="detail-attachment-name">{{ file.name }}</span>
             <po-button
@@ -190,8 +195,7 @@
               p-icon="an an-eye"
               (p-click)="previewAttachment(file)">
             </po-button>
-          </div>
-        </div>
+          </div>          }        </div>
       }
 
     }

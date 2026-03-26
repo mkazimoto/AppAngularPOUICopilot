@@ -29,11 +29,12 @@
         <div class="gantt-cell-name gantt-header-label">Tarefa</div>
         <div class="gantt-cell-bar">
           <div class="gantt-months">
+            @for (m of ganttMonths; track m) {
             <div
-              *ngFor="let m of ganttMonths"
               class="gantt-month"
               [style.width.%]="m.widthPct"
             >{{ m.label }}</div>
+            }
           </div>
           <!-- Marcador "Hoje" no header -->
           <div class="gantt-today-header" [style.left]="todayPct + '%'">
@@ -43,8 +44,8 @@
       </div>
 
       <!-- Linhas de tarefas -->
+      @for (t of tarefas; track t; let odd = $odd) {
       <div
-        *ngFor="let t of tarefas; let odd = odd"
         class="gantt-row"
         [class.gantt-row-alt]="odd"
       >
@@ -70,6 +71,7 @@
           </div>
         </div>
       </div>
+      }
 
       <!-- Legenda -->
       <div class="gantt-legend">
