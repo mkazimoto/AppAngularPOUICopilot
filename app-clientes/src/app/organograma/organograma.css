@@ -61,7 +61,7 @@
 /* ── Scroll container ────────────────────────────────────────────────────── */
 .og-scroll {
   overflow: auto;
-  border: 1px solid #e2e8f0;
+  border: 2px solid #cbd5e1;
   border-radius: 10px;
   background: #f8fafc;
   max-height: calc(100vh - 260px);
@@ -70,6 +70,7 @@
 
 .og-canvas {
   position: relative;
+  z-index: 0;
 }
 
 /* ── SVG connections ─────────────────────────────────────────────────────── */
@@ -78,13 +79,15 @@
   inset: 0;
   pointer-events: none;
   overflow: visible;
+  z-index: 0;
 }
 
 .og-conn {
   fill: none;
-  stroke: #cbd5e1;
-  stroke-width: 2;
+  stroke: #94a3b8;
+  stroke-width: 4;
   stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* ── Node card ───────────────────────────────────────────────────────────── */
@@ -94,22 +97,28 @@
   background: #ffffff;
   border-radius: 10px;
   /* full border with thicker left accent */
-  border: 1px solid #e2e8f0;
-  border-left-width: 4px;
+  border: 2px solid #cbd5e1;
+  border-left-width: 5px;
   border-left-color: #cbd5e1; /* overridden inline per node */
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  outline: 2px solid rgba(0, 0, 0, 0.5);
+  outline-offset: 2px;
   padding: 10px 12px;
   display: flex;
   align-items: center;
   gap: 10px;
-  transition: box-shadow 0.2s ease, transform 0.15s ease;
+  transition: box-shadow 0.2s ease, transform 0.15s ease, outline 0.2s ease;
   cursor: default;
+  z-index: 10;
+  opacity: 1;
+  backdrop-filter: none;
 }
 
 .og-node:hover {
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.13);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  outline: 2px solid rgba(0, 0, 0, 0.5);
   transform: translateY(-2px);
-  z-index: 10;
+  z-index: 20;
 }
 
 /* Avatar circle with initials */
@@ -123,14 +132,14 @@
   justify-content: center;
   color: #fff;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
   overflow: hidden;
-  border: 2px solid rgba(255,255,255,0.6);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+  border: 3px solid rgba(255,255,255,0.7);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.22);
 }
 
 .og-avatar.og-avatar-img-wrap {
-  border: 2px solid #e2e8f0;
+  border: 3px solid #cbd5e1;
 }
 
 .og-avatar-img {
@@ -151,16 +160,17 @@
 }
 
 .og-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: #1e293b;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .og-role {
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 500;
   color: #475569;
   white-space: nowrap;
   overflow: hidden;
@@ -168,7 +178,7 @@
 }
 
 .og-dept {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -184,7 +194,7 @@
   right: 5px;
   display: none;
   flex-direction: row;
-  gap: 3px;
+  gap: 4px;
 }
 
 .og-node:hover .og-actions {
@@ -192,26 +202,59 @@
 }
 
 .og-btn {
-  width: 22px;
-  height: 22px;
-  border: none;
-  border-radius: 5px;
+  width: 28px;
+  height: 28px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 13px;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  transition: filter 0.15s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
 }
 
 .og-btn:hover {
-  filter: brightness(0.88);
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
 }
 
-.og-btn-add  { background: #dcfce7; color: #16a34a; }
-.og-btn-edit { background: #dbeafe; color: #1d4ed8; }
-.og-btn-del  { background: #fee2e2; color: #dc2626; }
+.og-btn:active {
+  transform: scale(0.95);
+}
+
+.og-btn-add  { 
+  background: #22c55e; 
+  color: #ffffff;
+  border-color: #16a34a;
+}
+
+.og-btn-add:hover {
+  background: #16a34a;
+}
+
+.og-btn-edit { 
+  background: #3b82f6; 
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.og-btn-edit:hover {
+  background: #2563eb;
+}
+
+.og-btn-del  { 
+  background: #ef4444; 
+  color: #ffffff;
+  border-color: #dc2626;
+}
+
+.og-btn-del:hover {
+  background: #dc2626;
+}
 
 /* ── Modal photo section ─────────────────────────────────────────────────── */
 .og-photo-section {
