@@ -2,15 +2,17 @@ import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
-    PoButtonModule,
-    PoFieldModule,
-    PoModalAction,
-    PoModalComponent,
-    PoModalModule,
-    PoNotificationService,
-    PoPageModule,
-    PoSelectOption,
-    PoTagModule,
+  PoButtonGroupItem,
+  PoButtonGroupModule,
+  PoButtonModule,
+  PoFieldModule,
+  PoModalAction,
+  PoModalComponent,
+  PoModalModule,
+  PoNotificationService,
+  PoPageModule,
+  PoSelectOption,
+  PoTagModule,
 } from '@po-ui/ng-components';
 
 export interface AgendamentoItem {
@@ -30,6 +32,7 @@ export interface DiaCalendario {
   mes: number;
   ano: number;
   isHoje: boolean;
+  outOfMonth?: boolean;
 }
 
 interface AgendamentoForm {
@@ -48,6 +51,7 @@ interface AgendamentoForm {
     FormsModule,
     PoPageModule,
     PoButtonModule,
+    PoButtonGroupModule,
     PoModalModule,
     PoTagModule,
     PoFieldModule,
@@ -70,6 +74,16 @@ export class Agendamento implements OnInit {
   idEditando: number | null = null;
   draggingId: number | null = null;
   dragOverSlot: { dia: string; hora: string } | null = null;
+
+  viewMode: 'semanal' | 'mensal' = 'semanal';
+  private monthStart: Date = new Date();
+  semanasMes: DiaCalendario[][] = [];
+  readonly nomesDiasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+  viewButtons: PoButtonGroupItem[] = [
+    { label: 'Semanal', action: () => this.setViewMode('semanal'), selected: true },
+    { label: 'Mensal',  action: () => this.setViewMode('mensal'),  selected: false },
+  ];
 
   resizingId: number | null = null;
   resizeType: 'start' | 'end' | null = null;
@@ -112,6 +126,16 @@ export class Agendamento implements OnInit {
       return `${p.numero}–${u.numero} de ${this.nomeMes(p.mes)} de ${p.ano}`;
     }
     return `${p.numero}/${this.pad(p.mes)} – ${u.numero}/${this.pad(u.mes)} de ${p.ano}`;
+  }
+
+  get labelMes(): string {
+    const m = this.monthStart.getMonth() + 1;
+    const a = this.monthStart.getFullYear();
+    return `${this.nomeMes(m)} de ${a}`;
+  }
+
+  get labelNavegacao(): string {
+    return this.viewMode === 'mensal' ? this.labelMes : this.labelSemana;
   }
 
   constructor(private notification: PoNotificationService) {}
@@ -159,19 +183,110 @@ export class Agendamento implements OnInit {
     this.weekStart = new Date(hoje);
     this.weekStart.setDate(hoje.getDate() + offset);
     this.weekStart.setHours(0, 0, 0, 0);
+    this.monthStart = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
     this.gerarSemana();
+    if (this.viewMode === 'mensal') {
+      this.gerarMes();
+    }
   }
 
   navAnterior(): void {
-    this.weekStart = new Date(this.weekStart);
-    this.weekStart.setDate(this.weekStart.getDate() - 7);
-    this.gerarSemana();
+    if (this.viewMode === 'mensal') {
+      this.navAnteriorMes();
+    } else {
+      this.weekStart = new Date(this.weekStart);
+      this.weekStart.setDate(this.weekStart.getDate() - 7);
+      this.gerarSemana();
+    }
   }
 
   navProxima(): void {
-    this.weekStart = new Date(this.weekStart);
-    this.weekStart.setDate(this.weekStart.getDate() + 7);
+    if (this.viewMode === 'mensal') {
+      this.navProximaMes();
+    } else {
+      this.weekStart = new Date(this.weekStart);
+      this.weekStart.setDate(this.weekStart.getDate() + 7);
+      this.gerarSemana();
+    }
+  }
+
+  navAnteriorMes(): void {
+    const a = this.monthStart.getFullYear();
+    const m = this.monthStart.getMonth();
+    this.monthStart = new Date(a, m - 1, 1);
+    this.gerarMes();
+  }
+
+  navProximaMes(): void {
+    const a = this.monthStart.getFullYear();
+    const m = this.monthStart.getMonth();
+    this.monthStart = new Date(a, m + 1, 1);
+    this.gerarMes();
+  }
+
+  setViewMode(mode: 'semanal' | 'mensal'): void {
+    this.viewMode = mode;
+    this.viewButtons[0].selected = mode === 'semanal';
+    this.viewButtons[1].selected = mode === 'mensal';
+    if (mode === 'mensal') {
+      this.gerarMes();
+    }
+  }
+
+  gerarMes(): void {
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    const ano = this.monthStart.getFullYear();
+    const mes = this.monthStart.getMonth();
+    const primeiroDia = new Date(ano, mes, 1);
+    const startDow = primeiroDia.getDay();
+    const cursor = new Date(primeiroDia);
+    cursor.setDate(primeiroDia.getDate() - startDow);
+    cursor.setHours(0, 0, 0, 0);
+
+    this.semanasMes = [];
+    for (let s = 0; s < 6; s++) {
+      const semana: DiaCalendario[] = [];
+      for (let d = 0; d < 7; d++) {
+        semana.push({
+          date: this.formatDate(cursor),
+          diaSemana: this.nomesDiasSemana[cursor.getDay()],
+          numero: cursor.getDate(),
+          mes: cursor.getMonth() + 1,
+          ano: cursor.getFullYear(),
+          isHoje: cursor.getTime() === hoje.getTime(),
+          outOfMonth: cursor.getMonth() !== mes,
+        });
+        cursor.setDate(cursor.getDate() + 1);
+      }
+      this.semanasMes.push(semana);
+      if (s >= 4 && semana.every(d => d.outOfMonth)) {
+        this.semanasMes.pop();
+        break;
+      }
+    }
+  }
+
+  irParaSemana(date: string): void {
+    const d = new Date(date + 'T00:00:00');
+    const dow = d.getDay();
+    const offset = dow === 0 ? -6 : 1 - dow;
+    this.weekStart = new Date(d);
+    this.weekStart.setDate(d.getDate() + offset);
+    this.weekStart.setHours(0, 0, 0, 0);
     this.gerarSemana();
+    this.viewMode = 'semanal';
+    this.viewButtons[0].selected = true;
+    this.viewButtons[1].selected = false;
+  }
+
+  nomeMesAbrev(m: number): string {
+    const meses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+    return meses[m - 1] ?? '';
+  }
+
+  pad2(n: number): string {
+    return this.pad(n);
   }
 
   abrirNovoAgendamento(dia: string, hora: string): void {
@@ -411,7 +526,7 @@ export class Agendamento implements OnInit {
     return n.toString().padStart(2, '0');
   }
 
-  private nomeMes(m: number): string {
+  nomeMes(m: number): string {
     const meses = [
       'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
       'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',

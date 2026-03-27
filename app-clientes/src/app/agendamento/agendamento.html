@@ -1,28 +1,35 @@
 <po-page-default p-title="Agendamento" [p-actions]="pageActions">
 
-  <!-- Navegação da semana -->
-  <div class="agenda-nav">
-    <po-button
-      p-icon="an an-caret-left"
-      p-kind="secondary"
-      p-tooltip="Semana anterior"
-      (p-click)="navAnterior()">
-    </po-button>
+  <!-- Toolbar: seletor de visão + navegação -->
+  <div class="agenda-toolbar">
+    <po-button-group
+      [p-buttons]="viewButtons"
+      p-toggle="single">
+    </po-button-group>
 
-    <span class="agenda-nav-label">{{ labelSemana }}</span>
+    <div class="agenda-nav">
+      <po-button
+        p-icon="an an-caret-left"
+        p-kind="secondary"
+        [attr.p-tooltip]="viewMode === 'mensal' ? 'Mês anterior' : 'Semana anterior'"
+        (p-click)="navAnterior()">
+      </po-button>
 
-    <po-button
-      p-icon="an an-caret-right"
-      p-kind="secondary"
-      p-tooltip="Próxima semana"
-      (p-click)="navProxima()">
-    </po-button>
+      <span class="agenda-nav-label">{{ labelNavegacao }}</span>
 
-    <po-button
-      p-label="Hoje"
-      p-kind="tertiary"
-      (p-click)="navegarParaHoje()">
-    </po-button>
+      <po-button
+        p-icon="an an-caret-right"
+        p-kind="secondary"
+        [attr.p-tooltip]="viewMode === 'mensal' ? 'Próximo mês' : 'Próxima semana'"
+        (p-click)="navProxima()">
+      </po-button>
+
+      <po-button
+        p-label="Hoje"
+        p-kind="tertiary"
+        (p-click)="navegarParaHoje()">
+      </po-button>
+    </div>
   </div>
 
   <!-- Legenda -->
@@ -33,6 +40,8 @@
     <span class="legenda-item legenda-item--entrevista">Entrevista</span>
   </div>
 
+  <!-- Vista Semanal -->
+  @if (viewMode === 'semanal') {
   <!-- Grade de agendamento -->
   <div class="agenda-container">
 
@@ -129,6 +138,54 @@
 
     </div>
   </div>
+  }
+
+  <!-- Vista Mensal -->
+  @if (viewMode === 'mensal') {
+  <div class="mes-container">
+    <!-- Cabeçalho dos dias da semana -->
+    <div class="mes-header">
+      @for (nome of nomesDiasSemana; track nome) {
+        <div class="mes-header-cell">{{ nome }}</div>
+      }
+    </div>
+
+    <!-- Semanas do mês -->
+    @for (semana of semanasMes; track $index) {
+      <div class="mes-row">
+        @for (dia of semana; track dia.date) {
+          <div
+            class="mes-cell"
+            [class.mes-cell--hoje]="dia.isHoje"
+            [class.mes-cell--outro-mes]="dia.outOfMonth"
+            (click)="irParaSemana(dia.date)"
+            [title]="'Ver semana de ' + dia.numero + '/' + pad2(dia.mes) + '/' + dia.ano">
+            <span class="mes-cell__numero" [class.mes-cell__numero--hoje]="dia.isHoje">
+              {{ dia.numero }}
+              @if (dia.numero === 1) {
+                <span class="mes-cell__mes-mini">{{ nomeMesAbrev(dia.mes) }}</span>
+              }
+            </span>
+            <div class="mes-eventos">
+              @for (ag of getAgendamentosDia(dia.date).slice(0, 3); track ag.id) {
+                <div
+                  class="mes-appointment"
+                  [ngClass]="'mes-appointment--' + ag.tipo"
+                  (click)="abrirEdicao(ag, $event)"
+                  [title]="ag.titulo + ' — ' + ag.horaInicio + '–' + ag.horaFim">
+                  {{ ag.horaInicio }} {{ ag.titulo }}
+                </div>
+              }
+              @if (getAgendamentosDia(dia.date).length > 3) {
+                <div class="mes-mais">+{{ getAgendamentosDia(dia.date).length - 3 }} mais</div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+  }
 
   <!-- Modal de agendamento -->
   <po-modal

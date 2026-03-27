@@ -1,6 +1,14 @@
 /* ============================================================
    Navegação da semana
    ============================================================ */
+.agenda-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
 .agenda-nav {
   display: flex;
   align-items: center;
@@ -355,4 +363,157 @@
   margin-top: 16px;
   padding-top: 16px;
   border-top: 1px solid var(--color-neutral-light-20);
+}
+
+/* ============================================================
+   Vista Mensal — container
+   ============================================================ */
+.mes-container {
+  border: 1px solid var(--color-neutral-light-20);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--color-neutral-light-00);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* Cabeçalho (Dom … Sáb) */
+.mes-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: var(--color-neutral-light-05);
+  border-bottom: 2px solid var(--color-neutral-light-20);
+}
+
+.mes-header-cell {
+  text-align: center;
+  padding: 10px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-neutral-dark-70);
+  border-right: 1px solid var(--color-neutral-light-20);
+}
+
+.mes-header-cell:last-child {
+  border-right: none;
+}
+
+/* Linha de semana */
+.mes-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid var(--color-neutral-light-20);
+}
+
+.mes-row:last-child {
+  border-bottom: none;
+}
+
+/* Célula de dia */
+.mes-cell {
+  border-right: 1px solid var(--color-neutral-light-20);
+  padding: 6px;
+  min-height: 100px;
+  cursor: pointer;
+  transition: background 0.12s;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.mes-cell:last-child {
+  border-right: none;
+}
+
+.mes-cell:hover {
+  background: rgba(25, 118, 210, 0.05);
+}
+
+.mes-cell--hoje {
+  background: rgba(25, 118, 210, 0.04);
+}
+
+.mes-cell--outro-mes {
+  background: var(--color-neutral-light-02, #fafafa);
+  opacity: 0.55;
+}
+
+/* Número do dia */
+.mes-cell__numero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-neutral-dark-80);
+  margin-bottom: 4px;
+  padding: 0 3px;
+}
+
+.mes-cell__numero--hoje {
+  background: #1976d2;
+  color: #fff;
+}
+
+.mes-cell__mes-mini {
+  font-size: 10px;
+  margin-left: 3px;
+  font-weight: 400;
+  color: var(--color-neutral-mid-60);
+}
+
+/* Lista de eventos dentro do dia */
+.mes-eventos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mes-appointment {
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: 11px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  line-height: 1.5;
+}
+
+.mes-appointment:hover {
+  filter: brightness(0.88);
+}
+
+.mes-appointment--consulta   { background: #1e88e5; }
+.mes-appointment--reuniao    { background: #43a047; }
+.mes-appointment--servico    { background: #fb8c00; }
+.mes-appointment--entrevista { background: #8e24aa; }
+
+.mes-mais {
+  font-size: 11px;
+  color: var(--color-brand-01-dark, #1976d2);
+  font-weight: 600;
+  padding: 2px 4px;
+  cursor: default;
+}
+
+/* Responsivo */
+@media (max-width: 600px) {
+  .mes-cell {
+    min-height: 60px;
+    padding: 4px 2px;
+  }
+  .mes-cell__numero {
+    font-size: 11px;
+    min-width: 22px;
+    height: 22px;
+  }
+  .mes-appointment {
+    display: none;
+  }
+  .mes-mais {
+    display: none;
+  }
 }
