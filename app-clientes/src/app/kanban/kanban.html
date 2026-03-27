@@ -27,6 +27,9 @@
           class="kanban-card"
           draggable="true"
           [class.kanban-card--dragging]="isDragging(task)"
+          [class.kanban-card--priority-danger]="task.priorityType === PoTagType.Danger"
+          [class.kanban-card--priority-warning]="task.priorityType === PoTagType.Warning"
+          [class.kanban-card--priority-info]="task.priorityType === PoTagType.Info"
           (dragstart)="onDragStart(task)"
           (dragend)="onDragEnd()">
 

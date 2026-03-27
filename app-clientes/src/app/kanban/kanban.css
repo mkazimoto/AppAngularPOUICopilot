@@ -52,14 +52,17 @@
   background: #fff;
   border-radius: 6px;
   padding: 0.75rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  border: 1px solid var(--color-neutral-light-20, #e8e8e8);
-  transition: box-shadow 0.2s ease, opacity 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22), 0 1px 4px rgba(0, 0, 0, 0.14);
+  border: 1.5px solid var(--color-neutral-light-30, #d0d0d0);
+  border-left: 4px solid var(--color-brand-01-base, #0c6cde);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
   cursor: grab;
 }
 
 .kanban-card:hover {
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28), 0 3px 8px rgba(0, 0, 0, 0.18);
+  border-color: var(--color-brand-01-lighter, #7baaf7);
+  border-left-color: var(--color-brand-01-dark, #0952a5);
 }
 
 .kanban-card:active {
@@ -69,6 +72,28 @@
 .kanban-card--dragging {
   opacity: 0.4;
   box-shadow: none;
+}
+
+/* Prioridade — borda esquerda colorida */
+.kanban-card--priority-danger {
+  border-left-color: var(--color-feedback-negative-base, #c9402b);
+}
+
+.kanban-card--priority-warning {
+  border-left-color: var(--color-feedback-warning-base, #e87a00);
+}
+
+.kanban-card--priority-info {
+  border-left-color: var(--color-brand-01-base, #0c6cde);
+}
+
+/* Rodapé: destaca visualmente a tag de prioridade */
+.kanban-card--priority-danger .kanban-card-footer po-tag {
+  font-weight: 700;
+}
+
+.kanban-card--priority-warning .kanban-card-footer po-tag {
+  font-weight: 600;
 }
 
 .kanban-cards.kanban-drop-target {
