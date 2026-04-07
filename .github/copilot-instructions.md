@@ -1,11 +1,8 @@
 Este projeto usa PO-UI.
 
-Documentação local dos componentes:
-
-/docs/po-ui
-
 Sempre que gerar código Angular:
 
-- preferir componentes PO-UI
-- consultar documentação local
-- seguir exemplos oficiais
+- usar o mcp do Angular CLI.
+- usar o mcp do PO-UI para gerar componentes, serviços.
+- preferir componentes PO-UI.
+- seguir exemplos oficiais.
