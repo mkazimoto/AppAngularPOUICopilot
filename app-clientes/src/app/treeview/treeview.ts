@@ -63,13 +63,13 @@ function buildEapNodes(): TreeNode[] {
     id: rootId,
     label: 'EAP - Sistema Corporativo Integrado',
     category: 'Projeto',
-    responsible: 'JoÃ£o Silva',
+    responsible: 'João Silva',
     status: 'ativo',
     parentId: null,
     expanded: true,
   });
 
-  // 10 fases Ã— 10 entregÃ¡veis Ã— 10 pacotes Ã— 9 atividades = 9.000 + 1.000 + 100 + 10 + 1 = 10.111
+  // 10 fases × 10 entregáveis × 10 pacotes × 9 atividades = 9.000 + 1.000 + 100 + 10 + 1 = 10.111
   for (let f = 0; f < FASES.length; f++) {
     const faseId = String(seq++);
     nodes.push({
@@ -87,7 +87,7 @@ function buildEapNodes(): TreeNode[] {
       nodes.push({
         id: entId,
         label: `${f + 1}.${e + 1} ${ENTREGAVEIS[e]}`,
-        category: 'EntregÃ¡vel',
+        category: 'Entregável',
         responsible: RESPONSAVEIS[(f + e) % RESPONSAVEIS.length],
         status: STATUSES[(f + e) % STATUSES.length],
         parentId: faseId,
@@ -147,7 +147,7 @@ export class Treeview implements OnInit {
   readonly categoryOptions = [
     { label: 'Projeto',            value: 'Projeto'            },
     { label: 'Fase',               value: 'Fase'               },
-    { label: 'Entregavel',         value: 'Entregavel'         },
+    { label: 'Entregável',         value: 'Entregável'         },
     { label: 'Pacote de Trabalho', value: 'Pacote de Trabalho' },
     { label: 'Atividade',          value: 'Atividade'          },
   ];

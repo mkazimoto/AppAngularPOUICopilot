@@ -1,4 +1,4 @@
-﻿<po-page-default p-title="Tree View EditÃ¡vel" [p-actions]="pageActions">
+﻿<po-page-default p-title="Tree View Editável" [p-actions]="pageActions">
 
   <div class="treeview-grid">
 
@@ -6,9 +6,9 @@
     <div class="treeview-header">
       <div class="th th-nome">Nome</div>
       <div class="th th-categoria">Categoria</div>
-      <div class="th th-responsavel">ResponsÃ¡vel</div>
+      <div class="th th-responsavel">Responsável</div>
       <div class="th th-status">Status</div>
-      <div class="th th-acoes">AÃ§Ãµes</div>
+      <div class="th th-acoes">Ações</div>
     </div>
 
     <!-- â”€â”€ Virtual scroll body â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
@@ -68,14 +68,14 @@
           </select>
         </div>
 
-        <!-- â”€â”€ ResponsÃ¡vel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <!-- â”€â”€ Responsável â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <div class="td td-responsavel">
           <span *ngIf="node.id !== SENTINEL && node.id !== editingId">{{ node.responsible }}</span>
           <input *ngIf="node.id === editingId" class="inline-input"
-            [(ngModel)]="editForm.responsible" placeholder="ResponsÃ¡vel"
+            [(ngModel)]="editForm.responsible" placeholder="Responsável"
             (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()" />
           <input *ngIf="node.id === SENTINEL" class="inline-input"
-            [(ngModel)]="addForm.responsible" placeholder="ResponsÃ¡vel"
+            [(ngModel)]="addForm.responsible" placeholder="Responsável"
             (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()" />
         </div>
 
@@ -91,7 +91,7 @@
           </select>
         </div>
 
-        <!-- â”€â”€ AÃ§Ãµes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <!-- â”€â”€ Ações â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <div class="td td-acoes">
           <div *ngIf="node.id !== SENTINEL && node.id !== editingId" class="actions-row">
             <po-button p-icon="an an-pencil" p-kind="tertiary" p-label="" p-size="small" (p-click)="startEdit(node)"></po-button>
@@ -112,7 +112,7 @@
       <!-- Empty state -->
       <div *ngIf="visibleNodes.length === 0" class="empty-row">
         <i class="an an-tree-structure empty-icon"></i>
-        <p>Nenhum item. Clique em <strong>Adicionar Raiz</strong> para comeÃ§ar.</p>
+        <p>Nenhum item. Clique em <strong>Adicionar Raiz</strong> para começar.</p>
       </div>
 
     </cdk-virtual-scroll-viewport>
