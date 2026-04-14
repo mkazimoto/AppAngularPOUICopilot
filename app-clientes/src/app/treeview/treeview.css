@@ -11,7 +11,7 @@
 .treeview-header,
 .treeview-row {
   display: grid;
-  grid-template-columns: 1fr 140px 180px 110px 130px;
+  grid-template-columns: 1fr 80px 80px 110px 110px 110px 130px;
   align-items: center;
 }
 

@@ -5,8 +5,10 @@
     <!-- â”€â”€ Sticky header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div class="treeview-header">
       <div class="th th-nome">Nome</div>
-      <div class="th th-categoria">Categoria</div>
-      <div class="th th-responsavel">Responsável</div>
+      <div class="th th-quantidade">Quantidade</div>
+      <div class="th th-unidade">Unidade</div>
+      <div class="th th-preco">Preço</div>
+      <div class="th th-valor">Valor</div>
       <div class="th th-status">Status</div>
       <div class="th th-acoes">Ações</div>
     </div>
@@ -57,28 +59,44 @@
           </div>
         </div>
 
-        <!-- â”€â”€ Categoria â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-        <div class="td td-categoria">
-          <span *ngIf="node.id !== SENTINEL && node.id !== editingId">{{ node.category }}</span>
-          <select *ngIf="node.id === editingId" class="inline-select" [(ngModel)]="editForm.category">
-            <option *ngFor="let o of categoryOptions" [value]="o.value">{{ o.label }}</option>
-          </select>
-          <select *ngIf="node.id === SENTINEL" class="inline-select" [(ngModel)]="addForm.category">
-            <option *ngFor="let o of categoryOptions" [value]="o.value">{{ o.label }}</option>
-          </select>
-        </div>
-
-        <!-- â”€â”€ Responsável â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-        <div class="td td-responsavel">
-          <span *ngIf="node.id !== SENTINEL && node.id !== editingId">{{ node.responsible }}</span>
-          <input *ngIf="node.id === editingId" class="inline-input"
-            [(ngModel)]="editForm.responsible" placeholder="Responsável"
+        <div class="td td-quantidade">
+          <span *ngIf="node.id !== SENTINEL && node.id !== editingId && !node.hasChildren">{{ node.quantity }}</span>
+          <input *ngIf="node.id === editingId && editingIsLeaf" class="inline-input" type="number" min="0"
+            [(ngModel)]="editForm.quantity" placeholder="Qtd"
             (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()" />
-          <input *ngIf="node.id === SENTINEL" class="inline-input"
-            [(ngModel)]="addForm.responsible" placeholder="Responsável"
+          <input *ngIf="node.id === SENTINEL" class="inline-input" type="number" min="0"
+            [(ngModel)]="addForm.quantity" placeholder="Qtd"
             (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()" />
         </div>
 
+        <!-- â"€â"€ Unidade â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ -->
+        <div class="td td-unidade">
+          <span *ngIf="node.id !== SENTINEL && node.id !== editingId && !node.hasChildren">{{ node.unit }}</span>
+          <select *ngIf="node.id === editingId && editingIsLeaf" class="inline-select" [(ngModel)]="editForm.unit">
+            <option *ngFor="let o of unitOptions" [value]="o.value">{{ o.label }}</option>
+          </select>
+          <select *ngIf="node.id === SENTINEL" class="inline-select" [(ngModel)]="addForm.unit">
+            <option *ngFor="let o of unitOptions" [value]="o.value">{{ o.label }}</option>
+          </select>
+        </div>
+
+        <!-- â"€â"€ Preço â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ -->
+        <div class="td td-preco">
+          <span *ngIf="node.id !== SENTINEL && node.id !== editingId">{{ node.price | currency:'BRL':'symbol':'1.2-2' }}</span>
+          <input *ngIf="node.id === editingId" class="inline-input" type="number" min="0" step="0.01"
+            [(ngModel)]="editForm.price" placeholder="Preço"
+            (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()" />
+          <input *ngIf="node.id === SENTINEL" class="inline-input" type="number" min="0" step="0.01"
+            [(ngModel)]="addForm.price" placeholder="Preço"
+            (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()" />
+        </div>
+
+        <!-- â"€â"€ Valor â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ -->
+        <div class="td td-valor">
+          <span *ngIf="node.id !== editingId && node.id !== SENTINEL">{{ node.value | currency:'BRL':'symbol':'1.2-2' }}</span>
+          <span *ngIf="node.id === editingId">{{ editPreviewValue | currency:'BRL':'symbol':'1.2-2' }}</span>
+          <span *ngIf="node.id === SENTINEL">{{ addPreviewValue | currency:'BRL':'symbol':'1.2-2' }}</span>
+        </div>
         <!-- â”€â”€ Status â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <div class="td td-status">
           <po-tag *ngIf="node.id !== SENTINEL && node.id !== editingId"
