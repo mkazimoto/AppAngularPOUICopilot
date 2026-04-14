@@ -33,18 +33,18 @@ const SENTINEL_ID = '__new__';
 
 // â”€â”€ EAP generation constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const FASES = [
-  'IniciaÃ§Ã£o', 'Planejamento', 'Requisitos', 'Arquitetura', 'Desenvolvimento',
-  'Testes', 'IntegraÃ§Ã£o', 'ImplantaÃ§Ã£o', 'Treinamento', 'Encerramento',
+  'Inicialização', 'Planejamento', 'Requisitos', 'Arquitetura', 'Desenvolvimento',
+  'Testes', 'Integração', 'Implantação', 'Treinamento', 'Encerramento',
 ];
 
 const ENTREGAVEIS = [
-  'Escopo', 'Cronograma', 'OrÃ§amento', 'Riscos', 'Qualidade',
-  'Recursos', 'ComunicaÃ§Ã£o', 'Contratos', 'Stakeholders', 'MudanÃ§as',
+  'Escopo', 'Cronograma', 'Orçamento', 'Riscos', 'Qualidade',
+  'Recursos', 'Comunicação', 'Contratos', 'Stakeholders', 'Mudanças',
 ];
 
 const PACOTES = [
-  'DefiniÃ§Ã£o', 'AnÃ¡lise', 'Design', 'ImplementaÃ§Ã£o', 'RevisÃ£o',
-  'AprovaÃ§Ã£o', 'DocumentaÃ§Ã£o', 'ValidaÃ§Ã£o', 'PublicaÃ§Ã£o', 'Monitoramento',
+  'Definição', 'Análise', 'Design', 'Implementação', 'Revisão',
+  'Aprovação', 'Documentação', 'Validação', 'Publicação', 'Monitoramento',
 ];
 
 const RESPONSAVEIS = [
@@ -61,7 +61,7 @@ function buildEapNodes(): TreeNode[] {
   const rootId = String(seq++);
   nodes.push({
     id: rootId,
-    label: 'EAP â€” Sistema Corporativo Integrado',
+    label: 'EAP - Sistema Corporativo Integrado',
     category: 'Projeto',
     responsible: 'JoÃ£o Silva',
     status: 'ativo',
