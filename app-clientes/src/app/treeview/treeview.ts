@@ -61,7 +61,7 @@ function buildEapNodes(): TreeNode[] {
   const rootId = String(seq++);
   nodes.push({
     id: rootId,
-    label: 'EAP com 10.000 registros',
+    label: 'EAP - Estrutura Analítica do Projeto',
     category: 'Projeto',
     responsible: 'João Silva',
     status: 'ativo',
