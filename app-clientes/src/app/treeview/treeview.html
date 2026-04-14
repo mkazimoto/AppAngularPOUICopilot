@@ -1,0 +1,211 @@
+<po-page-default p-title="Tree View Editável" [p-actions]="pageActions">
+
+  <div class="treeview-wrapper">
+    <table class="treeview-table">
+      <thead>
+        <tr>
+          <th class="col-nome">Nome</th>
+          <th class="col-categoria">Categoria</th>
+          <th class="col-responsavel">Responsável</th>
+          <th class="col-status">Status</th>
+          <th class="col-acoes">Ações</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr
+          *ngFor="let node of visibleNodes; trackBy: trackById"
+          class="treeview-row"
+          [class.treeview-row--editing]="node.id === editingId || node.id === SENTINEL"
+        >
+          <!-- ── Nome ────────────────────────────────────── -->
+          <td class="col-nome">
+            <div class="tree-cell" [style.paddingLeft]="indentPx(node.level)">
+
+              <!-- expand/collapse: visible only in display mode and when has children -->
+              <button
+                *ngIf="node.hasChildren && node.id !== editingId && node.id !== SENTINEL"
+                class="expand-btn"
+                (click)="toggle(node)"
+                [attr.aria-expanded]="node.expanded"
+                [attr.aria-label]="node.expanded ? 'Recolher ' + node.label : 'Expandir ' + node.label"
+              >
+                <i class="an"
+                   [class.an-caret-right]="!node.expanded"
+                   [class.an-caret-down]="node.expanded"></i>
+              </button>
+              <span
+                *ngIf="!node.hasChildren || node.id === editingId || node.id === SENTINEL"
+                class="expand-spacer"
+              ></span>
+
+              <!-- node icon -->
+              <i *ngIf="node.id !== SENTINEL" class="an node-icon"
+                 [class.an-folder-full]="node.hasChildren && !node.expanded"
+                 [class.an-folder-open]="node.hasChildren && node.expanded"
+                 [class.an-file-text]="!node.hasChildren"></i>
+              <i *ngIf="node.id === SENTINEL" class="an an-plus-circle node-icon node-icon--new"></i>
+
+              <!-- display -->
+              <span *ngIf="node.id !== SENTINEL && node.id !== editingId" class="node-label">
+                {{ node.label }}
+              </span>
+
+              <!-- edit input -->
+              <input
+                *ngIf="node.id === editingId"
+                class="inline-input"
+                [(ngModel)]="editForm.label"
+                placeholder="Nome"
+                (keyup.enter)="saveEdit()"
+                (keyup.escape)="cancelEdit()"
+              />
+
+              <!-- add input -->
+              <input
+                *ngIf="node.id === SENTINEL"
+                class="inline-input"
+                [(ngModel)]="addForm.label"
+                placeholder="Nome"
+                (keyup.enter)="saveAdd()"
+                (keyup.escape)="cancelAdd()"
+              />
+            </div>
+          </td>
+
+          <!-- ── Categoria ──────────────────────────────── -->
+          <td class="col-categoria">
+            <span *ngIf="node.id !== SENTINEL && node.id !== editingId">{{ node.category }}</span>
+
+            <select *ngIf="node.id === editingId" class="inline-select" [(ngModel)]="editForm.category">
+              <option *ngFor="let o of categoryOptions" [value]="o.value">{{ o.label }}</option>
+            </select>
+
+            <select *ngIf="node.id === SENTINEL" class="inline-select" [(ngModel)]="addForm.category">
+              <option *ngFor="let o of categoryOptions" [value]="o.value">{{ o.label }}</option>
+            </select>
+          </td>
+
+          <!-- ── Responsável ────────────────────────────── -->
+          <td class="col-responsavel">
+            <span *ngIf="node.id !== SENTINEL && node.id !== editingId">{{ node.responsible }}</span>
+
+            <input
+              *ngIf="node.id === editingId"
+              class="inline-input"
+              [(ngModel)]="editForm.responsible"
+              placeholder="Responsável"
+              (keyup.enter)="saveEdit()"
+              (keyup.escape)="cancelEdit()"
+            />
+
+            <input
+              *ngIf="node.id === SENTINEL"
+              class="inline-input"
+              [(ngModel)]="addForm.responsible"
+              placeholder="Responsável"
+              (keyup.enter)="saveAdd()"
+              (keyup.escape)="cancelAdd()"
+            />
+          </td>
+
+          <!-- ── Status ─────────────────────────────────── -->
+          <td class="col-status">
+            <po-tag
+              *ngIf="node.id !== SENTINEL && node.id !== editingId"
+              [p-label]="statusLabel(node.status)"
+              [p-type]="statusType(node.status)"
+            ></po-tag>
+
+            <select *ngIf="node.id === editingId" class="inline-select" [(ngModel)]="editForm.status">
+              <option *ngFor="let o of statusOptions" [value]="o.value">{{ o.label }}</option>
+            </select>
+
+            <select *ngIf="node.id === SENTINEL" class="inline-select" [(ngModel)]="addForm.status">
+              <option *ngFor="let o of statusOptions" [value]="o.value">{{ o.label }}</option>
+            </select>
+          </td>
+
+          <!-- ── Ações ──────────────────────────────────── -->
+          <td class="col-acoes">
+
+            <!-- display mode -->
+            <div *ngIf="node.id !== SENTINEL && node.id !== editingId" class="actions-row">
+              <po-button
+                p-icon="an an-pencil"
+                p-kind="tertiary"
+                p-label=""
+                p-size="small"
+                (p-click)="startEdit(node)"
+              ></po-button>
+
+              <po-button
+                p-icon="an an-plus"
+                p-kind="tertiary"
+                p-label=""
+                p-size="small"
+                (p-click)="startAdd(node.id)"
+              ></po-button>
+
+              <po-button
+                p-icon="an an-trash"
+                p-kind="tertiary"
+                [p-danger]="true"
+                p-label=""
+                p-size="small"
+                (p-click)="deleteNode(node)"
+              ></po-button>
+            </div>
+
+            <!-- edit mode -->
+            <div *ngIf="node.id === editingId" class="actions-row">
+              <po-button
+                p-icon="an an-check"
+                p-kind="primary"
+                p-label=""
+                p-size="small"
+                (p-click)="saveEdit()"
+              ></po-button>
+
+              <po-button
+                p-icon="an an-x"
+                p-kind="tertiary"
+                p-label=""
+                p-size="small"
+                (p-click)="cancelEdit()"
+              ></po-button>
+            </div>
+
+            <!-- add mode -->
+            <div *ngIf="node.id === SENTINEL" class="actions-row">
+              <po-button
+                p-icon="an an-check"
+                p-kind="primary"
+                p-label=""
+                p-size="small"
+                (p-click)="saveAdd()"
+              ></po-button>
+
+              <po-button
+                p-icon="an an-x"
+                p-kind="tertiary"
+                p-label=""
+                p-size="small"
+                (p-click)="cancelAdd()"
+              ></po-button>
+            </div>
+
+          </td>
+        </tr>
+
+        <tr *ngIf="visibleNodes.length === 0">
+          <td colspan="5" class="empty-row">
+            <i class="an an-tree-structure empty-icon"></i>
+            <p>Nenhum item. Clique em <strong>Adicionar Raiz</strong> para começar.</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</po-page-default>

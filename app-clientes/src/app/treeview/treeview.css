@@ -1,0 +1,166 @@
+.treeview-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--color-neutral-light-20, #e0e0e0);
+  border-radius: 4px;
+}
+
+/* ─── Table base ─────────────────────────────────────────── */
+.treeview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  color: var(--color-neutral-dark-95, #1a1a1a);
+}
+
+.treeview-table thead tr {
+  background-color: var(--color-neutral-light-10, #f5f5f5);
+}
+
+.treeview-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--color-neutral-dark-90, #333);
+  border-bottom: 2px solid var(--color-neutral-mid-40, #c0c0c0);
+  white-space: nowrap;
+}
+
+.treeview-table td {
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--color-neutral-light-20, #e8e8e8);
+  vertical-align: middle;
+}
+
+/* ─── Row hover ────────────────────────────────────────────── */
+.treeview-row:hover td {
+  background-color: var(--color-brand-01-lightest, #eaf4fd);
+  transition: background-color 0.15s ease;
+}
+
+/* ─── Column widths ─────────────────────────────────────────── */
+.col-nome        { min-width: 260px; }
+.col-categoria   { width: 140px;     white-space: nowrap; }
+.col-responsavel { width: 180px;     }
+.col-status      { width: 110px;     }
+.col-acoes       { width: 130px;     }
+
+/* ─── Tree cell (indent + icon + label) ─────────────────────── */
+.tree-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ─── Expand/collapse button ────────────────────────────────── */
+.expand-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-action-default, #0079b8);
+  cursor: pointer;
+  transition: background-color 0.15s;
+  padding: 0;
+}
+
+.expand-btn:hover {
+  background-color: var(--color-brand-01-lighter, #c0dff5);
+}
+
+.expand-btn i {
+  font-size: 11px;
+}
+
+/* Spacer for leaf nodes (aligns label with parent labels) */
+.expand-spacer {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+/* ─── Node icon ─────────────────────────────────────────────── */
+.node-icon {
+  font-size: 15px;
+  flex-shrink: 0;
+  color: var(--color-action-default, #0079b8);
+}
+
+/* ─── Node label ────────────────────────────────────────────── */
+.node-label {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─── Actions cell ──────────────────────────────────────────── */
+.actions-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* ─── Editing row highlight ─────────────────────────────────── */
+.treeview-row--editing td {
+  background-color: var(--color-brand-01-lightest, #eaf4fd) !important;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+/* ─── Inline inputs ─────────────────────────────────────────── */
+.inline-input,
+.inline-select {
+  display: block;
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--color-neutral-mid-40, #c0c0c0);
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  font-family: inherit;
+  color: var(--color-neutral-dark-95, #1a1a1a);
+  background-color: var(--color-neutral-light-00, #fff);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.inline-input:focus,
+.inline-select:focus {
+  border-color: var(--color-action-default, #0079b8);
+  box-shadow: 0 0 0 2px var(--color-brand-01-lighter, #c2ddf5);
+}
+
+.inline-select {
+  cursor: pointer;
+}
+
+/* ─── New row icon ───────────────────────────────────────────── */
+.node-icon--new {
+  color: var(--color-feedback-positive-dark, #1d8348);
+}
+
+/* ─── Empty state ───────────────────────────────────────────── */
+.empty-row {
+  text-align: center;
+  padding: 48px 16px !important;
+  color: var(--color-neutral-mid-60, #999);
+  border-bottom: none !important;
+}
+
+.empty-icon {
+  font-size: 40px;
+  display: block;
+  margin: 0 auto 12px;
+  opacity: 0.35;
+}
+
+.empty-row p {
+  margin: 0;
+  font-size: 0.9rem;
+}

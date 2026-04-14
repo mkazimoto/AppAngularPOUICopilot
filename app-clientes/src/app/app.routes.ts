@@ -1,18 +1,19 @@
 import { Routes } from '@angular/router';
 import { Agendamento } from './agendamento/agendamento';
 import { Carros } from './carros/carros';
-import { Organograma } from './organograma/organograma';
-import { Workflow } from './workflow/workflow';
 import { ClienteEdit } from './clientes/cliente-edit/cliente-edit';
 import { Clientes } from './clientes/clientes';
 import { Cursos } from './cursos/cursos';
 import { Dashboard } from './dashboard/dashboard';
 import { Imoveis } from './imoveis/imoveis';
 import { Kanban } from './kanban/kanban';
+import { Organograma } from './organograma/organograma';
 import { Passagens } from './passagens/passagens';
 import { Pets } from './pets/pets';
 import { Produtos } from './produtos/produtos';
 import { Tarefas } from './tarefas/tarefas';
+import { Treeview } from './treeview/treeview';
+import { Workflow } from './workflow/workflow';
 
 export const routes: Routes = [
   { path: 'dashboard', component: Dashboard },
@@ -30,5 +31,6 @@ export const routes: Routes = [
   { path: 'agendamento', component: Agendamento },
   { path: 'workflow', component: Workflow },
   { path: 'organograma', component: Organograma },
+  { path: 'treeview', component: Treeview },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 ];
