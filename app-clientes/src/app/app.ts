@@ -25,7 +25,7 @@ export class App {
     { label: 'Agendamento', link: '/agendamento', icon: 'an an-calendar' },
     { label: 'Workflow', link: '/workflow', icon: 'an an-git-branch' },
     { label: 'Organograma', link: '/organograma', icon: 'an an-users' },
-    { label: 'Tree View', link: '/treeview', icon: 'an an-tree-structure' },
+    { label: 'Tree View Editável', link: '/treeview', icon: 'an an-tree-structure' },
   ];
 
 
