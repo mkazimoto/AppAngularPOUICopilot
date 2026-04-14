@@ -195,7 +195,7 @@ export class Treeview implements OnInit {
   ];
 
   readonly pageActions: PoPageAction[] = [
-    { label: 'Adicionar Raiz', action: () => this.startAdd(null), icon: 'an an-plus-circle' },
+    { label: 'Adicionar Obra', action: () => this.startAdd(null), icon: 'an an-plus-circle' },
     { label: 'Expandir Todos', action: () => this.expandAll(),    icon: 'an an-arrows-out'  },
     { label: 'Recolher Todos', action: () => this.collapseAll(),  icon: 'an an-arrows-in'   },
   ];
@@ -224,7 +224,7 @@ export class Treeview implements OnInit {
       }
     };
     traverse(null, 0);
-    if (this.pendingAdd?.parentId === null) result.push(this.makeSentinel(null, 0));
+    if (this.pendingAdd?.parentId === null) result.unshift(this.makeSentinel(null, 0));
     this.visibleNodes = result;
   }
 
@@ -241,7 +241,8 @@ export class Treeview implements OnInit {
 
   startAdd(parentId: string | null): void {
     this.cancelEdit();
-    this.addForm = { label: '', category: 'Atividade', responsible: '', status: 'ativo', quantity: 1, unit: 'un', price: 0 };
+    const defaultCategory = parentId === null ? 'Projeto' : 'Atividade';
+    this.addForm = { label: '', category: defaultCategory, responsible: '', status: 'ativo', quantity: 1, unit: 'un', price: 0 };
     this.pendingAdd = { parentId };
     if (parentId !== null) {
       const parent = this.nodes.find(n => n.id === parentId);
@@ -314,6 +315,7 @@ export class Treeview implements OnInit {
 
   get editPreviewValue(): number { return (this.editForm.quantity || 0) * (this.editForm.price || 0); }
   get addPreviewValue(): number  { return (this.addForm.quantity  || 0) * (this.addForm.price  || 0); }
+  get totalProjeto(): number     { return this.nodes.filter(n => n.parentId === null).reduce((s, n) => s + (n.value || 0), 0); }
 
   private getAllDescendantIds(parentId: string): string[] {
     const childrenMap = new Map<string, string[]>();

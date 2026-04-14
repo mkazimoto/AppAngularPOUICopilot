@@ -1,5 +1,10 @@
 ﻿<po-page-default p-title="Tree View Editável - com 10.000 registros" [p-actions]="pageActions">
 
+  <div class="project-total">
+    <span class="project-total__label">Valor total do projeto</span>
+    <span class="project-total__value">{{ totalProjeto | currency:'BRL':'symbol':'1.2-2' }}</span>
+  </div>
+
   <div class="treeview-grid">
 
     <!-- â”€â”€ Sticky header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
@@ -82,8 +87,8 @@
 
         <!-- â"€â"€ Preço â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ -->
         <div class="td td-preco">
-          <span *ngIf="node.id !== SENTINEL && node.id !== editingId">{{ node.price | currency:'BRL':'symbol':'1.2-2' }}</span>
-          <input *ngIf="node.id === editingId" class="inline-input" type="number" min="0" step="0.01"
+          <span *ngIf="node.id !== SENTINEL && node.id !== editingId && !node.hasChildren">{{ node.price | currency:'BRL':'symbol':'1.2-2' }}</span>
+          <input *ngIf="node.id === editingId && editingIsLeaf" class="inline-input" type="number" min="0" step="0.01"
             [(ngModel)]="editForm.price" placeholder="Preço"
             (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()" />
           <input *ngIf="node.id === SENTINEL" class="inline-input" type="number" min="0" step="0.01"
@@ -94,7 +99,8 @@
         <!-- â"€â"€ Valor â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ -->
         <div class="td td-valor">
           <span *ngIf="node.id !== editingId && node.id !== SENTINEL">{{ node.value | currency:'BRL':'symbol':'1.2-2' }}</span>
-          <span *ngIf="node.id === editingId">{{ editPreviewValue | currency:'BRL':'symbol':'1.2-2' }}</span>
+          <span *ngIf="node.id === editingId && editingIsLeaf">{{ editPreviewValue | currency:'BRL':'symbol':'1.2-2' }}</span>
+          <span *ngIf="node.id === editingId && !editingIsLeaf">{{ node.value | currency:'BRL':'symbol':'1.2-2' }}</span>
           <span *ngIf="node.id === SENTINEL">{{ addPreviewValue | currency:'BRL':'symbol':'1.2-2' }}</span>
         </div>
         <!-- â”€â”€ Status â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
