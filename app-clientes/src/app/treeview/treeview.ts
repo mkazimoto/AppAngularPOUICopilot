@@ -2,13 +2,13 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
-  PoButtonModule,
-  PoFieldModule,
-  PoNotificationService,
-  PoPageAction,
-  PoPageModule,
-  PoTagModule,
-  PoTagType,
+    PoButtonModule,
+    PoFieldModule,
+    PoNotificationService,
+    PoPageAction,
+    PoPageModule,
+    PoTagModule,
+    PoTagType,
 } from '@po-ui/ng-components';
 
 export type NodeStatus = 'ativo' | 'inativo' | 'pendente';
