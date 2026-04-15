@@ -15,6 +15,7 @@ import {
   PoPageModule,
   PoPageSlideComponent,
   PoPageSlideModule,
+  PoSwitchLabelPosition,
   PoTagModule
 } from '@po-ui/ng-components';
 import { Observable, of } from 'rxjs';
@@ -245,6 +246,9 @@ export class Treeview implements OnInit {
   readonly SENTINEL = SENTINEL_ID;
   readonly ROW_HEIGHT = 50;
 
+  labelPosition: PoSwitchLabelPosition = PoSwitchLabelPosition.Right;
+
+
   // ── Column manager ─────────────────────────────────────────
   @ViewChild('columnManagerSlide') columnManagerSlide!: PoPageSlideComponent;
 
@@ -272,12 +276,38 @@ export class Treeview implements OnInit {
     return this.columns.find(c => c.key === key)?.visible ?? true;
   }
 
+  colOrder(key: string): number {
+    return this.columns.filter(c => c.visible).findIndex(c => c.key === key);
+  }
+
   openColumnManager(): void {
     this.columnManagerSlide.open();
   }
 
   restoreColumns(): void {
     this.columns = this.columns.map(c => ({ ...c, visible: true }));
+  }
+
+  moveColumn(key: string, direction: 'up' | 'down'): void {
+    const movable = this.columns.filter(c => !c.fixed);
+    const idx = movable.findIndex(c => c.key === key);
+    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= movable.length) return;
+    const colIdx = this.columns.indexOf(movable[idx]);
+    const swapIdx = this.columns.indexOf(movable[targetIdx]);
+    const cols = [...this.columns];
+    [cols[colIdx], cols[swapIdx]] = [cols[swapIdx], cols[colIdx]];
+    this.columns = cols;
+  }
+
+  isFirstMovable(key: string): boolean {
+    const movable = this.columns.filter(c => !c.fixed);
+    return movable.length > 0 && movable[0].key === key;
+  }
+
+  isLastMovable(key: string): boolean {
+    const movable = this.columns.filter(c => !c.fixed);
+    return movable.length > 0 && movable[movable.length - 1].key === key;
   }
 
   resizeStart(event: MouseEvent, colKey: string): void {

@@ -22,26 +22,26 @@
 
     <!-- ── Sticky header ─────────────────────────────────── -->
     <div class="treeview-header" [style.grid-template-columns]="colTemplate">
-      <div class="th th-nome">Nome<span class="col-resize-handle" (mousedown)="resizeStart($event, 'nome')"></span></div>
+      <div class="th th-nome" [style.order]="colOrder('nome')">Nome<span class="col-resize-handle" (mousedown)="resizeStart($event, 'nome')"></span></div>
       @if (isVisible('tipoRecurso')) {
-        <div class="th th-tipo-recurso">Tipo de Recurso<span class="col-resize-handle" (mousedown)="resizeStart($event, 'tipoRecurso')"></span></div>
+        <div class="th th-tipo-recurso" [style.order]="colOrder('tipoRecurso')">Tipo de Recurso<span class="col-resize-handle" (mousedown)="resizeStart($event, 'tipoRecurso')"></span></div>
       }
       @if (isVisible('recurso')) {
-        <div class="th th-recurso">Recurso<span class="col-resize-handle" (mousedown)="resizeStart($event, 'recurso')"></span></div>
+        <div class="th th-recurso" [style.order]="colOrder('recurso')">Recurso<span class="col-resize-handle" (mousedown)="resizeStart($event, 'recurso')"></span></div>
       }
       @if (isVisible('quantidade')) {
-        <div class="th th-quantidade">Quantidade<span class="col-resize-handle" (mousedown)="resizeStart($event, 'quantidade')"></span></div>
+        <div class="th th-quantidade" [style.order]="colOrder('quantidade')">Quantidade<span class="col-resize-handle" (mousedown)="resizeStart($event, 'quantidade')"></span></div>
       }
       @if (isVisible('unidade')) {
-        <div class="th th-unidade">Unidade<span class="col-resize-handle" (mousedown)="resizeStart($event, 'unidade')"></span></div>
+        <div class="th th-unidade" [style.order]="colOrder('unidade')">Unidade<span class="col-resize-handle" (mousedown)="resizeStart($event, 'unidade')"></span></div>
       }
       @if (isVisible('preco')) {
-        <div class="th th-preco">Preço Unitário<span class="col-resize-handle" (mousedown)="resizeStart($event, 'preco')"></span></div>
+        <div class="th th-preco" [style.order]="colOrder('preco')">Preço Unitário<span class="col-resize-handle" (mousedown)="resizeStart($event, 'preco')"></span></div>
       }
       @if (isVisible('valor')) {
-        <div class="th th-valor">Valor<span class="col-resize-handle" (mousedown)="resizeStart($event, 'valor')"></span></div>
+        <div class="th th-valor" [style.order]="colOrder('valor')">Valor<span class="col-resize-handle" (mousedown)="resizeStart($event, 'valor')"></span></div>
       }
-      <div class="th th-acoes">Ações</div>
+      <div class="th th-acoes" [style.order]="colOrder('acoes')">Ações</div>
     </div>
 
     <!-- ── Virtual scroll body ───────────────────────────── -->
@@ -57,7 +57,7 @@
         (click)="selectNode(node)"
       >
         <!-- ── Nome ─────────────────────────────────────── -->
-        <div class="td td-nome">
+        <div class="td td-nome" [style.order]="colOrder('nome')">
           <div class="tree-cell" [style.paddingLeft]="indentPx(node.level)">
 
             @if (node.hasChildren && node.id !== editingId && node.id !== SENTINEL) {
@@ -109,7 +109,7 @@
 
         <!-- Tipo de Recurso -->
         @if (isVisible('tipoRecurso')) {
-        <div class="td td-tipo-recurso">
+        <div class="td td-tipo-recurso" [style.order]="colOrder('tipoRecurso')">
           @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
             <po-tag [p-value]="node.tipoRecurso!" p-text-color="White" [p-color]="tipoRecursoColor(node.tipoRecurso)"></po-tag>
           }
@@ -134,7 +134,7 @@
 
         <!-- Recurso -->
         @if (isVisible('recurso')) {
-        <div class="td td-recurso">
+        <div class="td td-recurso" [style.order]="colOrder('recurso')">
           @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
             @if (node.recursoId) {
               <a class="recurso-link" [href]="'app://editar-recurso/' + node.recursoId">{{ node.recurso }}</a>
@@ -206,7 +206,7 @@
         }
 
         @if (isVisible('quantidade')) {
-        <div class="td td-quantidade">
+        <div class="td td-quantidade" [style.order]="colOrder('quantidade')">
           @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
             <span>{{ node.quantity }}</span>
           }
@@ -233,7 +233,7 @@
 
         <!--  Unidade  -->
         @if (isVisible('unidade')) {
-        <div class="td td-unidade">
+        <div class="td td-unidade" [style.order]="colOrder('unidade')">
           @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
             <span>{{ node.unit }}</span>
           }
@@ -268,7 +268,7 @@
 
         <!--  Preço  -->
         @if (isVisible('preco')) {
-        <div class="td td-preco">
+        <div class="td td-preco" [style.order]="colOrder('preco')">
           @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
             <span>{{ node.price | currency:'BRL':'symbol':'1.2-2' }}</span>
           }
@@ -295,7 +295,7 @@
 
         <!--  Valor  -->
         @if (isVisible('valor')) {
-        <div class="td td-valor">
+        <div class="td td-valor" [style.order]="colOrder('valor')">
           @if (node.id !== editingId && node.id !== SENTINEL) {
             <span>{{ node.value | currency:'BRL':'symbol':'1.2-2' }}</span>
           }
@@ -309,7 +309,7 @@
             <span>{{ addPreviewValue | currency:'BRL':'symbol':'1.2-2' }}</span>
           }
         </div>        }        <!-- ── Ações ─────────────────────────────────────── -->
-        <div class="td td-acoes">
+        <div class="td td-acoes" [style.order]="colOrder('acoes')">
           @if (node.id !== SENTINEL && node.id !== editingId) {
             <div class="actions-row">
               <po-button p-icon="an an-pencil" p-kind="tertiary" p-label="" p-size="small" (p-click)="startEdit(node)"></po-button>
@@ -359,8 +359,31 @@
             <po-switch
               [name]="'col-' + col.key"
               [p-label]="col.label"
+              [p-label-position]="labelPosition"              
+              [p-label-on]="' '"
+              [p-label-off]="' '"
               [(ngModel)]="col.visible">
             </po-switch>
+            <div class="column-manager-move">
+              <po-button
+                p-icon="an an-caret-up"
+                p-kind="secondary"
+                p-size="small"
+                p-label=""
+                p-tooltip="Mover para cima"
+                [p-disabled]="isFirstMovable(col.key)"
+                (p-click)="moveColumn(col.key, 'up')">
+              </po-button>
+              <po-button
+                p-icon="an an-caret-down"
+                p-kind="secondary"
+                p-size="small"
+                p-label=""
+                p-tooltip="Mover para baixo"
+                [p-disabled]="isLastMovable(col.key)"
+                (p-click)="moveColumn(col.key, 'down')">
+              </po-button>
+            </div>
           </div>
         }
       }
