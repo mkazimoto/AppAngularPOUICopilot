@@ -49,7 +49,7 @@
 
             @if (node.id !== SENTINEL) {
               <i class="an node-icon"
-                 [class.an-folder-full]="node.hasChildren && !node.expanded"
+                 [class.an-folder]="node.hasChildren && !node.expanded"
                  [class.an-folder-open]="node.hasChildren && node.expanded"
                  [class.an-file-text]="!node.hasChildren"></i>
             } @else {
