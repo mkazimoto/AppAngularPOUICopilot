@@ -15,7 +15,6 @@
       <div class="th th-unidade">Unidade</div>
       <div class="th th-preco">Preço Unitário</div>
       <div class="th th-valor">Valor</div>
-      <div class="th th-status">Status</div>
       <div class="th th-acoes">Ações</div>
     </div>
 
@@ -131,18 +130,6 @@
           <span *ngIf="node.id === editingId && !editingIsLeaf">{{ node.value | currency:'BRL':'symbol':'1.2-2' }}</span>
           <span *ngIf="node.id === SENTINEL">{{ addPreviewValue | currency:'BRL':'symbol':'1.2-2' }}</span>
         </div>
-        <!-- ── Status ────────────────────────────────────── -->
-        <div class="td td-status">
-          <po-tag *ngIf="node.id !== SENTINEL && node.id !== editingId"
-            [p-label]="statusLabel(node.status)" [p-type]="statusType(node.status)"></po-tag>
-          <select *ngIf="node.id === editingId" class="inline-select" [(ngModel)]="editForm.status">
-            <option *ngFor="let o of statusOptions" [value]="o.value">{{ o.label }}</option>
-          </select>
-          <select *ngIf="node.id === SENTINEL" class="inline-select" [(ngModel)]="addForm.status">
-            <option *ngFor="let o of statusOptions" [value]="o.value">{{ o.label }}</option>
-          </select>
-        </div>
-
         <!-- ── Ações ─────────────────────────────────────── -->
         <div class="td td-acoes">
           <div *ngIf="node.id !== SENTINEL && node.id !== editingId" class="actions-row">
