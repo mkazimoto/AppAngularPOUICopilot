@@ -120,10 +120,12 @@ function buildEapNodes(): TreeNode[] {
   const nodes: TreeNode[] = [];
   let seq = 1;
 
-  const rootId = String(seq++);
+ const rootCode = `${(seq).toString().padStart(3, '0')}`;
+ const rootId = String(seq++);
+ 
   nodes.push({
     id: rootId,
-    label: 'EAP - Estrutura Analítica do Projeto',
+    label: `${rootCode} - EAP (Estrutura Analítica do Projeto)`,
     category: 'Projeto',
     responsible: 'João Silva',
     status: 'ativo',
@@ -140,7 +142,7 @@ function buildEapNodes(): TreeNode[] {
     const faseId = String(seq++);
     nodes.push({
       id: faseId,
-      label: `${f + 1}. ${FASES[f]}`,
+      label: `${rootCode}.${(f + 1).toString().padStart(2, '0')} - ${FASES[f]}`,
       category: 'Fase',
       responsible: RESPONSAVEIS[f % RESPONSAVEIS.length],
       status: STATUSES[f % STATUSES.length],
@@ -156,7 +158,7 @@ function buildEapNodes(): TreeNode[] {
       const entId = String(seq++);
       nodes.push({
         id: entId,
-        label: `${f + 1}.${e + 1} ${ENTREGAVEIS[e]}`,
+        label: `${rootCode}.${(f + 1).toString().padStart(2, '0')}.${(e + 1).toString().padStart(2, '0')} - ${ENTREGAVEIS[e]}`,
         category: 'Entregável',
         responsible: RESPONSAVEIS[(f + e) % RESPONSAVEIS.length],
         status: STATUSES[(f + e) % STATUSES.length],
@@ -172,7 +174,7 @@ function buildEapNodes(): TreeNode[] {
         const pacId = String(seq++);
         nodes.push({
           id: pacId,
-          label: `${f + 1}.${e + 1}.${p + 1} ${PACOTES[p]}`,
+          label: `${rootCode}.${(f + 1).toString().padStart(2, '0')}.${(e + 1).toString().padStart(2, '0')}.${(p + 1).toString().padStart(2, '0')} - ${PACOTES[p]}`,
           category: 'Pacote de Trabalho',
           responsible: RESPONSAVEIS[(f + e + p) % RESPONSAVEIS.length],
           status: STATUSES[(f + e + p) % STATUSES.length],
@@ -188,7 +190,7 @@ function buildEapNodes(): TreeNode[] {
           const insumo = INSUMOS[(f + e + p + a) % INSUMOS.length];
           nodes.push({
             id: String(seq++),
-            label: `${f + 1}.${e + 1}.${p + 1}.${a} Atividade ${a}`,
+            label: `${rootCode}.${(f + 1).toString().padStart(2, '0')}.${(e + 1).toString().padStart(2, '0')}.${(p + 1).toString().padStart(2, '0')}.${a.toString().padStart(2, '0')} - Atividade ${a}`,
             category: 'Atividade',
             responsible: RESPONSAVEIS[(f + e + p + a) % RESPONSAVEIS.length],
             status: STATUSES[(f + e + p + a) % STATUSES.length],
