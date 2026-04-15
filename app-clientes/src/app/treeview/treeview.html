@@ -108,7 +108,11 @@
         <!-- Recurso -->
         <div class="td td-recurso">
           @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
-            <span>{{ node.recurso }}</span>
+            @if (node.recursoId) {
+              <a class="recurso-link" [href]="'app://editar-recurso/' + node.recursoId">{{ node.recurso }}</a>
+            } @else {
+              <span>{{ node.recurso }}</span>
+            }
           }
           <!-- Edit: Insumo -->
           @if (node.id === editingId && editingIsLeaf && editForm.tipoRecurso === 'Insumo') {
