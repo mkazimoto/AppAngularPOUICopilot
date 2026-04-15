@@ -269,6 +269,13 @@ export class Treeview implements OnInit {
   visibleNodes: FlatNode[] = [];
   searchTerm = '';
 
+  selectedId: string | null = null;
+
+  selectNode(node: FlatNode): void {
+    if (node.id === SENTINEL_ID || node.id === this.editingId) return;
+    this.selectedId = node.id === this.selectedId ? null : node.id;
+  }
+
   editingId: string | null = null;
   editingIsLeaf = false;
   editForm = { label: '', tipoRecurso: 'Insumo' as string, quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '', insumoId: '', composicaoId: '' };
@@ -302,7 +309,7 @@ export class Treeview implements OnInit {
   ];
 
   tipoRecursoColor(tipo?: TipoRecurso): string {
-    return tipo === 'Composição' ? '#55AA55' : '#5555AA';
+    return tipo === 'Composição' ? '#55FF99' : '#5599FF';
   }
 
   readonly pageFilter: PoPageFilter = {

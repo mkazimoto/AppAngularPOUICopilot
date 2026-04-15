@@ -27,7 +27,9 @@
         class="treeview-row"
         [style.grid-template-columns]="colTemplate"
         [class.treeview-row--editing]="node.id === editingId || node.id === SENTINEL"
+        [class.treeview-row--selected]="node.id === selectedId && node.id !== editingId && node.id !== SENTINEL"
         [style.height.px]="ROW_HEIGHT"
+        (click)="selectNode(node)"
       >
         <!-- ── Nome ─────────────────────────────────────── -->
         <div class="td td-nome">
