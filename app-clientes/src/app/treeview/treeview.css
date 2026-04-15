@@ -2,7 +2,7 @@
 .project-total {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 12px;
   padding: 10px 16px;
   margin-bottom: 12px;
@@ -10,6 +10,11 @@
   border: 1px solid var(--color-brand-01-light, #74b8e8);
   border-radius: 4px;
   font-size: 0.9375rem;
+}
+
+.project-total__search {
+  flex: 1;
+  max-width: 320px;
 }
 
 .project-total__label {

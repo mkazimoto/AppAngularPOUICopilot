@@ -1,6 +1,13 @@
 <po-page-default p-title="Tree View Editável - com 10.000 registros" [p-actions]="pageActions">
 
   <div class="project-total">
+    <po-search
+      name="treeSearch"
+      p-placeholder="Pesquisar por nome ou recurso..."
+      p-search-type="action"
+      class="project-total__search"
+      (p-change-model)="onSearch($event)">
+    </po-search>
     <span class="project-total__label">Valor total do projeto</span>
     <span class="project-total__value">{{ totalProjeto | currency:'BRL':'symbol':'1.2-2' }}</span>
   </div>

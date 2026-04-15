@@ -12,6 +12,7 @@ import {
   PoNotificationService,
   PoPageAction,
   PoPageModule,
+  PoSearchModule,
 } from '@po-ui/ng-components';
 import { Observable, of } from 'rxjs';
 
@@ -217,7 +218,7 @@ function buildEapNodes(): TreeNode[] {
 @Component({
   selector: 'app-treeview',
   standalone: true,
-  imports: [CommonModule, FormsModule, ScrollingModule, PoButtonModule, PoFieldModule, PoPageModule],
+  imports: [CommonModule, FormsModule, ScrollingModule, PoButtonModule, PoFieldModule, PoPageModule, PoSearchModule],
   templateUrl: './treeview.html',
   styleUrl: './treeview.css',
 })
@@ -257,6 +258,7 @@ export class Treeview implements OnInit {
 
   nodes: TreeNode[] = buildEapNodes();
   visibleNodes: FlatNode[] = [];
+  searchTerm = '';
 
   editingId: string | null = null;
   editingIsLeaf = false;
@@ -310,7 +312,27 @@ export class Treeview implements OnInit {
 
   ngOnInit(): void { this.recalculateAll(); this.refreshVisibleNodes(); }
 
+  onSearch(term: string | null): void {
+    this.searchTerm = (term ?? '').trim();
+    this.refreshVisibleNodes();
+  }
+
   refreshVisibleNodes(): void {
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      const hasChildrenSet = new Set<string>();
+      for (const node of this.nodes) {
+        if (node.parentId !== null) hasChildrenSet.add(node.parentId);
+      }
+      this.visibleNodes = this.nodes
+        .filter(n =>
+          n.label.toLowerCase().includes(term) ||
+          (n.recurso ?? '').toLowerCase().includes(term)
+        )
+        .map(n => ({ ...n, level: 0, hasChildren: hasChildrenSet.has(n.id) }));
+      return;
+    }
+
     const result: FlatNode[] = [];
     const childrenMap = new Map<string | null, TreeNode[]>();
     const hasChildrenSet = new Set<string>();
