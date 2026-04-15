@@ -43,23 +43,23 @@ export interface FlatNode extends TreeNode {
 const SENTINEL_ID = '__new__';
 
 const INSUMOS = [
-  { id: 'INS001', nome: 'Cimento CP-II 32', unidade: 'kg',  preco: 0.85  },
-  { id: 'INS002', nome: 'Areia média lavada', unidade: 'm³', preco: 85.00 },
-  { id: 'INS003', nome: 'Brita 1', unidade: 'm³', preco: 120.00 },
-  { id: 'INS004', nome: 'Aço CA-50 10mm', unidade: 'kg',  preco: 8.50  },
-  { id: 'INS005', nome: 'Tijolo cerâmico 9 furos', unidade: 'un',  preco: 1.20  },
-  { id: 'INS006', nome: 'Cal hidratada CH-III', unidade: 'kg',  preco: 0.65  },
-  { id: 'INS007', nome: 'Cerâmica piso 60x60', unidade: 'm²', preco: 45.00 },
-  { id: 'INS008', nome: 'Tinta acrílica premium', unidade: 'l',   preco: 18.00 },
-  { id: 'INS009', nome: 'Tubo PVC 100mm', unidade: 'm',   preco: 12.50 },
-  { id: 'INS010', nome: 'Fio elétrico 2,5mm²', unidade: 'm',   preco: 3.80  },
+  { id: 'INS001', nome: 'Cimento CP-II 32', unidade: 'KG', preco: 0.85   },
+  { id: 'INS002', nome: 'Areia média lavada', unidade: 'M3', preco: 85.00 },
+  { id: 'INS003', nome: 'Brita 1', unidade: 'M3', preco: 120.00           },
+  { id: 'INS004', nome: 'Aço CA-50 10mm', unidade: 'KG', preco: 8.50     },
+  { id: 'INS005', nome: 'Tijolo cerâmico 9 furos', unidade: 'UN', preco: 1.20 },
+  { id: 'INS006', nome: 'Cal hidratada CH-III', unidade: 'KG', preco: 0.65 },
+  { id: 'INS007', nome: 'Cerâmica piso 60x60', unidade: 'M2', preco: 45.00 },
+  { id: 'INS008', nome: 'Tinta acrílica premium', unidade: 'L', preco: 18.00 },
+  { id: 'INS009', nome: 'Tubo PVC 100mm', unidade: 'M', preco: 12.50     },
+  { id: 'INS010', nome: 'Fio elétrico 2,5mm²', unidade: 'M', preco: 3.80 },
 ];
 
 class InsumoFilterService implements PoLookupFilter {
   getFilteredItems(params: PoLookupFilteredItemsParams): Observable<PoLookupResponseApi> {
-    const f = (params.filter ?? '').toLowerCase();
+    const f = (params.filter ?? '').toUpperCase();
     const items = f
-      ? INSUMOS.filter(i => i.nome.toLowerCase().includes(f) || i.id.toLowerCase().includes(f))
+      ? INSUMOS.filter(i => i.nome.toUpperCase().includes(f) || i.id.toUpperCase().includes(f))
       : INSUMOS;
     return of({ items, hasNext: false });
   }
@@ -68,7 +68,30 @@ class InsumoFilterService implements PoLookupFilter {
   }
 }
 
-// â”€â”€ EAP generation constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const UNIT_ITEMS = [
+  { value: 'UN', label: 'Unidade (UN)'         },
+  { value: 'H',  label: 'Hora (H)'             },
+  { value: 'KG', label: 'Quilograma (KG)'      },
+  { value: 'M',  label: 'Metro (M)'            },
+  { value: 'M2', label: 'Metro quadrado (M2)'  },
+  { value: 'M3', label: 'Metro cúbico (M3)'    },
+  { value: 'L',  label: 'Litro (L)'            },
+];
+
+class UnitFilterService implements PoLookupFilter {
+  getFilteredItems(params: PoLookupFilteredItemsParams): Observable<PoLookupResponseApi> {
+    const f = (params.filter ?? '').toUpperCase();
+    const items = f
+      ? UNIT_ITEMS.filter(u => u.value.toUpperCase().includes(f) || u.label.toUpperCase().includes(f))
+      : UNIT_ITEMS;
+    return of({ items, hasNext: false });
+  }
+  getObjectByValue(value: string): Observable<any> {
+    return of(UNIT_ITEMS.find(u => u.value === String(value)) ?? null);
+  }
+}
+
+// ── EAP generation constants ────────────────────────────────
 const FASES = [
   'Inicialização', 'Planejamento', 'Requisitos', 'Arquitetura', 'Desenvolvimento',
   'Testes', 'Integração', 'Implantação', 'Treinamento', 'Encerramento',
@@ -90,7 +113,7 @@ const RESPONSAVEIS = [
 ];
 
 const STATUSES: NodeStatus[] = ['ativo', 'ativo', 'ativo', 'pendente', 'inativo'];
-const UNITS = ['un', 'h', 'kg', 'm', 'm²', 'l'];
+const UNITS = ['UN', 'H', 'KG', 'M', 'M2', 'M3', 'L'];
 const VALUES = [100, 250, 500, 1000, 1500, 2000, 2500, 3000, 5000, 10000];
 
 function buildEapNodes(): TreeNode[] {
@@ -105,7 +128,7 @@ function buildEapNodes(): TreeNode[] {
     responsible: 'João Silva',
     status: 'ativo',
     quantity: 1,
-    unit: 'un',
+    unit: 'UN',
     price: 0,
     value: 0,
     parentId: null,
@@ -122,7 +145,7 @@ function buildEapNodes(): TreeNode[] {
       responsible: RESPONSAVEIS[f % RESPONSAVEIS.length],
       status: STATUSES[f % STATUSES.length],
       quantity: 1,
-      unit: 'un',
+      unit: 'UN',
       price: VALUES[(f * 3) % VALUES.length],
       value: 0,
       parentId: rootId,
@@ -153,7 +176,7 @@ function buildEapNodes(): TreeNode[] {
           category: 'Pacote de Trabalho',
           responsible: RESPONSAVEIS[(f + e + p) % RESPONSAVEIS.length],
           status: STATUSES[(f + e + p) % STATUSES.length],
-          quantity: (p % 20) + 1,
+          quantity: ((p % 20) + 1) * 10,
           unit: UNITS[(f + e + p) % UNITS.length],
           price: VALUES[(f + e + p) % VALUES.length],
           value: 0,
@@ -202,25 +225,22 @@ export class Treeview implements OnInit {
 
   editingId: string | null = null;
   editingIsLeaf = false;
-  editForm = { label: '', category: 'Fase', responsible: '', status: 'ativo' as NodeStatus, quantity: 1, unit: 'un', price: 0, recurso: '', recursoId: '' };
+  editForm = { label: '', category: 'Fase', responsible: '', status: 'ativo' as NodeStatus, quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '' };
 
   pendingAdd: { parentId: string | null } | null = null;
-  addForm = { label: '', category: 'Atividade', responsible: '', status: 'ativo' as NodeStatus, quantity: 1, unit: 'un', price: 0, recurso: '', recursoId: '' };
+  addForm = { label: '', category: 'Atividade', responsible: '', status: 'ativo' as NodeStatus, quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '' };
 
   readonly insumoService = new InsumoFilterService();
-  readonly insumoColumns: PoLookupColumn[] = [
-    { property: 'id',      label: 'Código',    width: '100px' },
-    { property: 'nome',    label: 'Nome',      width: '55%'   },
-    { property: 'unidade', label: 'Un.',       width: '60px'  },
-    { property: 'preco',   label: 'Preço',     width: '90px'  },
+  readonly unitService = new UnitFilterService();
+  readonly unitColumns: PoLookupColumn[] = [
+    { property: 'value', label: 'Código',    width: '150px' },
+    { property: 'label', label: 'Descricao',  width: '300px' },
   ];
-
-  readonly categoryOptions = [
-    { label: 'Projeto',            value: 'Projeto'            },
-    { label: 'Fase',               value: 'Fase'               },
-    { label: 'Entregável',         value: 'Entregável'         },
-    { label: 'Pacote de Trabalho', value: 'Pacote de Trabalho' },
-    { label: 'Atividade',          value: 'Atividade'          },
+  readonly insumoColumns: PoLookupColumn[] = [
+    { property: 'id',      label: 'Código',    width: '150px' },
+    { property: 'nome',    label: 'Nome',      width: '55%'   },
+    { property: 'unidade', label: 'Un.',       width: '150px'  },
+    { property: 'preco',   label: 'Preço',     width: '150px'  },
   ];
 
   readonly unitOptions = [
@@ -232,11 +252,6 @@ export class Treeview implements OnInit {
     { label: 'l',   value: 'l'   },
   ];
 
-  readonly statusOptions = [
-    { label: 'Ativo',    value: 'ativo'    },
-    { label: 'Inativo',  value: 'inativo'  },
-    { label: 'Pendente', value: 'pendente' },
-  ];
 
   readonly pageActions: PoPageAction[] = [
     { label: 'Adicionar Obra', action: () => this.startAdd(null), icon: 'an an-plus-circle' },
@@ -273,7 +288,7 @@ export class Treeview implements OnInit {
   }
 
   private makeSentinel(parentId: string | null, level: number): FlatNode {
-    return { id: SENTINEL_ID, label: '', category: 'Atividade', responsible: '', status: 'ativo', quantity: 1, unit: 'un', price: 0, value: 0, parentId, expanded: false, level, hasChildren: false };
+    return { id: SENTINEL_ID, label: '', category: 'Atividade', responsible: '', status: 'ativo', quantity: 1, unit: 'UN', price: 0, value: 0, parentId, expanded: false, level, hasChildren: false };
   }
 
   trackById(_i: number, n: FlatNode): string { return n.id; }
@@ -286,7 +301,7 @@ export class Treeview implements OnInit {
   startAdd(parentId: string | null): void {
     this.cancelEdit();
     const defaultCategory = parentId === null ? 'Projeto' : 'Atividade';
-    this.addForm = { label: '', category: defaultCategory, responsible: '', status: 'ativo', quantity: 1, unit: 'un', price: 0, recurso: '', recursoId: '' };
+    this.addForm = { label: '', category: defaultCategory, responsible: '', status: 'ativo', quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '' };
     this.pendingAdd = { parentId };
     if (parentId !== null) {
       const parent = this.nodes.find(n => n.id === parentId);

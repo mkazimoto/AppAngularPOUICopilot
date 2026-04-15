@@ -104,12 +104,26 @@
         <!--  Unidade  -->
         <div class="td td-unidade">
           <span *ngIf="node.id !== SENTINEL && node.id !== editingId && !node.hasChildren">{{ node.unit }}</span>
-          <select *ngIf="node.id === editingId && editingIsLeaf" class="inline-select" [(ngModel)]="editForm.unit">
-            <option *ngFor="let o of unitOptions" [value]="o.value">{{ o.label }}</option>
-          </select>
-          <select *ngIf="node.id === SENTINEL" class="inline-select" [(ngModel)]="addForm.unit">
-            <option *ngFor="let o of unitOptions" [value]="o.value">{{ o.label }}</option>
-          </select>
+          <po-lookup *ngIf="node.id === editingId && editingIsLeaf"
+            name="editUnit"
+            p-placeholder="Unidade"
+            p-field-value="value"
+            p-field-label="label"
+            p-clean
+            [p-filter-service]="unitService"
+            [p-columns]="unitColumns"
+            [(ngModel)]="editForm.unit">
+          </po-lookup>
+          <po-lookup *ngIf="node.id === SENTINEL"
+            name="addUnit"
+            p-placeholder="Unidade"
+            p-field-value="value"
+            p-field-label="label"
+            p-clean
+            [p-filter-service]="unitService"
+            [p-columns]="unitColumns"
+            [(ngModel)]="addForm.unit">
+          </po-lookup>
         </div>
 
         <!--  Preço  -->
