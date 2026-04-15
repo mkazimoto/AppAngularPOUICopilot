@@ -8,14 +8,14 @@
   <div class="treeview-grid">
 
     <!-- ── Sticky header ─────────────────────────────────── -->
-    <div class="treeview-header">
-      <div class="th th-nome">Nome</div>
-      <div class="th th-tipo-recurso">Tipo de Recurso</div>
-      <div class="th th-recurso">Recurso (Insumo)</div>
-      <div class="th th-quantidade">Quantidade</div>
-      <div class="th th-unidade">Unidade</div>
-      <div class="th th-preco">Preço Unitário</div>
-      <div class="th th-valor">Valor</div>
+    <div class="treeview-header" [style.grid-template-columns]="colTemplate">
+      <div class="th th-nome">Nome<span class="col-resize-handle" (mousedown)="resizeStart($event, 0)"></span></div>
+      <div class="th th-tipo-recurso">Tipo de Recurso<span class="col-resize-handle" (mousedown)="resizeStart($event, 1)"></span></div>
+      <div class="th th-recurso">Recurso<span class="col-resize-handle" (mousedown)="resizeStart($event, 2)"></span></div>
+      <div class="th th-quantidade">Quantidade<span class="col-resize-handle" (mousedown)="resizeStart($event, 3)"></span></div>
+      <div class="th th-unidade">Unidade<span class="col-resize-handle" (mousedown)="resizeStart($event, 4)"></span></div>
+      <div class="th th-preco">Preço Unitário<span class="col-resize-handle" (mousedown)="resizeStart($event, 5)"></span></div>
+      <div class="th th-valor">Valor<span class="col-resize-handle" (mousedown)="resizeStart($event, 6)"></span></div>
       <div class="th th-acoes">Ações</div>
     </div>
 
@@ -25,6 +25,7 @@
       <div
         *cdkVirtualFor="let node of visibleNodes; trackBy: trackById"
         class="treeview-row"
+        [style.grid-template-columns]="colTemplate"
         [class.treeview-row--editing]="node.id === editingId || node.id === SENTINEL"
         [style.height.px]="ROW_HEIGHT"
       >
@@ -55,13 +56,19 @@
 
             <span *ngIf="node.id !== SENTINEL && node.id !== editingId" class="node-label">{{ node.label }}</span>
 
-            <input *ngIf="node.id === editingId" class="inline-input"
-              [(ngModel)]="editForm.label" placeholder="Nome"
-              (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()" />
+            <po-input *ngIf="node.id === editingId"
+              name="editLabel"
+              p-placeholder="Nome"
+              [(ngModel)]="editForm.label"
+              (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()">
+            </po-input>
 
-            <input *ngIf="node.id === SENTINEL" class="inline-input"
-              [(ngModel)]="addForm.label" placeholder="Nome"
-              (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()" />
+            <po-input *ngIf="node.id === SENTINEL"
+              name="addLabel"
+              p-placeholder="Nome"
+              [(ngModel)]="addForm.label"
+              (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()">
+            </po-input>
           </div>
         </div>
 
@@ -141,12 +148,20 @@
 
         <div class="td td-quantidade">
           <span *ngIf="node.id !== SENTINEL && node.id !== editingId && !node.hasChildren">{{ node.quantity }}</span>
-          <input *ngIf="node.id === editingId && editingIsLeaf" class="inline-input" type="number" min="0"
-            [(ngModel)]="editForm.quantity" placeholder="Qtd"
-            (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()" />
-          <input *ngIf="node.id === SENTINEL" class="inline-input" type="number" min="0"
-            [(ngModel)]="addForm.quantity" placeholder="Qtd"
-            (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()" />
+          <po-decimal *ngIf="node.id === editingId && editingIsLeaf"
+            name="editQuantity"
+            p-placeholder="Qtd"
+            [p-decimals-length]="3"
+            [(ngModel)]="editForm.quantity"
+            (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()">
+          </po-decimal>
+          <po-decimal *ngIf="node.id === SENTINEL"
+            name="addQuantity"
+            p-placeholder="Qtd"
+            [p-decimals-length]="3"
+            [(ngModel)]="addForm.quantity"
+            (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()">
+          </po-decimal>
         </div>
 
         <!--  Unidade  -->
@@ -179,12 +194,20 @@
         <!--  Preço  -->
         <div class="td td-preco">
           <span *ngIf="node.id !== SENTINEL && node.id !== editingId && !node.hasChildren">{{ node.price | currency:'BRL':'symbol':'1.2-2' }}</span>
-          <input *ngIf="node.id === editingId && editingIsLeaf" class="inline-input" type="number" min="0" step="0.01"
-            [(ngModel)]="editForm.price" placeholder="Preço Unitário"
-            (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()" />
-          <input *ngIf="node.id === SENTINEL" class="inline-input" type="number" min="0" step="0.01"
-            [(ngModel)]="addForm.price" placeholder="Preço"
-            (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()" />
+          <po-decimal *ngIf="node.id === editingId && editingIsLeaf"
+            name="editPrice"
+            p-placeholder="Preço Unitário"
+            [p-decimals-length]="2"
+            [(ngModel)]="editForm.price"
+            (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()">
+          </po-decimal>
+          <po-decimal *ngIf="node.id === SENTINEL"
+            name="addPrice"
+            p-placeholder="Preço"
+            [p-decimals-length]="2"
+            [(ngModel)]="addForm.price"
+            (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()">
+          </po-decimal>
         </div>
 
         <!--  Valor  -->

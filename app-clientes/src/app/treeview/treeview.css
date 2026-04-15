@@ -36,7 +36,6 @@
 .treeview-header,
 .treeview-row {
   display: grid;
-  grid-template-columns: minmax(200px, 2fr) 130px minmax(160px, 1.5fr) 110px 150px 150px 110px 110px 150px;
   align-items: center;
 }
 
@@ -54,6 +53,25 @@
   font-weight: 700;
   color: var(--color-neutral-dark-90, #333);
   white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ─── Column resize handle ──────────────────────────────────── */
+.col-resize-handle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 6px;
+  cursor: col-resize;
+  user-select: none;
+  z-index: 2;
+}
+
+.col-resize-handle:hover,
+.col-resize-handle:active {
+  border-right: 2px solid var(--color-action-default, #0079b8);
 }
 
 /* ─── Virtual scroll viewport ───────────────────────────────── */

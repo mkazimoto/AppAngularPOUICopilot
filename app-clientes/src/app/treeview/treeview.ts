@@ -1,6 +1,6 @@
 ﻿import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   PoButtonModule,
@@ -224,6 +224,36 @@ function buildEapNodes(): TreeNode[] {
 export class Treeview implements OnInit {
   readonly SENTINEL = SENTINEL_ID;
   readonly ROW_HEIGHT = 44;
+
+  // ── Resizable columns ──────────────────────────────────────
+  colWidths = [280, 130, 200, 110, 130, 150, 120, 100];
+  private _resizingCol = -1;
+  private _resizeStartX = 0;
+  private _resizeStartWidth = 0;
+
+  get colTemplate(): string {
+    return this.colWidths.map(w => w + 'px').join(' ');
+  }
+
+  resizeStart(event: MouseEvent, colIndex: number): void {
+    this._resizingCol    = colIndex;
+    this._resizeStartX   = event.clientX;
+    this._resizeStartWidth = this.colWidths[colIndex];
+    event.preventDefault();
+  }
+
+  @HostListener('document:mousemove', ['$event'])
+  onMouseMove(event: MouseEvent): void {
+    if (this._resizingCol < 0) return;
+    const delta = event.clientX - this._resizeStartX;
+    this.colWidths[this._resizingCol] = Math.max(60, this._resizeStartWidth + delta);
+  }
+
+  @HostListener('document:mouseup')
+  onMouseUp(): void {
+    this._resizingCol = -1;
+  }
+  // ───────────────────────────────────────────────────────────
 
   nodes: TreeNode[] = buildEapNodes();
   visibleNodes: FlatNode[] = [];
