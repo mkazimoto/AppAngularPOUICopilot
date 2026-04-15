@@ -1,4 +1,4 @@
-﻿<po-page-default p-title="Tree View Editável - com 10.000 registros" [p-actions]="pageActions">
+<po-page-default p-title="Tree View Edit�vel - com 10.000 registros" [p-actions]="pageActions">
 
   <div class="project-total">
     <span class="project-total__label">Valor total do projeto</span>
@@ -7,18 +7,18 @@
 
   <div class="treeview-grid">
 
-    <!-- â”€â”€ Sticky header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Sticky header ─────────────────────────────────── -->
     <div class="treeview-header">
       <div class="th th-nome">Nome</div>
       <div class="th th-quantidade">Quantidade</div>
       <div class="th th-unidade">Unidade</div>
-      <div class="th th-preco">Preço</div>
+      <div class="th th-preco">Preço Unitário</div>
       <div class="th th-valor">Valor</div>
       <div class="th th-status">Status</div>
       <div class="th th-acoes">Ações</div>
     </div>
 
-    <!-- â”€â”€ Virtual scroll body â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <!-- ── Virtual scroll body ───────────────────────────── -->
     <cdk-virtual-scroll-viewport [itemSize]="ROW_HEIGHT" class="treeview-viewport">
 
       <div
@@ -27,7 +27,7 @@
         [class.treeview-row--editing]="node.id === editingId || node.id === SENTINEL"
         [style.height.px]="ROW_HEIGHT"
       >
-        <!-- â”€â”€ Nome â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <!-- ── Nome ─────────────────────────────────────── -->
         <div class="td td-nome">
           <div class="tree-cell" [style.paddingLeft]="indentPx(node.level)">
 
@@ -74,7 +74,7 @@
             (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()" />
         </div>
 
-        <!-- â"€â"€ Unidade â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ -->
+        <!--  Unidade  -->
         <div class="td td-unidade">
           <span *ngIf="node.id !== SENTINEL && node.id !== editingId && !node.hasChildren">{{ node.unit }}</span>
           <select *ngIf="node.id === editingId && editingIsLeaf" class="inline-select" [(ngModel)]="editForm.unit">
@@ -85,25 +85,25 @@
           </select>
         </div>
 
-        <!-- â"€â"€ Preço â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ -->
+        <!--  Preço  -->
         <div class="td td-preco">
           <span *ngIf="node.id !== SENTINEL && node.id !== editingId && !node.hasChildren">{{ node.price | currency:'BRL':'symbol':'1.2-2' }}</span>
           <input *ngIf="node.id === editingId && editingIsLeaf" class="inline-input" type="number" min="0" step="0.01"
-            [(ngModel)]="editForm.price" placeholder="Preço"
+            [(ngModel)]="editForm.price" placeholder="Preço Unitário"
             (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()" />
           <input *ngIf="node.id === SENTINEL" class="inline-input" type="number" min="0" step="0.01"
             [(ngModel)]="addForm.price" placeholder="Preço"
             (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()" />
         </div>
 
-        <!-- â"€â"€ Valor â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ -->
+        <!--  Valor  -->
         <div class="td td-valor">
           <span *ngIf="node.id !== editingId && node.id !== SENTINEL">{{ node.value | currency:'BRL':'symbol':'1.2-2' }}</span>
           <span *ngIf="node.id === editingId && editingIsLeaf">{{ editPreviewValue | currency:'BRL':'symbol':'1.2-2' }}</span>
           <span *ngIf="node.id === editingId && !editingIsLeaf">{{ node.value | currency:'BRL':'symbol':'1.2-2' }}</span>
           <span *ngIf="node.id === SENTINEL">{{ addPreviewValue | currency:'BRL':'symbol':'1.2-2' }}</span>
         </div>
-        <!-- â”€â”€ Status â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <!-- ── Status ────────────────────────────────────── -->
         <div class="td td-status">
           <po-tag *ngIf="node.id !== SENTINEL && node.id !== editingId"
             [p-label]="statusLabel(node.status)" [p-type]="statusType(node.status)"></po-tag>
@@ -115,7 +115,7 @@
           </select>
         </div>
 
-        <!-- â”€â”€ Ações â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+        <!-- ── Ações ─────────────────────────────────────── -->
         <div class="td td-acoes">
           <div *ngIf="node.id !== SENTINEL && node.id !== editingId" class="actions-row">
             <po-button p-icon="an an-pencil" p-kind="tertiary" p-label="" p-size="small" (p-click)="startEdit(node)"></po-button>

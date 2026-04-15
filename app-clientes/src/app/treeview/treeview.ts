@@ -196,8 +196,8 @@ export class Treeview implements OnInit {
 
   readonly pageActions: PoPageAction[] = [
     { label: 'Adicionar Obra', action: () => this.startAdd(null), icon: 'an an-plus-circle' },
-    { label: 'Expandir Todos', action: () => this.expandAll(),    icon: 'an an-arrows-out'  },
-    { label: 'Recolher Todos', action: () => this.collapseAll(),  icon: 'an an-arrows-in'   },
+    { label: 'Expandir Todos', action: () => this.expandAll(),   icon: 'an an-arrows-out'  },
+    { label: 'Recolher Todos', action: () => this.collapseAll(), icon: 'an an-arrows-in'   },
   ];
 
   constructor(private notification: PoNotificationService) {}
@@ -299,6 +299,7 @@ export class Treeview implements OnInit {
   deleteNode(node: FlatNode): void {
     const ids = new Set([node.id, ...this.getAllDescendantIds(node.id)]);
     this.nodes = this.nodes.filter(n => !ids.has(n.id));
+    this.recalculateAncestors(node.parentId);
     this.refreshVisibleNodes();
     this.notification.success('Registro excluido com sucesso.');
   }
