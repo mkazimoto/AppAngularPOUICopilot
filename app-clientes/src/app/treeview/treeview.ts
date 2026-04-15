@@ -371,11 +371,25 @@ export class Treeview implements OnInit {
     this.editForm.price     = item ? item.preco   : this.editForm.price;
   }
 
+  onEditRecursoChange(value: any): void {
+    if (!value) {
+      this.editForm.recurso   = '';
+      this.editForm.recursoId = '';
+    }
+  }
+
   onAddRecursoSelected(item: any): void {
     this.addForm.recurso   = item ? item.nome    : '';
     this.addForm.recursoId = item ? item.id      : '';
     this.addForm.unit      = item ? item.unidade : this.addForm.unit;
     this.addForm.price     = item ? item.preco   : this.addForm.price;
+  }
+
+  onAddRecursoChange(value: any): void {
+    if (!value) {
+      this.addForm.recurso   = '';
+      this.addForm.recursoId = '';
+    }
   }
 
   statusLabel(status: NodeStatus): string {
@@ -390,6 +404,8 @@ export class Treeview implements OnInit {
 
   get editPreviewValue(): number { return (this.editForm.quantity || 0) * (this.editForm.price || 0); }
   get addPreviewValue(): number  { return (this.addForm.quantity  || 0) * (this.addForm.price  || 0); }
+  get editUnitReadonly(): boolean { return !!this.editForm.recursoId; }
+  get addUnitReadonly(): boolean  { return !!this.addForm.recursoId; }
   get totalProjeto(): number     { return this.nodes.filter(n => n.parentId === null).reduce((s, n) => s + (n.value || 0), 0); }
 
   private getAllDescendantIds(parentId: string): string[] {

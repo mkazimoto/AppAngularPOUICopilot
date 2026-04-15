@@ -76,7 +76,8 @@
             [p-filter-service]="insumoService"
             [p-columns]="insumoColumns"
             [(ngModel)]="editForm.recursoId"
-            (p-selected)="onEditRecursoSelected($event)">
+            (p-selected)="onEditRecursoSelected($event)"
+            (p-change)="onEditRecursoChange($event)">
           </po-lookup>
           <po-lookup *ngIf="node.id === SENTINEL"
             name="addRecurso"
@@ -87,7 +88,8 @@
             [p-filter-service]="insumoService"
             [p-columns]="insumoColumns"
             [(ngModel)]="addForm.recursoId"
-            (p-selected)="onAddRecursoSelected($event)">
+            (p-selected)="onAddRecursoSelected($event)"
+            (p-change)="onAddRecursoChange($event)">
           </po-lookup>
         </div>
 
@@ -112,6 +114,7 @@
             p-clean
             [p-filter-service]="unitService"
             [p-columns]="unitColumns"
+            [p-disabled]="editUnitReadonly"
             [(ngModel)]="editForm.unit">
           </po-lookup>
           <po-lookup *ngIf="node.id === SENTINEL"
@@ -122,6 +125,7 @@
             p-clean
             [p-filter-service]="unitService"
             [p-columns]="unitColumns"
+            [p-disabled]="addUnitReadonly"
             [(ngModel)]="addForm.unit">
           </po-lookup>
         </div>
