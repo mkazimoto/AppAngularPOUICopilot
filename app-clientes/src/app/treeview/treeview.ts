@@ -1,6 +1,6 @@
-﻿import { ScrollingModule } from '@angular/cdk/scrolling';
+﻿import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, NgZone, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   PoButtonModule,
@@ -251,8 +251,11 @@ export class Treeview implements OnInit {
 
   // ── Column manager ─────────────────────────────────────────
   @ViewChild('columnManagerSlide') columnManagerSlide!: PoPageSlideComponent;
+  @ViewChild(CdkVirtualScrollViewport) viewport!: CdkVirtualScrollViewport;
 
-  columns: ColumnConfig[] = [
+  private readonly COLUMNS_STORAGE_KEY = 'treeview_columns';
+
+  private readonly DEFAULT_COLUMNS: ColumnConfig[] = [
     { key: 'nome',        label: 'Nome',           width: 450, visible: true, fixed: true },
     { key: 'tipoRecurso', label: 'Tipo de Recurso', width: 130, visible: true },
     { key: 'recurso',     label: 'Recurso',         width: 200, visible: true },
@@ -262,6 +265,34 @@ export class Treeview implements OnInit {
     { key: 'valor',       label: 'Valor',           width: 120, visible: true },
     { key: 'acoes',       label: 'Ações',           width: 100, visible: true, fixed: true },
   ];
+
+  columns: ColumnConfig[] = [];
+
+  private loadColumns(): ColumnConfig[] {
+    try {
+      const saved = localStorage.getItem(this.COLUMNS_STORAGE_KEY);
+      if (!saved) return this.DEFAULT_COLUMNS.map(c => ({ ...c }));
+      const parsed: Array<{ key: string; visible: boolean; width: number }> = JSON.parse(saved);
+      const ordered = parsed
+        .map(s => {
+          const def = this.DEFAULT_COLUMNS.find(d => d.key === s.key);
+          return def ? { ...def, visible: s.visible, width: s.width } : null;
+        })
+        .filter((c): c is ColumnConfig => c !== null);
+      // append any new default columns not yet in storage
+      this.DEFAULT_COLUMNS.forEach(def => {
+        if (!ordered.find(o => o.key === def.key)) ordered.push({ ...def });
+      });
+      return ordered;
+    } catch {
+      return this.DEFAULT_COLUMNS.map(c => ({ ...c }));
+    }
+  }
+
+  saveColumns(): void {
+    const payload = this.columns.map(c => ({ key: c.key, visible: c.visible, width: c.width }));
+    localStorage.setItem(this.COLUMNS_STORAGE_KEY, JSON.stringify(payload));
+  }
 
   // ── Resizable columns ──────────────────────────────────────
   private _resizingCol = -1;
@@ -285,7 +316,8 @@ export class Treeview implements OnInit {
   }
 
   restoreColumns(): void {
-    this.columns = this.columns.map(c => ({ ...c, visible: true }));
+    this.columns = this.DEFAULT_COLUMNS.map(c => ({ ...c }));
+    this.saveColumns();
   }
 
   moveColumn(key: string, direction: 'up' | 'down'): void {
@@ -298,6 +330,7 @@ export class Treeview implements OnInit {
     const cols = [...this.columns];
     [cols[colIdx], cols[swapIdx]] = [cols[swapIdx], cols[colIdx]];
     this.columns = cols;
+    this.saveColumns();
   }
 
   isFirstMovable(key: string): boolean {
@@ -328,7 +361,10 @@ export class Treeview implements OnInit {
 
   @HostListener('document:mouseup')
   onMouseUp(): void {
-    this._resizingCol = -1;
+    if (this._resizingCol >= 0) {
+      this._resizingCol = -1;
+      this.saveColumns();
+    }
   }
   // ───────────────────────────────────────────────────────────
 
@@ -391,9 +427,13 @@ export class Treeview implements OnInit {
     { label: 'Recolher Todos', action: () => this.collapseAll(), icon: 'an an-arrows-in'   },
   ];
 
-  constructor(private notification: PoNotificationService) {}
+  constructor(private notification: PoNotificationService, private ngZone: NgZone) {}
 
-  ngOnInit(): void { this.recalculateAll(); this.refreshVisibleNodes(); }
+  ngOnInit(): void {
+    this.columns = this.loadColumns();
+    this.recalculateAll();
+    this.refreshVisibleNodes();
+  }
 
   onSearch(term: string | null): void {
     this.searchTerm = (term ?? '').trim();
@@ -459,6 +499,19 @@ export class Treeview implements OnInit {
       if (parent) parent.expanded = true;
     }
     this.refreshVisibleNodes();
+    this.scrollToSentinel();
+  }
+
+  private scrollToSentinel(): void {
+    this.ngZone.onStable.pipe().subscribe(() => {
+      const idx = this.visibleNodes.findIndex(n => n.id === SENTINEL_ID);
+      if (idx < 0 || !this.viewport) return;
+      const totalHeight = this.viewport.measureScrollOffset('bottom') + this.viewport.measureScrollOffset('top') + this.viewport.elementRef.nativeElement.clientHeight;
+      const rowTop = idx * this.ROW_HEIGHT;
+      const viewportHeight = this.viewport.elementRef.nativeElement.clientHeight;
+      const centeredOffset = rowTop - (viewportHeight - this.ROW_HEIGHT) / 2;
+      this.viewport.scrollToOffset(Math.max(0, centeredOffset), 'smooth');
+    }).unsubscribe();
   }
 
   cancelAdd(): void { this.pendingAdd = null; this.refreshVisibleNodes(); }

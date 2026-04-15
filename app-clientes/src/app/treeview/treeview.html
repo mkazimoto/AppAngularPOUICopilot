@@ -16,7 +16,7 @@
       p-kind="tertiary"
       p-size="small"
       p-label=""
-      p-tooltip="Gerenciar colunas visíveis"
+      p-tooltip="Gerenciar de colunas"
       (p-click)="openColumnManager()">
     </po-button>
 
@@ -362,7 +362,8 @@
               [p-label-position]="labelPosition"              
               [p-label-on]="' '"
               [p-label-off]="' '"
-              [(ngModel)]="col.visible">
+              [(ngModel)]="col.visible"
+              (ngModelChange)="saveColumns()">
             </po-switch>
             <div class="column-manager-move">
               <po-button
