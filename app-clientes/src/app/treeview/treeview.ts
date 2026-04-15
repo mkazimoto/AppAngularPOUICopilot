@@ -30,6 +30,8 @@ export interface TreeNode {
   expanded: boolean;
   recurso?: string;
   recursoId?: string;
+  insumoId?: string;
+  composicaoId?: string;
 }
 
 export interface FlatNode extends TreeNode {
@@ -209,6 +211,7 @@ function buildEapNodes(): TreeNode[] {
             value: 0,
             recurso: insumo.nome,
             recursoId: insumo.id,
+            insumoId: insumo.id,
             parentId: pacId,
             expanded: false,
           });
@@ -267,10 +270,10 @@ export class Treeview implements OnInit {
 
   editingId: string | null = null;
   editingIsLeaf = false;
-  editForm = { label: '', tipoRecurso: 'Insumo' as string, quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '' };
+  editForm = { label: '', tipoRecurso: 'Insumo' as string, quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '', insumoId: '', composicaoId: '' };
 
   pendingAdd: { parentId: string | null } | null = null;
-  addForm = { label: '', tipoRecurso: 'Insumo' as string, quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '' };
+  addForm = { label: '', tipoRecurso: 'Insumo' as string, quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '', insumoId: '', composicaoId: '' };
 
   readonly insumoService = new InsumoFilterService();
   readonly composicaoService = new ComposicaoFilterService();
@@ -293,19 +296,9 @@ export class Treeview implements OnInit {
   ];
 
   readonly tipoRecursoOptions = [
-    { label: 'Insumo',     value: 'Insumo'     },
-    { label: 'Composição', value: 'Composição' },
+    { label: 'Insumo local',     value: 'Insumo'     },
+    { label: 'Composição local', value: 'Composição' },
   ];
-
-  readonly unitOptions = [
-    { label: 'un',  value: 'un'  },
-    { label: 'h',   value: 'h'   },
-    { label: 'kg',  value: 'kg'  },
-    { label: 'm',   value: 'm'   },
-    { label: 'm²',  value: 'm²'  },
-    { label: 'l',   value: 'l'   },
-  ];
-
 
   readonly pageFilter: PoPageFilter = {
     placeholder: 'Pesquisar por nome ou recurso...',
@@ -380,7 +373,7 @@ export class Treeview implements OnInit {
 
   startAdd(parentId: string | null): void {
     this.cancelEdit();
-    this.addForm = { label: '', tipoRecurso: 'Insumo' as TipoRecurso, quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '' };
+    this.addForm = { label: '', tipoRecurso: 'Insumo' as TipoRecurso, quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '', insumoId: '', composicaoId: '' };
     this.pendingAdd = { parentId };
     if (parentId !== null) {
       const parent = this.nodes.find(n => n.id === parentId);
@@ -400,6 +393,8 @@ export class Treeview implements OnInit {
       quantity: this.addForm.quantity, unit: this.addForm.unit,
       price: this.addForm.price, value: this.addForm.quantity * this.addForm.price,
       recurso: this.addForm.recurso, recursoId: this.addForm.recursoId,
+      insumoId: this.addForm.insumoId || undefined,
+      composicaoId: this.addForm.composicaoId || undefined,
       parentId: addParentId, expanded: false,
     }];
     this.recalculateAncestors(addParentId);
@@ -412,7 +407,7 @@ export class Treeview implements OnInit {
     this.cancelAdd();
     this.editingId = node.id;
     this.editingIsLeaf = !node.hasChildren;
-    this.editForm = { label: node.label, tipoRecurso: node.tipoRecurso ?? 'Insumo' as string, quantity: node.quantity, unit: node.unit, price: node.price, recurso: node.recurso ?? '', recursoId: node.recursoId ?? '' };
+    this.editForm = { label: node.label, tipoRecurso: node.tipoRecurso ?? 'Insumo' as string, quantity: node.quantity, unit: node.unit, price: node.price, recurso: node.recurso ?? '', recursoId: node.recursoId ?? '', insumoId: node.insumoId ?? '', composicaoId: node.composicaoId ?? '' };
     this.refreshVisibleNodes();
   }
 
@@ -446,6 +441,7 @@ export class Treeview implements OnInit {
   onEditRecursoSelected(item: any): void {
     this.editForm.recurso   = item ? item.nome    : '';
     this.editForm.recursoId = item ? item.id      : '';
+    this.editForm.insumoId  = item ? item.id      : '';
     this.editForm.unit      = item ? item.unidade : this.editForm.unit;
     this.editForm.price     = item ? item.preco   : this.editForm.price;
   }
@@ -454,34 +450,40 @@ export class Treeview implements OnInit {
     if (!value) {
       this.editForm.recurso   = '';
       this.editForm.recursoId = '';
+      this.editForm.insumoId  = '';
     }
   }
 
   onEditComposicaoSelected(item: any): void {
-    this.editForm.recurso   = item ? item.nome    : '';
-    this.editForm.recursoId = item ? item.id      : '';
-    this.editForm.unit      = item ? item.unidade : this.editForm.unit;
-    this.editForm.price     = item ? item.preco   : this.editForm.price;
+    this.editForm.recurso      = item ? item.nome    : '';
+    this.editForm.recursoId    = item ? item.id      : '';
+    this.editForm.composicaoId = item ? item.id      : '';
+    this.editForm.unit         = item ? item.unidade : this.editForm.unit;
+    this.editForm.price        = item ? item.preco   : this.editForm.price;
   }
 
   onEditComposicaoChange(value: any): void {
     if (!value) {
-      this.editForm.recurso   = '';
-      this.editForm.recursoId = '';
+      this.editForm.recurso      = '';
+      this.editForm.recursoId    = '';
+      this.editForm.composicaoId = '';
     }
   }
 
   onEditTipoRecursoChange(tipo: string): void {
-    this.editForm.tipoRecurso = tipo;
-    this.editForm.recurso     = '';
-    this.editForm.recursoId   = '';
-    this.editForm.unit        = 'UN';
-    this.editForm.price       = 0;
+    this.editForm.tipoRecurso  = tipo;
+    this.editForm.recurso      = '';
+    this.editForm.recursoId    = '';
+    this.editForm.insumoId     = '';
+    this.editForm.composicaoId = '';
+    this.editForm.unit         = 'UN';
+    this.editForm.price        = 0;
   }
 
   onAddRecursoSelected(item: any): void {
     this.addForm.recurso   = item ? item.nome    : '';
     this.addForm.recursoId = item ? item.id      : '';
+    this.addForm.insumoId  = item ? item.id      : '';
     this.addForm.unit      = item ? item.unidade : this.addForm.unit;
     this.addForm.price     = item ? item.preco   : this.addForm.price;
   }
@@ -490,29 +492,34 @@ export class Treeview implements OnInit {
     if (!value) {
       this.addForm.recurso   = '';
       this.addForm.recursoId = '';
+      this.addForm.insumoId  = '';
     }
   }
 
   onAddComposicaoSelected(item: any): void {
-    this.addForm.recurso   = item ? item.nome    : '';
-    this.addForm.recursoId = item ? item.id      : '';
-    this.addForm.unit      = item ? item.unidade : this.addForm.unit;
-    this.addForm.price     = item ? item.preco   : this.addForm.price;
+    this.addForm.recurso      = item ? item.nome    : '';
+    this.addForm.recursoId    = item ? item.id      : '';
+    this.addForm.composicaoId = item ? item.id      : '';
+    this.addForm.unit         = item ? item.unidade : this.addForm.unit;
+    this.addForm.price        = item ? item.preco   : this.addForm.price;
   }
 
   onAddComposicaoChange(value: any): void {
     if (!value) {
-      this.addForm.recurso   = '';
-      this.addForm.recursoId = '';
+      this.addForm.recurso      = '';
+      this.addForm.recursoId    = '';
+      this.addForm.composicaoId = '';
     }
   }
 
   onAddTipoRecursoChange(tipo: string): void {
-    this.addForm.tipoRecurso = tipo;
-    this.addForm.recurso     = '';
-    this.addForm.recursoId   = '';
-    this.addForm.unit        = 'UN';
-    this.addForm.price       = 0;
+    this.addForm.tipoRecurso  = tipo;
+    this.addForm.recurso      = '';
+    this.addForm.recursoId    = '';
+    this.addForm.insumoId     = '';
+    this.addForm.composicaoId = '';
+    this.addForm.unit         = 'UN';
+    this.addForm.price        = 0;
   }
 
   indentPx(level: number): string { return level * 24 + 'px'; }
