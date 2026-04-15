@@ -1,4 +1,4 @@
-<po-page-default p-title="Tree View Edit�vel - com 10.000 registros" [p-actions]="pageActions">
+<po-page-default p-title="Tree View Editável - com 10.000 registros" [p-actions]="pageActions">
 
   <div class="project-total">
     <span class="project-total__label">Valor total do projeto</span>
@@ -10,6 +10,7 @@
     <!-- ── Sticky header ─────────────────────────────────── -->
     <div class="treeview-header">
       <div class="th th-nome">Nome</div>
+      <div class="th th-recurso">Recurso (Insumo)</div>
       <div class="th th-quantidade">Quantidade</div>
       <div class="th th-unidade">Unidade</div>
       <div class="th th-preco">Preço Unitário</div>
@@ -62,6 +63,33 @@
               [(ngModel)]="addForm.label" placeholder="Nome"
               (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()" />
           </div>
+        </div>
+
+        <!-- Recurso -->
+        <div class="td td-recurso">
+          <span *ngIf="node.id !== SENTINEL && node.id !== editingId">{{ node.recurso }}</span>
+          <po-lookup *ngIf="node.id === editingId"
+            name="editRecurso"
+            p-placeholder="Selecionar insumo"
+            p-field-value="id"
+            p-field-label="nome"
+            p-clean
+            [p-filter-service]="insumoService"
+            [p-columns]="insumoColumns"
+            [(ngModel)]="editForm.recursoId"
+            (p-selected)="onEditRecursoSelected($event)">
+          </po-lookup>
+          <po-lookup *ngIf="node.id === SENTINEL"
+            name="addRecurso"
+            p-placeholder="Selecionar insumo"
+            p-field-value="id"
+            p-field-label="nome"
+            p-clean
+            [p-filter-service]="insumoService"
+            [p-columns]="insumoColumns"
+            [(ngModel)]="addForm.recursoId"
+            (p-selected)="onAddRecursoSelected($event)">
+          </po-lookup>
         </div>
 
         <div class="td td-quantidade">

@@ -5,12 +5,17 @@ import { FormsModule } from '@angular/forms';
 import {
   PoButtonModule,
   PoFieldModule,
+  PoLookupColumn,
+  PoLookupFilter,
+  PoLookupFilteredItemsParams,
+  PoLookupResponseApi,
   PoNotificationService,
   PoPageAction,
   PoPageModule,
   PoTagModule,
   PoTagType,
 } from '@po-ui/ng-components';
+import { Observable, of } from 'rxjs';
 
 export type NodeStatus = 'ativo' | 'inativo' | 'pendente';
 
@@ -26,6 +31,8 @@ export interface TreeNode {
   value: number;
   parentId: string | null;
   expanded: boolean;
+  recurso?: string;
+  recursoId?: string;
 }
 
 export interface FlatNode extends TreeNode {
@@ -34,6 +41,32 @@ export interface FlatNode extends TreeNode {
 }
 
 const SENTINEL_ID = '__new__';
+
+const INSUMOS = [
+  { id: 'INS001', nome: 'Cimento CP-II 32', unidade: 'kg',  preco: 0.85  },
+  { id: 'INS002', nome: 'Areia média lavada', unidade: 'm³', preco: 85.00 },
+  { id: 'INS003', nome: 'Brita 1', unidade: 'm³', preco: 120.00 },
+  { id: 'INS004', nome: 'Aço CA-50 10mm', unidade: 'kg',  preco: 8.50  },
+  { id: 'INS005', nome: 'Tijolo cerâmico 9 furos', unidade: 'un',  preco: 1.20  },
+  { id: 'INS006', nome: 'Cal hidratada CH-III', unidade: 'kg',  preco: 0.65  },
+  { id: 'INS007', nome: 'Cerâmica piso 60x60', unidade: 'm²', preco: 45.00 },
+  { id: 'INS008', nome: 'Tinta acrílica premium', unidade: 'l',   preco: 18.00 },
+  { id: 'INS009', nome: 'Tubo PVC 100mm', unidade: 'm',   preco: 12.50 },
+  { id: 'INS010', nome: 'Fio elétrico 2,5mm²', unidade: 'm',   preco: 3.80  },
+];
+
+class InsumoFilterService implements PoLookupFilter {
+  getFilteredItems(params: PoLookupFilteredItemsParams): Observable<PoLookupResponseApi> {
+    const f = (params.filter ?? '').toLowerCase();
+    const items = f
+      ? INSUMOS.filter(i => i.nome.toLowerCase().includes(f) || i.id.toLowerCase().includes(f))
+      : INSUMOS;
+    return of({ items, hasNext: false });
+  }
+  getObjectByValue(value: string): Observable<any> {
+    return of(INSUMOS.find(i => i.id === String(value)) ?? null);
+  }
+}
 
 // â”€â”€ EAP generation constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const FASES = [
@@ -129,6 +162,7 @@ function buildEapNodes(): TreeNode[] {
         });
 
         for (let a = 1; a <= 9; a++) {
+          const insumo = INSUMOS[(f + e + p + a) % INSUMOS.length];
           nodes.push({
             id: String(seq++),
             label: `${f + 1}.${e + 1}.${p + 1}.${a} Atividade ${a}`,
@@ -136,9 +170,11 @@ function buildEapNodes(): TreeNode[] {
             responsible: RESPONSAVEIS[(f + e + p + a) % RESPONSAVEIS.length],
             status: STATUSES[(f + e + p + a) % STATUSES.length],
             quantity: a,
-            unit: UNITS[(f + e + p + a) % UNITS.length],
-            price: VALUES[(f + e + p + a) % VALUES.length],
+            unit: insumo.unidade,
+            price: insumo.preco,
             value: 0,
+            recurso: insumo.nome,
+            recursoId: insumo.id,
             parentId: pacId,
             expanded: false,
           });
@@ -166,10 +202,18 @@ export class Treeview implements OnInit {
 
   editingId: string | null = null;
   editingIsLeaf = false;
-  editForm = { label: '', category: 'Fase', responsible: '', status: 'ativo' as NodeStatus, quantity: 1, unit: 'un', price: 0 };
+  editForm = { label: '', category: 'Fase', responsible: '', status: 'ativo' as NodeStatus, quantity: 1, unit: 'un', price: 0, recurso: '', recursoId: '' };
 
   pendingAdd: { parentId: string | null } | null = null;
-  addForm = { label: '', category: 'Atividade', responsible: '', status: 'ativo' as NodeStatus, quantity: 1, unit: 'un', price: 0 };
+  addForm = { label: '', category: 'Atividade', responsible: '', status: 'ativo' as NodeStatus, quantity: 1, unit: 'un', price: 0, recurso: '', recursoId: '' };
+
+  readonly insumoService = new InsumoFilterService();
+  readonly insumoColumns: PoLookupColumn[] = [
+    { property: 'id',      label: 'Código',    width: '100px' },
+    { property: 'nome',    label: 'Nome',      width: '55%'   },
+    { property: 'unidade', label: 'Un.',       width: '60px'  },
+    { property: 'preco',   label: 'Preço',     width: '90px'  },
+  ];
 
   readonly categoryOptions = [
     { label: 'Projeto',            value: 'Projeto'            },
@@ -242,7 +286,7 @@ export class Treeview implements OnInit {
   startAdd(parentId: string | null): void {
     this.cancelEdit();
     const defaultCategory = parentId === null ? 'Projeto' : 'Atividade';
-    this.addForm = { label: '', category: defaultCategory, responsible: '', status: 'ativo', quantity: 1, unit: 'un', price: 0 };
+    this.addForm = { label: '', category: defaultCategory, responsible: '', status: 'ativo', quantity: 1, unit: 'un', price: 0, recurso: '', recursoId: '' };
     this.pendingAdd = { parentId };
     if (parentId !== null) {
       const parent = this.nodes.find(n => n.id === parentId);
@@ -261,6 +305,7 @@ export class Treeview implements OnInit {
       responsible: this.addForm.responsible, status: this.addForm.status,
       quantity: this.addForm.quantity, unit: this.addForm.unit,
       price: this.addForm.price, value: this.addForm.quantity * this.addForm.price,
+      recurso: this.addForm.recurso, recursoId: this.addForm.recursoId,
       parentId: addParentId, expanded: false,
     }];
     this.recalculateAncestors(addParentId);
@@ -273,7 +318,7 @@ export class Treeview implements OnInit {
     this.cancelAdd();
     this.editingId = node.id;
     this.editingIsLeaf = !node.hasChildren;
-    this.editForm = { label: node.label, category: node.category, responsible: node.responsible, status: node.status, quantity: node.quantity, unit: node.unit, price: node.price };
+    this.editForm = { label: node.label, category: node.category, responsible: node.responsible, status: node.status, quantity: node.quantity, unit: node.unit, price: node.price, recurso: node.recurso ?? '', recursoId: node.recursoId ?? '' };
     this.refreshVisibleNodes();
   }
 
@@ -302,6 +347,20 @@ export class Treeview implements OnInit {
     this.recalculateAncestors(node.parentId);
     this.refreshVisibleNodes();
     this.notification.success('Registro excluido com sucesso.');
+  }
+
+  onEditRecursoSelected(item: any): void {
+    this.editForm.recurso   = item ? item.nome    : '';
+    this.editForm.recursoId = item ? item.id      : '';
+    this.editForm.unit      = item ? item.unidade : this.editForm.unit;
+    this.editForm.price     = item ? item.preco   : this.editForm.price;
+  }
+
+  onAddRecursoSelected(item: any): void {
+    this.addForm.recurso   = item ? item.nome    : '';
+    this.addForm.recursoId = item ? item.id      : '';
+    this.addForm.unit      = item ? item.unidade : this.addForm.unit;
+    this.addForm.price     = item ? item.preco   : this.addForm.price;
   }
 
   statusLabel(status: NodeStatus): string {
