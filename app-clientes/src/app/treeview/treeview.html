@@ -1,21 +1,46 @@
 <po-page-list p-title="TreeView Editável com 10.000 registros" [p-actions]="pageActions" [p-filter]="pageFilter">
 
   <div class="project-total">
-    <span class="project-total__label">Valor total do projeto</span>
-    <span class="project-total__value">{{ totalProjeto | currency:'BRL':'symbol':'1.2-2' }}</span>
+    <div class="project-total__summary">
+      <span class="project-total__label">Valor total do projeto</span>
+      <span class="project-total__value">{{ totalProjeto | currency:'BRL':'symbol':'1.2-2' }}</span>
+    </div>
   </div>
 
   <div class="treeview-grid">
 
+    <!-- ── Botão gerenciador de colunas ─────────────────── -->
+    <po-button
+      class="column-manager-btn"
+      p-icon="an an-gear"
+      p-kind="tertiary"
+      p-size="small"
+      p-label=""
+      p-tooltip="Gerenciar colunas visíveis"
+      (p-click)="openColumnManager()">
+    </po-button>
+
     <!-- ── Sticky header ─────────────────────────────────── -->
     <div class="treeview-header" [style.grid-template-columns]="colTemplate">
-      <div class="th th-nome">Nome<span class="col-resize-handle" (mousedown)="resizeStart($event, 0)"></span></div>
-      <div class="th th-tipo-recurso">Tipo de Recurso<span class="col-resize-handle" (mousedown)="resizeStart($event, 1)"></span></div>
-      <div class="th th-recurso">Recurso<span class="col-resize-handle" (mousedown)="resizeStart($event, 2)"></span></div>
-      <div class="th th-quantidade">Quantidade<span class="col-resize-handle" (mousedown)="resizeStart($event, 3)"></span></div>
-      <div class="th th-unidade">Unidade<span class="col-resize-handle" (mousedown)="resizeStart($event, 4)"></span></div>
-      <div class="th th-preco">Preço Unitário<span class="col-resize-handle" (mousedown)="resizeStart($event, 5)"></span></div>
-      <div class="th th-valor">Valor<span class="col-resize-handle" (mousedown)="resizeStart($event, 6)"></span></div>
+      <div class="th th-nome">Nome<span class="col-resize-handle" (mousedown)="resizeStart($event, 'nome')"></span></div>
+      @if (isVisible('tipoRecurso')) {
+        <div class="th th-tipo-recurso">Tipo de Recurso<span class="col-resize-handle" (mousedown)="resizeStart($event, 'tipoRecurso')"></span></div>
+      }
+      @if (isVisible('recurso')) {
+        <div class="th th-recurso">Recurso<span class="col-resize-handle" (mousedown)="resizeStart($event, 'recurso')"></span></div>
+      }
+      @if (isVisible('quantidade')) {
+        <div class="th th-quantidade">Quantidade<span class="col-resize-handle" (mousedown)="resizeStart($event, 'quantidade')"></span></div>
+      }
+      @if (isVisible('unidade')) {
+        <div class="th th-unidade">Unidade<span class="col-resize-handle" (mousedown)="resizeStart($event, 'unidade')"></span></div>
+      }
+      @if (isVisible('preco')) {
+        <div class="th th-preco">Preço Unitário<span class="col-resize-handle" (mousedown)="resizeStart($event, 'preco')"></span></div>
+      }
+      @if (isVisible('valor')) {
+        <div class="th th-valor">Valor<span class="col-resize-handle" (mousedown)="resizeStart($event, 'valor')"></span></div>
+      }
       <div class="th th-acoes">Ações</div>
     </div>
 
@@ -83,6 +108,7 @@
         </div>
 
         <!-- Tipo de Recurso -->
+        @if (isVisible('tipoRecurso')) {
         <div class="td td-tipo-recurso">
           @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
             <po-tag [p-value]="node.tipoRecurso!" p-text-color="White" [p-color]="tipoRecursoColor(node.tipoRecurso)"></po-tag>
@@ -104,8 +130,10 @@
             </po-select>
           }
         </div>
+        }
 
         <!-- Recurso -->
+        @if (isVisible('recurso')) {
         <div class="td td-recurso">
           @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
             @if (node.recursoId) {
@@ -175,7 +203,9 @@
             </po-lookup>
           }
         </div>
+        }
 
+        @if (isVisible('quantidade')) {
         <div class="td td-quantidade">
           @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
             <span>{{ node.quantity }}</span>
@@ -199,8 +229,10 @@
             </po-decimal>
           }
         </div>
+        }
 
         <!--  Unidade  -->
+        @if (isVisible('unidade')) {
         <div class="td td-unidade">
           @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
             <span>{{ node.unit }}</span>
@@ -232,8 +264,10 @@
             </po-lookup>
           }
         </div>
+        }
 
         <!--  Preço  -->
+        @if (isVisible('preco')) {
         <div class="td td-preco">
           @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
             <span>{{ node.price | currency:'BRL':'symbol':'1.2-2' }}</span>
@@ -257,8 +291,10 @@
             </po-decimal>
           }
         </div>
+        }
 
         <!--  Valor  -->
+        @if (isVisible('valor')) {
         <div class="td td-valor">
           @if (node.id !== editingId && node.id !== SENTINEL) {
             <span>{{ node.value | currency:'BRL':'symbol':'1.2-2' }}</span>
@@ -272,8 +308,7 @@
           @if (node.id === SENTINEL) {
             <span>{{ addPreviewValue | currency:'BRL':'symbol':'1.2-2' }}</span>
           }
-        </div>
-        <!-- ── Ações ─────────────────────────────────────── -->
+        </div>        }        <!-- ── Ações ─────────────────────────────────────── -->
         <div class="td td-acoes">
           @if (node.id !== SENTINEL && node.id !== editingId) {
             <div class="actions-row">
@@ -308,5 +343,38 @@
     </cdk-virtual-scroll-viewport>
 
   </div>
+
+
+  <!-- ── Gerenciador de colunas ──────────────────────────── -->
+  <po-page-slide
+    #columnManagerSlide
+    p-title="Gerenciar Colunas"
+    p-size="sm"
+    [p-click-out]="true">
+
+    <div class="column-manager-list">
+      @for (col of columns; track col.key) {
+        @if (!col.fixed) {
+          <div class="column-manager-item">
+            <po-switch
+              [name]="'col-' + col.key"
+              [p-label]="col.label"
+              [(ngModel)]="col.visible">
+            </po-switch>
+          </div>
+        }
+      }
+    </div>
+
+    <po-page-slide-footer>
+      <po-button
+        p-kind="secondary"
+        p-label="Restaurar padrão"
+        p-icon="an an-arrow-counterclockwise"
+        (p-click)="restoreColumns()">
+      </po-button>
+    </po-page-slide-footer>
+
+  </po-page-slide>
 
 </po-page-list>

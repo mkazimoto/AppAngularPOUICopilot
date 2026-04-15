@@ -1,6 +1,6 @@
 ﻿import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   PoButtonModule,
@@ -13,11 +13,21 @@ import {
   PoPageAction,
   PoPageFilter,
   PoPageModule,
+  PoPageSlideComponent,
+  PoPageSlideModule,
   PoTagModule
 } from '@po-ui/ng-components';
 import { Observable, of } from 'rxjs';
 
 export type TipoRecurso = 'Insumo' | 'Composição';
+
+export interface ColumnConfig {
+  key: string;
+  label: string;
+  width: number;
+  visible: boolean;
+  fixed?: boolean;
+}
 
 export interface TreeNode {
   id: string;
@@ -227,7 +237,7 @@ function buildEapNodes(): TreeNode[] {
 @Component({
   selector: 'app-treeview',
   standalone: true,
-  imports: [CommonModule, FormsModule, ScrollingModule, PoButtonModule, PoFieldModule, PoPageModule, PoTagModule],
+  imports: [CommonModule, FormsModule, ScrollingModule, PoButtonModule, PoFieldModule, PoPageModule, PoPageSlideModule, PoTagModule],
   templateUrl: './treeview.html',
   styleUrl: './treeview.css',
 })
@@ -235,20 +245,47 @@ export class Treeview implements OnInit {
   readonly SENTINEL = SENTINEL_ID;
   readonly ROW_HEIGHT = 50;
 
+  // ── Column manager ─────────────────────────────────────────
+  @ViewChild('columnManagerSlide') columnManagerSlide!: PoPageSlideComponent;
+
+  columns: ColumnConfig[] = [
+    { key: 'nome',        label: 'Nome',           width: 450, visible: true, fixed: true },
+    { key: 'tipoRecurso', label: 'Tipo de Recurso', width: 130, visible: true },
+    { key: 'recurso',     label: 'Recurso',         width: 200, visible: true },
+    { key: 'quantidade',  label: 'Quantidade',      width: 110, visible: true },
+    { key: 'unidade',     label: 'Unidade',         width: 130, visible: true },
+    { key: 'preco',       label: 'Preço Unitário',  width: 150, visible: true },
+    { key: 'valor',       label: 'Valor',           width: 120, visible: true },
+    { key: 'acoes',       label: 'Ações',           width: 100, visible: true, fixed: true },
+  ];
+
   // ── Resizable columns ──────────────────────────────────────
-  colWidths = [450, 130, 200, 110, 130, 150, 120, 100];
   private _resizingCol = -1;
   private _resizeStartX = 0;
   private _resizeStartWidth = 0;
 
   get colTemplate(): string {
-    return this.colWidths.map(w => w + 'px').join(' ');
+    return this.columns.filter(c => c.visible).map(c => c.width + 'px').join(' ');
   }
 
-  resizeStart(event: MouseEvent, colIndex: number): void {
-    this._resizingCol    = colIndex;
-    this._resizeStartX   = event.clientX;
-    this._resizeStartWidth = this.colWidths[colIndex];
+  isVisible(key: string): boolean {
+    return this.columns.find(c => c.key === key)?.visible ?? true;
+  }
+
+  openColumnManager(): void {
+    this.columnManagerSlide.open();
+  }
+
+  restoreColumns(): void {
+    this.columns = this.columns.map(c => ({ ...c, visible: true }));
+  }
+
+  resizeStart(event: MouseEvent, colKey: string): void {
+    const idx = this.columns.findIndex(c => c.key === colKey);
+    if (idx < 0) return;
+    this._resizingCol      = idx;
+    this._resizeStartX     = event.clientX;
+    this._resizeStartWidth = this.columns[idx].width;
     event.preventDefault();
   }
 
@@ -256,7 +293,7 @@ export class Treeview implements OnInit {
   onMouseMove(event: MouseEvent): void {
     if (this._resizingCol < 0) return;
     const delta = event.clientX - this._resizeStartX;
-    this.colWidths[this._resizingCol] = Math.max(60, this._resizeStartWidth + delta);
+    this.columns[this._resizingCol].width = Math.max(60, this._resizeStartWidth + delta);
   }
 
   @HostListener('document:mouseup')
