@@ -12,19 +12,12 @@ import {
   PoNotificationService,
   PoPageAction,
   PoPageModule,
-  PoTagModule,
-  PoTagType,
 } from '@po-ui/ng-components';
 import { Observable, of } from 'rxjs';
-
-export type NodeStatus = 'ativo' | 'inativo' | 'pendente';
 
 export interface TreeNode {
   id: string;
   label: string;
-  category: string;
-  responsible: string;
-  status: NodeStatus;
   quantity: number;
   unit: string;
   price: number;
@@ -107,12 +100,6 @@ const PACOTES = [
   'Aprovação', 'Documentação', 'Validação', 'Publicação', 'Monitoramento',
 ];
 
-const RESPONSAVEIS = [
-  'Ana Costa', 'Bruno Lima', 'Carlos Oliveira', 'Diana Santos', 'Eduardo Ferreira',
-  'Fernanda Alves', 'Gabriel Ramos', 'Helena Souza', 'Igor Martins', 'Julia Pereira',
-];
-
-const STATUSES: NodeStatus[] = ['ativo', 'ativo', 'ativo', 'pendente', 'inativo'];
 const UNITS = ['UN', 'H', 'KG', 'M', 'M2', 'M3', 'L'];
 const VALUES = [100, 250, 500, 1000, 1500, 2000, 2500, 3000, 5000, 10000];
 
@@ -126,9 +113,6 @@ function buildEapNodes(): TreeNode[] {
   nodes.push({
     id: rootId,
     label: `${rootCode} - EAP (Estrutura Analítica do Projeto)`,
-    category: 'Projeto',
-    responsible: 'João Silva',
-    status: 'ativo',
     quantity: 1,
     unit: 'UN',
     price: 0,
@@ -143,9 +127,6 @@ function buildEapNodes(): TreeNode[] {
     nodes.push({
       id: faseId,
       label: `${rootCode}.${(f + 1).toString().padStart(2, '0')} - ${FASES[f]}`,
-      category: 'Fase',
-      responsible: RESPONSAVEIS[f % RESPONSAVEIS.length],
-      status: STATUSES[f % STATUSES.length],
       quantity: 1,
       unit: 'UN',
       price: VALUES[(f * 3) % VALUES.length],
@@ -159,9 +140,6 @@ function buildEapNodes(): TreeNode[] {
       nodes.push({
         id: entId,
         label: `${rootCode}.${(f + 1).toString().padStart(2, '0')}.${(e + 1).toString().padStart(2, '0')} - ${ENTREGAVEIS[e]}`,
-        category: 'Entregável',
-        responsible: RESPONSAVEIS[(f + e) % RESPONSAVEIS.length],
-        status: STATUSES[(f + e) % STATUSES.length],
         quantity: (e % 10) + 1,
         unit: UNITS[(f + e) % UNITS.length],
         price: VALUES[(f + e) % VALUES.length],
@@ -175,9 +153,6 @@ function buildEapNodes(): TreeNode[] {
         nodes.push({
           id: pacId,
           label: `${rootCode}.${(f + 1).toString().padStart(2, '0')}.${(e + 1).toString().padStart(2, '0')}.${(p + 1).toString().padStart(2, '0')} - ${PACOTES[p]}`,
-          category: 'Pacote de Trabalho',
-          responsible: RESPONSAVEIS[(f + e + p) % RESPONSAVEIS.length],
-          status: STATUSES[(f + e + p) % STATUSES.length],
           quantity: ((p % 20) + 1) * 10,
           unit: UNITS[(f + e + p) % UNITS.length],
           price: VALUES[(f + e + p) % VALUES.length],
@@ -190,10 +165,7 @@ function buildEapNodes(): TreeNode[] {
           const insumo = INSUMOS[(f + e + p + a) % INSUMOS.length];
           nodes.push({
             id: String(seq++),
-            label: `${rootCode}.${(f + 1).toString().padStart(2, '0')}.${(e + 1).toString().padStart(2, '0')}.${(p + 1).toString().padStart(2, '0')}.${a.toString().padStart(2, '0')} - Atividade ${a}`,
-            category: 'Atividade',
-            responsible: RESPONSAVEIS[(f + e + p + a) % RESPONSAVEIS.length],
-            status: STATUSES[(f + e + p + a) % STATUSES.length],
+            label: `${rootCode}.${(f + 1).toString().padStart(2, '0')}.${(e + 1).toString().padStart(2, '0')}.${(p + 1).toString().padStart(2, '0')}.${a.toString().padStart(2, '00')} - Atividade ${a}`,
             quantity: a,
             unit: insumo.unidade,
             price: insumo.preco,
@@ -214,7 +186,7 @@ function buildEapNodes(): TreeNode[] {
 @Component({
   selector: 'app-treeview',
   standalone: true,
-  imports: [CommonModule, FormsModule, ScrollingModule, PoButtonModule, PoFieldModule, PoPageModule, PoTagModule],
+  imports: [CommonModule, FormsModule, ScrollingModule, PoButtonModule, PoFieldModule, PoPageModule],
   templateUrl: './treeview.html',
   styleUrl: './treeview.css',
 })
@@ -227,10 +199,10 @@ export class Treeview implements OnInit {
 
   editingId: string | null = null;
   editingIsLeaf = false;
-  editForm = { label: '', category: 'Fase', responsible: '', status: 'ativo' as NodeStatus, quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '' };
+  editForm = { label: '', quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '' };
 
   pendingAdd: { parentId: string | null } | null = null;
-  addForm = { label: '', category: 'Atividade', responsible: '', status: 'ativo' as NodeStatus, quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '' };
+  addForm = { label: '', quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '' };
 
   readonly insumoService = new InsumoFilterService();
   readonly unitService = new UnitFilterService();
@@ -290,7 +262,7 @@ export class Treeview implements OnInit {
   }
 
   private makeSentinel(parentId: string | null, level: number): FlatNode {
-    return { id: SENTINEL_ID, label: '', category: 'Atividade', responsible: '', status: 'ativo', quantity: 1, unit: 'UN', price: 0, value: 0, parentId, expanded: false, level, hasChildren: false };
+    return { id: SENTINEL_ID, label: '', quantity: 1, unit: 'UN', price: 0, value: 0, parentId, expanded: false, level, hasChildren: false };
   }
 
   trackById(_i: number, n: FlatNode): string { return n.id; }
@@ -302,8 +274,7 @@ export class Treeview implements OnInit {
 
   startAdd(parentId: string | null): void {
     this.cancelEdit();
-    const defaultCategory = parentId === null ? 'Projeto' : 'Atividade';
-    this.addForm = { label: '', category: defaultCategory, responsible: '', status: 'ativo', quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '' };
+    this.addForm = { label: '', quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '' };
     this.pendingAdd = { parentId };
     if (parentId !== null) {
       const parent = this.nodes.find(n => n.id === parentId);
@@ -318,8 +289,7 @@ export class Treeview implements OnInit {
     if (!this.addForm.label.trim()) { this.notification.warning('O campo Nome e obrigatorio.'); return; }
     const addParentId = this.pendingAdd!.parentId;
     this.nodes = [...this.nodes, {
-      id: Date.now().toString(), label: this.addForm.label, category: this.addForm.category,
-      responsible: this.addForm.responsible, status: this.addForm.status,
+      id: Date.now().toString(), label: this.addForm.label,
       quantity: this.addForm.quantity, unit: this.addForm.unit,
       price: this.addForm.price, value: this.addForm.quantity * this.addForm.price,
       recurso: this.addForm.recurso, recursoId: this.addForm.recursoId,
@@ -335,7 +305,7 @@ export class Treeview implements OnInit {
     this.cancelAdd();
     this.editingId = node.id;
     this.editingIsLeaf = !node.hasChildren;
-    this.editForm = { label: node.label, category: node.category, responsible: node.responsible, status: node.status, quantity: node.quantity, unit: node.unit, price: node.price, recurso: node.recurso ?? '', recursoId: node.recursoId ?? '' };
+    this.editForm = { label: node.label, quantity: node.quantity, unit: node.unit, price: node.price, recurso: node.recurso ?? '', recursoId: node.recursoId ?? '' };
     this.refreshVisibleNodes();
   }
 
@@ -392,14 +362,6 @@ export class Treeview implements OnInit {
       this.addForm.recurso   = '';
       this.addForm.recursoId = '';
     }
-  }
-
-  statusLabel(status: NodeStatus): string {
-    return { ativo: 'Ativo', inativo: 'Inativo', pendente: 'Pendente' }[status];
-  }
-
-  statusType(status: NodeStatus): PoTagType {
-    return { ativo: PoTagType.Success, inativo: PoTagType.Danger, pendente: PoTagType.Warning }[status];
   }
 
   indentPx(level: number): string { return level * 24 + 'px'; }
