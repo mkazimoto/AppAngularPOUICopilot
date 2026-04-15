@@ -66,8 +66,8 @@
 
         <!-- Recurso -->
         <div class="td td-recurso">
-          <span *ngIf="node.id !== SENTINEL && node.id !== editingId">{{ node.recurso }}</span>
-          <po-lookup *ngIf="node.id === editingId"
+          <span *ngIf="node.id !== SENTINEL && node.id !== editingId && !node.hasChildren">{{ node.recurso }}</span>
+          <po-lookup *ngIf="node.id === editingId && editingIsLeaf"
             name="editRecurso"
             p-placeholder="Selecionar insumo"
             p-field-value="id"
