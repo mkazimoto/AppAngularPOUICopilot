@@ -83,7 +83,7 @@
         <!-- Tipo de Recurso -->
         <div class="td td-tipo-recurso">
           @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
-            <span>{{ node.tipoRecurso }}</span>
+            <po-tag [p-value]="node.tipoRecurso!" p-text-color="White" [p-color]="tipoRecursoColor(node.tipoRecurso)"></po-tag>
           }
           @if (node.id === editingId && editingIsLeaf) {
             <po-select

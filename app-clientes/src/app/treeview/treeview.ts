@@ -13,6 +13,7 @@ import {
   PoPageAction,
   PoPageFilter,
   PoPageModule,
+  PoTagModule
 } from '@po-ui/ng-components';
 import { Observable, of } from 'rxjs';
 
@@ -226,7 +227,7 @@ function buildEapNodes(): TreeNode[] {
 @Component({
   selector: 'app-treeview',
   standalone: true,
-  imports: [CommonModule, FormsModule, ScrollingModule, PoButtonModule, PoFieldModule, PoPageModule],
+  imports: [CommonModule, FormsModule, ScrollingModule, PoButtonModule, PoFieldModule, PoPageModule, PoTagModule],
   templateUrl: './treeview.html',
   styleUrl: './treeview.css',
 })
@@ -299,6 +300,10 @@ export class Treeview implements OnInit {
     { label: 'Insumo local',     value: 'Insumo'     },
     { label: 'Composição local', value: 'Composição' },
   ];
+
+  tipoRecursoColor(tipo?: TipoRecurso): string {
+    return tipo === 'Composição' ? '#55AA55' : '#5555AA';
+  }
 
   readonly pageFilter: PoPageFilter = {
     placeholder: 'Pesquisar por nome ou recurso...',
