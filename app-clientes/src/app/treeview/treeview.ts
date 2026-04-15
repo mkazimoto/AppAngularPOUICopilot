@@ -117,18 +117,23 @@ class UnitFilterService implements PoLookupFilter {
 
 // ── EAP generation constants ────────────────────────────────
 const FASES = [
-  'Inicialização', 'Planejamento', 'Requisitos', 'Arquitetura', 'Desenvolvimento',
-  'Testes', 'Integração', 'Implantação', 'Treinamento', 'Encerramento',
+  'Serviços Preliminares', 'Fundações', 'Estrutura', 'Alvenaria', 'Cobertura',
+  'Instalações Hidráulicas', 'Instalações Elétricas', 'Revestimentos', 'Esquadrias e Vidros', 'Pintura e Acabamento',
 ];
 
 const ENTREGAVEIS = [
-  'Escopo', 'Cronograma', 'Orçamento', 'Riscos', 'Qualidade',
-  'Recursos', 'Comunicação', 'Contratos', 'Stakeholders', 'Mudanças',
+  'Projeto Executivo', 'Locação da Obra', 'Terraplanagem', 'Radier', 'Pilares',
+  'Vigas', 'Laje', 'Paredes', 'Telhado', 'Contrapiso',
 ];
 
 const PACOTES = [
-  'Definição', 'Análise', 'Design', 'Implementação', 'Revisão',
-  'Aprovação', 'Documentação', 'Validação', 'Publicação', 'Monitoramento',
+  'Escavação', 'Concretagem', 'Armação', 'Formas', 'Chapisco',
+  'Emboço', 'Reboco', 'Assentamento', 'Instalação', 'Impermeabilização',
+];
+
+const ATIVIDADES = [
+  'Escavação', 'Formas', 'Armação', 'Concretagem', 'Desforma',
+  'Impermeabilização', 'Aterro', 'Compactação', 'Inspeção',
 ];
 
 const UNITS = ['UN', 'H', 'KG', 'M', 'M2', 'M3', 'L'];
@@ -143,7 +148,7 @@ function buildEapNodes(): TreeNode[] {
  
   nodes.push({
     id: rootId,
-    label: `${rootCode} - EAP (Estrutura Analítica do Projeto)`,
+    label: `${rootCode} - Construção Residencial Unifamiliar`,
     quantity: 1,
     unit: 'UN',
     price: 0,
@@ -196,7 +201,7 @@ function buildEapNodes(): TreeNode[] {
           const insumo = INSUMOS[(f + e + p + a) % INSUMOS.length];
           nodes.push({
             id: String(seq++),
-            label: `${rootCode}.${(f + 1).toString().padStart(2, '0')}.${(e + 1).toString().padStart(2, '0')}.${(p + 1).toString().padStart(2, '0')}.${a.toString().padStart(2, '00')} - Atividade ${a}`,
+            label: `${rootCode}.${(f + 1).toString().padStart(2, '0')}.${(e + 1).toString().padStart(2, '0')}.${(p + 1).toString().padStart(2, '0')}.${a.toString().padStart(2, '00')} - ${ATIVIDADES[a - 1]}`,
             tipoRecurso: 'Insumo',
             quantity: a,
             unit: insumo.unidade,
