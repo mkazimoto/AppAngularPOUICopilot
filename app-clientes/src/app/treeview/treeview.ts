@@ -233,7 +233,7 @@ function buildEapNodes(): TreeNode[] {
 })
 export class Treeview implements OnInit {
   readonly SENTINEL = SENTINEL_ID;
-  readonly ROW_HEIGHT = 44;
+  readonly ROW_HEIGHT = 60;
 
   // ── Resizable columns ──────────────────────────────────────
   colWidths = [450, 130, 200, 110, 130, 150, 120, 100];
@@ -418,6 +418,7 @@ export class Treeview implements OnInit {
   startEdit(node: FlatNode): void {
     this.cancelAdd();
     this.editingId = node.id;
+    this.selectedId = node.id;
     this.editingIsLeaf = !node.hasChildren;
     this.editForm = { label: node.label, tipoRecurso: node.tipoRecurso ?? 'Insumo' as string, quantity: node.quantity, unit: node.unit, price: node.price, recurso: node.recurso ?? '', recursoId: node.recursoId ?? '', insumoId: node.insumoId ?? '', composicaoId: node.composicaoId ?? '' };
     this.refreshVisibleNodes();
