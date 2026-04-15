@@ -10,6 +10,7 @@
     <!-- ── Sticky header ─────────────────────────────────── -->
     <div class="treeview-header">
       <div class="th th-nome">Nome</div>
+      <div class="th th-tipo-recurso">Tipo de Recurso</div>
       <div class="th th-recurso">Recurso (Insumo)</div>
       <div class="th th-quantidade">Quantidade</div>
       <div class="th th-unidade">Unidade</div>
@@ -64,10 +65,28 @@
           </div>
         </div>
 
+        <!-- Tipo de Recurso -->
+        <div class="td td-tipo-recurso">
+          <span *ngIf="node.id !== SENTINEL && node.id !== editingId && !node.hasChildren">{{ node.tipoRecurso }}</span>
+          <po-select *ngIf="node.id === editingId && editingIsLeaf"
+            name="editTipoRecurso"
+            [p-options]="tipoRecursoOptions"
+            [ngModel]="editForm.tipoRecurso"
+            (ngModelChange)="onEditTipoRecursoChange($event)">
+          </po-select>
+          <po-select *ngIf="node.id === SENTINEL"
+            name="addTipoRecurso"
+            [p-options]="tipoRecursoOptions"
+            [ngModel]="addForm.tipoRecurso"
+            (ngModelChange)="onAddTipoRecursoChange($event)">
+          </po-select>
+        </div>
+
         <!-- Recurso -->
         <div class="td td-recurso">
           <span *ngIf="node.id !== SENTINEL && node.id !== editingId && !node.hasChildren">{{ node.recurso }}</span>
-          <po-lookup *ngIf="node.id === editingId && editingIsLeaf"
+          <!-- Edit: Insumo -->
+          <po-lookup *ngIf="node.id === editingId && editingIsLeaf && editForm.tipoRecurso === 'Insumo'"
             name="editRecurso"
             p-placeholder="Selecionar insumo"
             p-field-value="id"
@@ -79,7 +98,21 @@
             (p-selected)="onEditRecursoSelected($event)"
             (p-change)="onEditRecursoChange($event)">
           </po-lookup>
-          <po-lookup *ngIf="node.id === SENTINEL"
+          <!-- Edit: Composição -->
+          <po-lookup *ngIf="node.id === editingId && editingIsLeaf && editForm.tipoRecurso === 'Composição'"
+            name="editComposicao"
+            p-placeholder="Selecionar composição"
+            p-field-value="id"
+            p-field-label="nome"
+            p-clean
+            [p-filter-service]="composicaoService"
+            [p-columns]="composicaoColumns"
+            [(ngModel)]="editForm.recursoId"
+            (p-selected)="onEditComposicaoSelected($event)"
+            (p-change)="onEditComposicaoChange($event)">
+          </po-lookup>
+          <!-- Add: Insumo -->
+          <po-lookup *ngIf="node.id === SENTINEL && addForm.tipoRecurso === 'Insumo'"
             name="addRecurso"
             p-placeholder="Selecionar insumo"
             p-field-value="id"
@@ -90,6 +123,19 @@
             [(ngModel)]="addForm.recursoId"
             (p-selected)="onAddRecursoSelected($event)"
             (p-change)="onAddRecursoChange($event)">
+          </po-lookup>
+          <!-- Add: Composição -->
+          <po-lookup *ngIf="node.id === SENTINEL && addForm.tipoRecurso === 'Composição'"
+            name="addComposicao"
+            p-placeholder="Selecionar composição"
+            p-field-value="id"
+            p-field-label="nome"
+            p-clean
+            [p-filter-service]="composicaoService"
+            [p-columns]="composicaoColumns"
+            [(ngModel)]="addForm.recursoId"
+            (p-selected)="onAddComposicaoSelected($event)"
+            (p-change)="onAddComposicaoChange($event)">
           </po-lookup>
         </div>
 

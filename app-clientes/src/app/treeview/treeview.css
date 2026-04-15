@@ -36,7 +36,7 @@
 .treeview-header,
 .treeview-row {
   display: grid;
-  grid-template-columns: minmax(200px, 2fr) minmax(160px, 1.5fr) 110px 150px 150px 110px 110px 150px;
+  grid-template-columns: minmax(200px, 2fr) 130px minmax(160px, 1.5fr) 110px 150px 150px 110px 110px 150px;
   align-items: center;
 }
 

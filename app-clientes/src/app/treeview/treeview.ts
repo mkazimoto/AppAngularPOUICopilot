@@ -15,9 +15,12 @@ import {
 } from '@po-ui/ng-components';
 import { Observable, of } from 'rxjs';
 
+export type TipoRecurso = 'Insumo' | 'Composição';
+
 export interface TreeNode {
   id: string;
   label: string;
+  tipoRecurso?: TipoRecurso;
   quantity: number;
   unit: string;
   price: number;
@@ -61,6 +64,32 @@ class InsumoFilterService implements PoLookupFilter {
   }
 }
 
+const COMPOSICOES = [
+  { id: 'COMP001', nome: 'Concreto fck 25 MPa',            unidade: 'M3', preco: 450.00 },
+  { id: 'COMP002', nome: 'Argamassa de assentamento',       unidade: 'M3', preco: 220.00 },
+  { id: 'COMP003', nome: 'Alvenaria tijolo 9 furos',        unidade: 'M2', preco: 85.00  },
+  { id: 'COMP004', nome: 'Revestimento cerâmico 60x60',     unidade: 'M2', preco: 120.00 },
+  { id: 'COMP005', nome: 'Pintura acrílica 2 demãos',       unidade: 'M2', preco: 25.00  },
+  { id: 'COMP006', nome: 'Instalação elétrica ponto',       unidade: 'PT', preco: 180.00 },
+  { id: 'COMP007', nome: 'Instalação hidráulica ramal',     unidade: 'PT', preco: 350.00 },
+  { id: 'COMP008', nome: 'Forma de madeira laje',           unidade: 'M2', preco: 65.00  },
+  { id: 'COMP009', nome: 'Estrutura metálica cobertura',    unidade: 'KG', preco: 22.00  },
+  { id: 'COMP010', nome: 'Impermeabilização manta asfáltica', unidade: 'M2', preco: 95.00 },
+];
+
+class ComposicaoFilterService implements PoLookupFilter {
+  getFilteredItems(params: PoLookupFilteredItemsParams): Observable<PoLookupResponseApi> {
+    const f = (params.filter ?? '').toUpperCase();
+    const items = f
+      ? COMPOSICOES.filter(c => c.nome.toUpperCase().includes(f) || c.id.toUpperCase().includes(f))
+      : COMPOSICOES;
+    return of({ items, hasNext: false });
+  }
+  getObjectByValue(value: string): Observable<any> {
+    return of(COMPOSICOES.find(c => c.id === String(value)) ?? null);
+  }
+}
+
 const UNIT_ITEMS = [
   { value: 'UN', label: 'Unidade (UN)'         },
   { value: 'H',  label: 'Hora (H)'             },
@@ -69,6 +98,7 @@ const UNIT_ITEMS = [
   { value: 'M2', label: 'Metro quadrado (M2)'  },
   { value: 'M3', label: 'Metro cúbico (M3)'    },
   { value: 'L',  label: 'Litro (L)'            },
+  { value: 'PT', label: 'Ponto (PT)'           },
 ];
 
 class UnitFilterService implements PoLookupFilter {
@@ -166,6 +196,7 @@ function buildEapNodes(): TreeNode[] {
           nodes.push({
             id: String(seq++),
             label: `${rootCode}.${(f + 1).toString().padStart(2, '0')}.${(e + 1).toString().padStart(2, '0')}.${(p + 1).toString().padStart(2, '0')}.${a.toString().padStart(2, '00')} - Atividade ${a}`,
+            tipoRecurso: 'Insumo',
             quantity: a,
             unit: insumo.unidade,
             price: insumo.preco,
@@ -199,12 +230,13 @@ export class Treeview implements OnInit {
 
   editingId: string | null = null;
   editingIsLeaf = false;
-  editForm = { label: '', quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '' };
+  editForm = { label: '', tipoRecurso: 'Insumo' as string, quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '' };
 
   pendingAdd: { parentId: string | null } | null = null;
-  addForm = { label: '', quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '' };
+  addForm = { label: '', tipoRecurso: 'Insumo' as string, quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '' };
 
   readonly insumoService = new InsumoFilterService();
+  readonly composicaoService = new ComposicaoFilterService();
   readonly unitService = new UnitFilterService();
   readonly unitColumns: PoLookupColumn[] = [
     { property: 'value', label: 'Código',    width: '150px' },
@@ -215,6 +247,17 @@ export class Treeview implements OnInit {
     { property: 'nome',    label: 'Nome',      width: '55%'   },
     { property: 'unidade', label: 'Un.',       width: '150px'  },
     { property: 'preco',   label: 'Preço',     width: '150px'  },
+  ];
+  readonly composicaoColumns: PoLookupColumn[] = [
+    { property: 'id',      label: 'Código',    width: '150px' },
+    { property: 'nome',    label: 'Nome',      width: '55%'   },
+    { property: 'unidade', label: 'Un.',       width: '150px'  },
+    { property: 'preco',   label: 'Preço',     width: '150px'  },
+  ];
+
+  readonly tipoRecursoOptions = [
+    { label: 'Insumo',     value: 'Insumo'     },
+    { label: 'Composição', value: 'Composição' },
   ];
 
   readonly unitOptions = [
@@ -262,7 +305,7 @@ export class Treeview implements OnInit {
   }
 
   private makeSentinel(parentId: string | null, level: number): FlatNode {
-    return { id: SENTINEL_ID, label: '', quantity: 1, unit: 'UN', price: 0, value: 0, parentId, expanded: false, level, hasChildren: false };
+    return { id: SENTINEL_ID, label: '', tipoRecurso: 'Insumo', quantity: 1, unit: 'UN', price: 0, value: 0, parentId, expanded: false, level, hasChildren: false };
   }
 
   trackById(_i: number, n: FlatNode): string { return n.id; }
@@ -274,7 +317,7 @@ export class Treeview implements OnInit {
 
   startAdd(parentId: string | null): void {
     this.cancelEdit();
-    this.addForm = { label: '', quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '' };
+    this.addForm = { label: '', tipoRecurso: 'Insumo' as TipoRecurso, quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '' };
     this.pendingAdd = { parentId };
     if (parentId !== null) {
       const parent = this.nodes.find(n => n.id === parentId);
@@ -290,6 +333,7 @@ export class Treeview implements OnInit {
     const addParentId = this.pendingAdd!.parentId;
     this.nodes = [...this.nodes, {
       id: Date.now().toString(), label: this.addForm.label,
+      tipoRecurso: this.addForm.tipoRecurso as TipoRecurso,
       quantity: this.addForm.quantity, unit: this.addForm.unit,
       price: this.addForm.price, value: this.addForm.quantity * this.addForm.price,
       recurso: this.addForm.recurso, recursoId: this.addForm.recursoId,
@@ -305,7 +349,7 @@ export class Treeview implements OnInit {
     this.cancelAdd();
     this.editingId = node.id;
     this.editingIsLeaf = !node.hasChildren;
-    this.editForm = { label: node.label, quantity: node.quantity, unit: node.unit, price: node.price, recurso: node.recurso ?? '', recursoId: node.recursoId ?? '' };
+    this.editForm = { label: node.label, tipoRecurso: node.tipoRecurso ?? 'Insumo' as string, quantity: node.quantity, unit: node.unit, price: node.price, recurso: node.recurso ?? '', recursoId: node.recursoId ?? '' };
     this.refreshVisibleNodes();
   }
 
@@ -315,7 +359,7 @@ export class Treeview implements OnInit {
     if (!this.editForm.label.trim()) { this.notification.warning('O campo Nome e obrigatorio.'); return; }
     const idx = this.nodes.findIndex(n => n.id === this.editingId);
     if (idx > -1) {
-      const updated = { ...this.nodes[idx], ...this.editForm };
+      const updated = { ...this.nodes[idx], ...this.editForm, tipoRecurso: this.editForm.tipoRecurso as TipoRecurso };
       const isLeaf = !this.nodes.some(n => n.parentId === updated.id);
       updated.value = isLeaf
         ? updated.quantity * updated.price
@@ -350,6 +394,28 @@ export class Treeview implements OnInit {
     }
   }
 
+  onEditComposicaoSelected(item: any): void {
+    this.editForm.recurso   = item ? item.nome    : '';
+    this.editForm.recursoId = item ? item.id      : '';
+    this.editForm.unit      = item ? item.unidade : this.editForm.unit;
+    this.editForm.price     = item ? item.preco   : this.editForm.price;
+  }
+
+  onEditComposicaoChange(value: any): void {
+    if (!value) {
+      this.editForm.recurso   = '';
+      this.editForm.recursoId = '';
+    }
+  }
+
+  onEditTipoRecursoChange(tipo: string): void {
+    this.editForm.tipoRecurso = tipo;
+    this.editForm.recurso     = '';
+    this.editForm.recursoId   = '';
+    this.editForm.unit        = 'UN';
+    this.editForm.price       = 0;
+  }
+
   onAddRecursoSelected(item: any): void {
     this.addForm.recurso   = item ? item.nome    : '';
     this.addForm.recursoId = item ? item.id      : '';
@@ -362,6 +428,28 @@ export class Treeview implements OnInit {
       this.addForm.recurso   = '';
       this.addForm.recursoId = '';
     }
+  }
+
+  onAddComposicaoSelected(item: any): void {
+    this.addForm.recurso   = item ? item.nome    : '';
+    this.addForm.recursoId = item ? item.id      : '';
+    this.addForm.unit      = item ? item.unidade : this.addForm.unit;
+    this.addForm.price     = item ? item.preco   : this.addForm.price;
+  }
+
+  onAddComposicaoChange(value: any): void {
+    if (!value) {
+      this.addForm.recurso   = '';
+      this.addForm.recursoId = '';
+    }
+  }
+
+  onAddTipoRecursoChange(tipo: string): void {
+    this.addForm.tipoRecurso = tipo;
+    this.addForm.recurso     = '';
+    this.addForm.recursoId   = '';
+    this.addForm.unit        = 'UN';
+    this.addForm.price       = 0;
   }
 
   indentPx(level: number): string { return level * 24 + 'px'; }
