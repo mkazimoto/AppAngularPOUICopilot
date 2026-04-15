@@ -233,7 +233,7 @@ function buildEapNodes(): TreeNode[] {
 })
 export class Treeview implements OnInit {
   readonly SENTINEL = SENTINEL_ID;
-  readonly ROW_HEIGHT = 60;
+  readonly ROW_HEIGHT = 50;
 
   // ── Resizable columns ──────────────────────────────────────
   colWidths = [450, 130, 200, 110, 130, 150, 120, 100];
@@ -272,7 +272,7 @@ export class Treeview implements OnInit {
   selectedId: string | null = null;
 
   selectNode(node: FlatNode): void {
-    if (node.id === SENTINEL_ID || node.id === this.editingId) return;
+    if (node.id === SENTINEL_ID) return;
     this.selectedId = node.id === this.selectedId ? null : node.id;
   }
 
