@@ -33,213 +33,271 @@
         <div class="td td-nome">
           <div class="tree-cell" [style.paddingLeft]="indentPx(node.level)">
 
-            <button
-              *ngIf="node.hasChildren && node.id !== editingId && node.id !== SENTINEL"
-              class="expand-btn"
-              (click)="toggle(node)"
-              [attr.aria-expanded]="node.expanded"
-            >
-              <i class="an"
-                 [class.an-caret-right]="!node.expanded"
-                 [class.an-caret-down]="node.expanded"></i>
-            </button>
-            <span
-              *ngIf="!node.hasChildren || node.id === editingId || node.id === SENTINEL"
-              class="expand-spacer"
-            ></span>
+            @if (node.hasChildren && node.id !== editingId && node.id !== SENTINEL) {
+              <button
+                class="expand-btn"
+                (click)="toggle(node)"
+                [attr.aria-expanded]="node.expanded"
+              >
+                <i class="an"
+                   [class.an-caret-right]="!node.expanded"
+                   [class.an-caret-down]="node.expanded"></i>
+              </button>
+            } @else {
+              <span class="expand-spacer"></span>
+            }
 
-            <i *ngIf="node.id !== SENTINEL" class="an node-icon"
-               [class.an-folder-full]="node.hasChildren && !node.expanded"
-               [class.an-folder-open]="node.hasChildren && node.expanded"
-               [class.an-file-text]="!node.hasChildren"></i>
-            <i *ngIf="node.id === SENTINEL" class="an an-plus-circle node-icon node-icon--new"></i>
+            @if (node.id !== SENTINEL) {
+              <i class="an node-icon"
+                 [class.an-folder-full]="node.hasChildren && !node.expanded"
+                 [class.an-folder-open]="node.hasChildren && node.expanded"
+                 [class.an-file-text]="!node.hasChildren"></i>
+            } @else {
+              <i class="an an-plus-circle node-icon node-icon--new"></i>
+            }
 
-            <span *ngIf="node.id !== SENTINEL && node.id !== editingId" class="node-label">{{ node.label }}</span>
+            @if (node.id !== SENTINEL && node.id !== editingId) {
+              <span class="node-label">{{ node.label }}</span>
+            }
 
-            <po-input *ngIf="node.id === editingId"
-              name="editLabel"
-              p-placeholder="Nome"
-              [(ngModel)]="editForm.label"
-              (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()">
-            </po-input>
+            @if (node.id === editingId) {
+              <po-input
+                name="editLabel"
+                p-placeholder="Nome"
+                [(ngModel)]="editForm.label"
+                (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()">
+              </po-input>
+            }
 
-            <po-input *ngIf="node.id === SENTINEL"
-              name="addLabel"
-              p-placeholder="Nome"
-              [(ngModel)]="addForm.label"
-              (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()">
-            </po-input>
+            @if (node.id === SENTINEL) {
+              <po-input
+                name="addLabel"
+                p-placeholder="Nome"
+                [(ngModel)]="addForm.label"
+                (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()">
+              </po-input>
+            }
           </div>
         </div>
 
         <!-- Tipo de Recurso -->
         <div class="td td-tipo-recurso">
-          <span *ngIf="node.id !== SENTINEL && node.id !== editingId && !node.hasChildren">{{ node.tipoRecurso }}</span>
-          <po-select *ngIf="node.id === editingId && editingIsLeaf"
-            name="editTipoRecurso"
-            [p-options]="tipoRecursoOptions"
-            [ngModel]="editForm.tipoRecurso"
-            (ngModelChange)="onEditTipoRecursoChange($event)">
-          </po-select>
-          <po-select *ngIf="node.id === SENTINEL"
-            name="addTipoRecurso"
-            [p-options]="tipoRecursoOptions"
-            [ngModel]="addForm.tipoRecurso"
-            (ngModelChange)="onAddTipoRecursoChange($event)">
-          </po-select>
+          @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
+            <span>{{ node.tipoRecurso }}</span>
+          }
+          @if (node.id === editingId && editingIsLeaf) {
+            <po-select
+              name="editTipoRecurso"
+              [p-options]="tipoRecursoOptions"
+              [ngModel]="editForm.tipoRecurso"
+              (ngModelChange)="onEditTipoRecursoChange($event)">
+            </po-select>
+          }
+          @if (node.id === SENTINEL) {
+            <po-select
+              name="addTipoRecurso"
+              [p-options]="tipoRecursoOptions"
+              [ngModel]="addForm.tipoRecurso"
+              (ngModelChange)="onAddTipoRecursoChange($event)">
+            </po-select>
+          }
         </div>
 
         <!-- Recurso -->
         <div class="td td-recurso">
-          <span *ngIf="node.id !== SENTINEL && node.id !== editingId && !node.hasChildren">{{ node.recurso }}</span>
+          @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
+            <span>{{ node.recurso }}</span>
+          }
           <!-- Edit: Insumo -->
-          <po-lookup *ngIf="node.id === editingId && editingIsLeaf && editForm.tipoRecurso === 'Insumo'"
-            name="editRecurso"
-            p-placeholder="Selecionar insumo"
-            p-field-value="id"
-            p-field-label="nome"
-            p-clean
-            [p-filter-service]="insumoService"
-            [p-columns]="insumoColumns"
-            [(ngModel)]="editForm.recursoId"
-            (p-selected)="onEditRecursoSelected($event)"
-            (p-change)="onEditRecursoChange($event)">
-          </po-lookup>
+          @if (node.id === editingId && editingIsLeaf && editForm.tipoRecurso === 'Insumo') {
+            <po-lookup
+              name="editRecurso"
+              p-placeholder="Selecionar insumo"
+              p-field-value="id"
+              p-field-label="nome"
+              p-clean
+              [p-filter-service]="insumoService"
+              [p-columns]="insumoColumns"
+              [(ngModel)]="editForm.recursoId"
+              (p-selected)="onEditRecursoSelected($event)"
+              (p-change)="onEditRecursoChange($event)">
+            </po-lookup>
+          }
           <!-- Edit: Composição -->
-          <po-lookup *ngIf="node.id === editingId && editingIsLeaf && editForm.tipoRecurso === 'Composição'"
-            name="editComposicao"
-            p-placeholder="Selecionar composição"
-            p-field-value="id"
-            p-field-label="nome"
-            p-clean
-            [p-filter-service]="composicaoService"
-            [p-columns]="composicaoColumns"
-            [(ngModel)]="editForm.recursoId"
-            (p-selected)="onEditComposicaoSelected($event)"
-            (p-change)="onEditComposicaoChange($event)">
-          </po-lookup>
+          @if (node.id === editingId && editingIsLeaf && editForm.tipoRecurso === 'Composição') {
+            <po-lookup
+              name="editComposicao"
+              p-placeholder="Selecionar composição"
+              p-field-value="id"
+              p-field-label="nome"
+              p-clean
+              [p-filter-service]="composicaoService"
+              [p-columns]="composicaoColumns"
+              [(ngModel)]="editForm.recursoId"
+              (p-selected)="onEditComposicaoSelected($event)"
+              (p-change)="onEditComposicaoChange($event)">
+            </po-lookup>
+          }
           <!-- Add: Insumo -->
-          <po-lookup *ngIf="node.id === SENTINEL && addForm.tipoRecurso === 'Insumo'"
-            name="addRecurso"
-            p-placeholder="Selecionar insumo"
-            p-field-value="id"
-            p-field-label="nome"
-            p-clean
-            [p-filter-service]="insumoService"
-            [p-columns]="insumoColumns"
-            [(ngModel)]="addForm.recursoId"
-            (p-selected)="onAddRecursoSelected($event)"
-            (p-change)="onAddRecursoChange($event)">
-          </po-lookup>
+          @if (node.id === SENTINEL && addForm.tipoRecurso === 'Insumo') {
+            <po-lookup
+              name="addRecurso"
+              p-placeholder="Selecionar insumo"
+              p-field-value="id"
+              p-field-label="nome"
+              p-clean
+              [p-filter-service]="insumoService"
+              [p-columns]="insumoColumns"
+              [(ngModel)]="addForm.recursoId"
+              (p-selected)="onAddRecursoSelected($event)"
+              (p-change)="onAddRecursoChange($event)">
+            </po-lookup>
+          }
           <!-- Add: Composição -->
-          <po-lookup *ngIf="node.id === SENTINEL && addForm.tipoRecurso === 'Composição'"
-            name="addComposicao"
-            p-placeholder="Selecionar composição"
-            p-field-value="id"
-            p-field-label="nome"
-            p-clean
-            [p-filter-service]="composicaoService"
-            [p-columns]="composicaoColumns"
-            [(ngModel)]="addForm.recursoId"
-            (p-selected)="onAddComposicaoSelected($event)"
-            (p-change)="onAddComposicaoChange($event)">
-          </po-lookup>
+          @if (node.id === SENTINEL && addForm.tipoRecurso === 'Composição') {
+            <po-lookup
+              name="addComposicao"
+              p-placeholder="Selecionar composição"
+              p-field-value="id"
+              p-field-label="nome"
+              p-clean
+              [p-filter-service]="composicaoService"
+              [p-columns]="composicaoColumns"
+              [(ngModel)]="addForm.recursoId"
+              (p-selected)="onAddComposicaoSelected($event)"
+              (p-change)="onAddComposicaoChange($event)">
+            </po-lookup>
+          }
         </div>
 
         <div class="td td-quantidade">
-          <span *ngIf="node.id !== SENTINEL && node.id !== editingId && !node.hasChildren">{{ node.quantity }}</span>
-          <po-decimal *ngIf="node.id === editingId && editingIsLeaf"
-            name="editQuantity"
-            p-placeholder="Qtd"
-            [p-decimals-length]="3"
-            [(ngModel)]="editForm.quantity"
-            (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()">
-          </po-decimal>
-          <po-decimal *ngIf="node.id === SENTINEL"
-            name="addQuantity"
-            p-placeholder="Qtd"
-            [p-decimals-length]="3"
-            [(ngModel)]="addForm.quantity"
-            (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()">
-          </po-decimal>
+          @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
+            <span>{{ node.quantity }}</span>
+          }
+          @if (node.id === editingId && editingIsLeaf) {
+            <po-decimal
+              name="editQuantity"
+              p-placeholder="Qtd"
+              [p-decimals-length]="3"
+              [(ngModel)]="editForm.quantity"
+              (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()">
+            </po-decimal>
+          }
+          @if (node.id === SENTINEL) {
+            <po-decimal
+              name="addQuantity"
+              p-placeholder="Qtd"
+              [p-decimals-length]="3"
+              [(ngModel)]="addForm.quantity"
+              (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()">
+            </po-decimal>
+          }
         </div>
 
         <!--  Unidade  -->
         <div class="td td-unidade">
-          <span *ngIf="node.id !== SENTINEL && node.id !== editingId && !node.hasChildren">{{ node.unit }}</span>
-          <po-lookup *ngIf="node.id === editingId && editingIsLeaf"
-            name="editUnit"
-            p-placeholder="Unidade"
-            p-field-value="value"
-            p-field-label="label"
-            p-clean
-            [p-filter-service]="unitService"
-            [p-columns]="unitColumns"
-            [p-disabled]="editUnitReadonly"
-            [(ngModel)]="editForm.unit">
-          </po-lookup>
-          <po-lookup *ngIf="node.id === SENTINEL"
-            name="addUnit"
-            p-placeholder="Unidade"
-            p-field-value="value"
-            p-field-label="label"
-            p-clean
-            [p-filter-service]="unitService"
-            [p-columns]="unitColumns"
-            [p-disabled]="addUnitReadonly"
-            [(ngModel)]="addForm.unit">
-          </po-lookup>
+          @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
+            <span>{{ node.unit }}</span>
+          }
+          @if (node.id === editingId && editingIsLeaf) {
+            <po-lookup
+              name="editUnit"
+              p-placeholder="Unidade"
+              p-field-value="value"
+              p-field-label="label"
+              p-clean
+              [p-filter-service]="unitService"
+              [p-columns]="unitColumns"
+              [p-disabled]="editUnitReadonly"
+              [(ngModel)]="editForm.unit">
+            </po-lookup>
+          }
+          @if (node.id === SENTINEL) {
+            <po-lookup
+              name="addUnit"
+              p-placeholder="Unidade"
+              p-field-value="value"
+              p-field-label="label"
+              p-clean
+              [p-filter-service]="unitService"
+              [p-columns]="unitColumns"
+              [p-disabled]="addUnitReadonly"
+              [(ngModel)]="addForm.unit">
+            </po-lookup>
+          }
         </div>
 
         <!--  Preço  -->
         <div class="td td-preco">
-          <span *ngIf="node.id !== SENTINEL && node.id !== editingId && !node.hasChildren">{{ node.price | currency:'BRL':'symbol':'1.2-2' }}</span>
-          <po-decimal *ngIf="node.id === editingId && editingIsLeaf"
-            name="editPrice"
-            p-placeholder="Preço Unitário"
-            [p-decimals-length]="2"
-            [(ngModel)]="editForm.price"
-            (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()">
-          </po-decimal>
-          <po-decimal *ngIf="node.id === SENTINEL"
-            name="addPrice"
-            p-placeholder="Preço"
-            [p-decimals-length]="2"
-            [(ngModel)]="addForm.price"
-            (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()">
-          </po-decimal>
+          @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
+            <span>{{ node.price | currency:'BRL':'symbol':'1.2-2' }}</span>
+          }
+          @if (node.id === editingId && editingIsLeaf) {
+            <po-decimal
+              name="editPrice"
+              p-placeholder="Preço Unitário"
+              [p-decimals-length]="2"
+              [(ngModel)]="editForm.price"
+              (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()">
+            </po-decimal>
+          }
+          @if (node.id === SENTINEL) {
+            <po-decimal
+              name="addPrice"
+              p-placeholder="Preço"
+              [p-decimals-length]="2"
+              [(ngModel)]="addForm.price"
+              (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()">
+            </po-decimal>
+          }
         </div>
 
         <!--  Valor  -->
         <div class="td td-valor">
-          <span *ngIf="node.id !== editingId && node.id !== SENTINEL">{{ node.value | currency:'BRL':'symbol':'1.2-2' }}</span>
-          <span *ngIf="node.id === editingId && editingIsLeaf">{{ editPreviewValue | currency:'BRL':'symbol':'1.2-2' }}</span>
-          <span *ngIf="node.id === editingId && !editingIsLeaf">{{ node.value | currency:'BRL':'symbol':'1.2-2' }}</span>
-          <span *ngIf="node.id === SENTINEL">{{ addPreviewValue | currency:'BRL':'symbol':'1.2-2' }}</span>
+          @if (node.id !== editingId && node.id !== SENTINEL) {
+            <span>{{ node.value | currency:'BRL':'symbol':'1.2-2' }}</span>
+          }
+          @if (node.id === editingId && editingIsLeaf) {
+            <span>{{ editPreviewValue | currency:'BRL':'symbol':'1.2-2' }}</span>
+          }
+          @if (node.id === editingId && !editingIsLeaf) {
+            <span>{{ node.value | currency:'BRL':'symbol':'1.2-2' }}</span>
+          }
+          @if (node.id === SENTINEL) {
+            <span>{{ addPreviewValue | currency:'BRL':'symbol':'1.2-2' }}</span>
+          }
         </div>
         <!-- ── Ações ─────────────────────────────────────── -->
         <div class="td td-acoes">
-          <div *ngIf="node.id !== SENTINEL && node.id !== editingId" class="actions-row">
-            <po-button p-icon="an an-pencil" p-kind="tertiary" p-label="" p-size="small" (p-click)="startEdit(node)"></po-button>
-            <po-button p-icon="an an-plus"   p-kind="tertiary" p-label="" p-size="small" (p-click)="startAdd(node.id)"></po-button>
-            <po-button p-icon="an an-trash"  p-kind="tertiary" [p-danger]="true" p-label="" p-size="small" (p-click)="deleteNode(node)"></po-button>
-          </div>
-          <div *ngIf="node.id === editingId" class="actions-row">
-            <po-button p-icon="an an-check" p-kind="primary"  p-label="" p-size="small" (p-click)="saveEdit()"></po-button>
-            <po-button p-icon="an an-x"     p-kind="tertiary" p-label="" p-size="small" (p-click)="cancelEdit()"></po-button>
-          </div>
-          <div *ngIf="node.id === SENTINEL" class="actions-row">
-            <po-button p-icon="an an-check" p-kind="primary"  p-label="" p-size="small" (p-click)="saveAdd()"></po-button>
-            <po-button p-icon="an an-x"     p-kind="tertiary" p-label="" p-size="small" (p-click)="cancelAdd()"></po-button>
-          </div>
+          @if (node.id !== SENTINEL && node.id !== editingId) {
+            <div class="actions-row">
+              <po-button p-icon="an an-pencil" p-kind="tertiary" p-label="" p-size="small" (p-click)="startEdit(node)"></po-button>
+              <po-button p-icon="an an-plus"   p-kind="tertiary" p-label="" p-size="small" (p-click)="startAdd(node.id)"></po-button>
+              <po-button p-icon="an an-trash"  p-kind="tertiary" [p-danger]="true" p-label="" p-size="small" (p-click)="deleteNode(node)"></po-button>
+            </div>
+          }
+          @if (node.id === editingId) {
+            <div class="actions-row">
+              <po-button p-icon="an an-check" p-kind="primary"  p-label="" p-size="small" (p-click)="saveEdit()"></po-button>
+              <po-button p-icon="an an-x"     p-kind="tertiary" p-label="" p-size="small" (p-click)="cancelEdit()"></po-button>
+            </div>
+          }
+          @if (node.id === SENTINEL) {
+            <div class="actions-row">
+              <po-button p-icon="an an-check" p-kind="primary"  p-label="" p-size="small" (p-click)="saveAdd()"></po-button>
+              <po-button p-icon="an an-x"     p-kind="tertiary" p-label="" p-size="small" (p-click)="cancelAdd()"></po-button>
+            </div>
+          }
         </div>
       </div>
 
       <!-- Empty state -->
-      <div *ngIf="visibleNodes.length === 0" class="empty-row">
-        <i class="an an-tree-structure empty-icon"></i>
-        <p>Nenhum item. Clique em <strong>Adicionar Raiz</strong> para começar.</p>
-      </div>
+      @if (visibleNodes.length === 0) {
+        <div class="empty-row">
+          <i class="an an-tree-structure empty-icon"></i>
+          <p>Nenhum item. Clique em <strong>Adicionar Raiz</strong> para começar.</p>
+        </div>
+      }
 
     </cdk-virtual-scroll-viewport>
 

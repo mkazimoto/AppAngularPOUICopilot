@@ -148,7 +148,7 @@ function buildEapNodes(): TreeNode[] {
  
   nodes.push({
     id: rootId,
-    label: `${rootCode} - Construção Residencial Unifamiliar`,
+    label: `${rootCode} - Construção Residencial`,
     quantity: 1,
     unit: 'UN',
     price: 0,
@@ -232,7 +232,7 @@ export class Treeview implements OnInit {
   readonly ROW_HEIGHT = 44;
 
   // ── Resizable columns ──────────────────────────────────────
-  colWidths = [280, 130, 200, 110, 130, 150, 120, 100];
+  colWidths = [450, 130, 200, 110, 130, 150, 120, 100];
   private _resizingCol = -1;
   private _resizeStartX = 0;
   private _resizeStartWidth = 0;
