@@ -11,8 +11,8 @@ import {
   PoLookupResponseApi,
   PoNotificationService,
   PoPageAction,
+  PoPageFilter,
   PoPageModule,
-  PoSearchModule,
 } from '@po-ui/ng-components';
 import { Observable, of } from 'rxjs';
 
@@ -218,7 +218,7 @@ function buildEapNodes(): TreeNode[] {
 @Component({
   selector: 'app-treeview',
   standalone: true,
-  imports: [CommonModule, FormsModule, ScrollingModule, PoButtonModule, PoFieldModule, PoPageModule, PoSearchModule],
+  imports: [CommonModule, FormsModule, ScrollingModule, PoButtonModule, PoFieldModule, PoPageModule],
   templateUrl: './treeview.html',
   styleUrl: './treeview.css',
 })
@@ -301,6 +301,12 @@ export class Treeview implements OnInit {
     { label: 'l',   value: 'l'   },
   ];
 
+
+  readonly pageFilter: PoPageFilter = {
+    placeholder: 'Pesquisar por nome ou recurso...',
+    action: (value: string) => this.onSearch(value),
+    width: 6,
+  };
 
   readonly pageActions: PoPageAction[] = [
     { label: 'Adicionar Obra', action: () => this.startAdd(null), icon: 'an an-plus-circle' },
