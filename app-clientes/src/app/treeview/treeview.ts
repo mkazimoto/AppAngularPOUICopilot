@@ -352,6 +352,15 @@ export class Treeview implements OnInit {
     event.preventDefault();
   }
 
+  @HostListener('input', ['$event'])
+  onFilterInput(event: Event): void {
+    const target = event.target as HTMLElement;
+    // Reage apenas ao input do filtro da página (fora do grid e do gerenciador de colunas)
+    if (!target.closest('.treeview-grid') && !target.closest('.column-manager-list')) {
+      this.onSearch((target as HTMLInputElement).value);
+    }
+  }
+
   @HostListener('document:mousemove', ['$event'])
   onMouseMove(event: MouseEvent): void {
     if (this._resizingCol < 0) return;
