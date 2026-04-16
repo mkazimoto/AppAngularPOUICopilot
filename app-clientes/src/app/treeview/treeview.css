@@ -101,9 +101,13 @@
   box-sizing: border-box;
 }
 
-.treeview-row:hover .td {
+.treeview-row:hover {
   background-color: var(--color-brand-01-lightest, #eaf4fd);
   transition: background-color 0.15s ease;
+}
+
+.treeview-row:hover .td {
+  background-color: transparent;
 }
 
 /* ─── Cell ───────────────────────────────────────────────────── */
