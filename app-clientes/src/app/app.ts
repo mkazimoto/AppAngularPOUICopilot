@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 import { PoMenuItem, PoMenuModule, PoToolbarModule } from '@po-ui/ng-components';
+import poUiPackage from '@po-ui/ng-components/package.json';
 
 @Component({
   selector: 'app-root',
@@ -11,6 +12,9 @@ import { PoMenuItem, PoMenuModule, PoToolbarModule } from '@po-ui/ng-components'
   styleUrls: ['./app.css'],
 })
 export class App {
+  readonly poUiVersion = poUiPackage.version;
+  readonly toolbarTitle = `App PO-UI gerado pelo Copilot com o Modelo Claude Sonnet 4.6 - Versão do PO-UI ${this.poUiVersion}`;
+
   readonly menus: Array<PoMenuItem> = [
     { label: 'Dashboard', link: '/dashboard', icon: 'an an-chart-bar' },
     { label: 'Clientes', link: '/clientes', icon: 'an an-users' },
