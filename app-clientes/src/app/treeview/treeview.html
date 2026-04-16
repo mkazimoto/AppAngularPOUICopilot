@@ -312,21 +312,21 @@
         <div class="td td-acoes" [style.order]="colOrder('acoes')">
           @if (node.id !== SENTINEL && node.id !== editingId) {
             <div class="actions-row">
-              <po-button p-icon="an an-pencil" p-kind="tertiary" p-label="" p-size="small" (p-click)="startEdit(node)"></po-button>
-              <po-button p-icon="an an-plus"   p-kind="tertiary" p-label="" p-size="small" (p-click)="startAdd(node.id)"></po-button>
-              <po-button p-icon="an an-trash"  p-kind="tertiary" [p-danger]="true" p-label="" p-size="small" (p-click)="deleteNode(node)"></po-button>
+              <po-button p-icon="an an-pencil" p-kind="tertiary" p-label="" p-size="small" (p-click)="startEdit(node)" p-tooltip="Editar" p-append-in-body="true"></po-button>
+              <po-button p-icon="an an-plus"   p-kind="tertiary" p-label="" p-size="small" (p-click)="startAdd(node.id)" p-tooltip="Adicionar" p-append-in-body="true"></po-button>
+              <po-button p-icon="an an-trash"  p-kind="tertiary" [p-danger]="true" p-label="" p-size="small" (p-click)="deleteNode(node)" p-tooltip="Excluir" p-append-in-body="true"></po-button>
             </div>
           }
           @if (node.id === editingId) {
             <div class="actions-row">
-              <po-button p-icon="an an-check" p-kind="primary"  p-label="" p-size="small" (p-click)="saveEdit()"></po-button>
-              <po-button p-icon="an an-x"     p-kind="tertiary" p-label="" p-size="small" (p-click)="cancelEdit()"></po-button>
+              <po-button p-icon="an an-check" p-kind="primary"  p-label="" p-size="small" (p-click)="saveEdit()" p-tooltip="Salvar"></po-button>
+              <po-button p-icon="an an-x"     p-kind="tertiary" p-label="" p-size="small" (p-click)="cancelEdit()" p-tooltip="Cancelar"></po-button>
             </div>
           }
           @if (node.id === SENTINEL) {
             <div class="actions-row">
-              <po-button p-icon="an an-check" p-kind="primary"  p-label="" p-size="small" (p-click)="saveAdd()"></po-button>
-              <po-button p-icon="an an-x"     p-kind="tertiary" p-label="" p-size="small" (p-click)="cancelAdd()"></po-button>
+              <po-button p-icon="an an-check" p-kind="primary"  p-label="" p-size="small" (p-click)="saveAdd()" p-tooltip="Salvar"></po-button>
+              <po-button p-icon="an an-x"     p-kind="tertiary" p-label="" p-size="small" (p-click)="cancelAdd()" p-tooltip="Cancelar"></po-button>
             </div>
           }
         </div>

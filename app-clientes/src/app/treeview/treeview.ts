@@ -2,22 +2,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, NgZone, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import {
-  PoButtonModule,
-  PoFieldModule,
-  PoLookupColumn,
-  PoLookupFilter,
-  PoLookupFilteredItemsParams,
-  PoLookupResponseApi,
-  PoNotificationService,
-  PoPageAction,
-  PoPageFilter,
-  PoPageModule,
-  PoPageSlideComponent,
-  PoPageSlideModule,
-  PoSwitchLabelPosition,
-  PoTagModule
-} from '@po-ui/ng-components';
+import { PoButtonModule, PoFieldModule, PoLookupColumn, PoLookupFilter, PoLookupFilteredItemsParams, PoLookupResponseApi, PoNotificationService, PoPageAction, PoPageFilter, PoPageModule, PoPageSlideComponent, PoPageSlideModule, PoSwitchLabelPosition, PoTagModule, PoTooltipModule } from '@po-ui/ng-components';
 import { Observable, of } from 'rxjs';
 
 export type TipoRecurso = 'Insumo' | 'Composição';
@@ -238,7 +223,7 @@ function buildEapNodes(): TreeNode[] {
 @Component({
   selector: 'app-treeview',
   standalone: true,
-  imports: [CommonModule, FormsModule, ScrollingModule, PoButtonModule, PoFieldModule, PoPageModule, PoPageSlideModule, PoTagModule],
+  imports: [CommonModule, FormsModule, ScrollingModule, PoButtonModule, PoFieldModule, PoPageModule, PoPageSlideModule, PoTagModule, PoTooltipModule],
   templateUrl: './treeview.html',
   styleUrl: './treeview.css',
 })
