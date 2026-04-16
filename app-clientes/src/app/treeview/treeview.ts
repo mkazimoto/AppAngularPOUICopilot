@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { PoButtonModule, PoFieldModule, PoLookupColumn, PoLookupFilter, PoLookupFilteredItemsParams, PoLookupResponseApi, PoNotificationService, PoPageAction, PoPageFilter, PoPageModule, PoPageSlideComponent, PoPageSlideModule, PoSwitchLabelPosition, PoTagModule, PoTooltipModule } from '@po-ui/ng-components';
 import { Observable, of } from 'rxjs';
 
-export type TipoRecurso = 'Insumo' | 'Composição';
+export type TipoRecurso = 'Insumo' | 'Composição' | 'Valor cotado';
 
 export interface ColumnConfig {
   key: string;
@@ -407,12 +407,15 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
   ];
 
   readonly tipoRecursoOptions = [
-    { label: 'Insumo local',     value: 'Insumo'     },
-    { label: 'Composição local', value: 'Composição' },
+    { label: 'Valor cotado',     value: 'Valor cotado' },
+    { label: 'Insumo local',     value: 'Insumo'       },
+    { label: 'Composição local', value: 'Composição'   },
   ];
 
   tipoRecursoColor(tipo?: TipoRecurso): string {
-    return tipo === 'Composição' ? '#55FF99' : '#5599FF';
+    if (tipo === 'Composição')   return '#55FF99';
+    if (tipo === 'Valor cotado') return '#FF9955';
+    return '#5599FF';
   }
 
   readonly pageFilter: PoPageFilter = {
@@ -507,7 +510,7 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private makeSentinel(parentId: string | null, level: number): FlatNode {
-    return { id: SENTINEL_ID, label: '', tipoRecurso: 'Insumo', quantity: 1, unit: 'UN', price: 0, value: 0, parentId, expanded: false, level, hasChildren: false };
+    return { id: SENTINEL_ID, label: '', tipoRecurso: 'Valor cotado', quantity: 1, unit: 'UN', price: 0, value: 0, parentId, expanded: false, level, hasChildren: false };
   }
 
   trackById(_i: number, n: FlatNode): string { return n.id; }
@@ -519,7 +522,7 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
 
   startAdd(parentId: string | null): void {
     this.cancelEdit();
-    this.addForm = { label: '', tipoRecurso: 'Insumo' as TipoRecurso, quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '', insumoId: '', composicaoId: '' };
+    this.addForm = { label: '', tipoRecurso: 'Valor cotado' as TipoRecurso, quantity: 1, unit: 'UN', price: 0, recurso: '', recursoId: '', insumoId: '', composicaoId: '' };
     this.pendingAdd = { parentId };
     if (parentId !== null) {
       const parent = this.nodes.find(n => n.id === parentId);
@@ -547,9 +550,10 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
     if (!this.addForm.label.trim()) { this.notification.warning('O campo Nome e obrigatorio.'); return; }
     const addParentId = this.pendingAdd!.parentId;
     const parentWasLeaf = addParentId !== null && !this.nodes.some(n => n.parentId === addParentId);
+    const addTipoRecurso: TipoRecurso = this.addForm.recursoId ? this.addForm.tipoRecurso as TipoRecurso : 'Valor cotado';
     this.nodes = [...this.nodes, {
       id: Date.now().toString(), label: this.addForm.label,
-      tipoRecurso: this.addForm.tipoRecurso as TipoRecurso,
+      tipoRecurso: addTipoRecurso,
       quantity: this.addForm.quantity, unit: this.addForm.unit,
       price: this.addForm.price, value: this.addForm.quantity * this.addForm.price,
       recurso: this.addForm.recurso, recursoId: this.addForm.recursoId,
@@ -579,7 +583,7 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
     this.editingId = node.id;
     this.selectedId = node.id;
     this.editingIsLeaf = !node.hasChildren;
-    this.editForm = { label: node.label, tipoRecurso: node.tipoRecurso ?? 'Insumo' as string, quantity: node.quantity, unit: node.unit, price: node.price, recurso: node.recurso ?? '', recursoId: node.recursoId ?? '', insumoId: node.insumoId ?? '', composicaoId: node.composicaoId ?? '' };
+    this.editForm = { label: node.label, tipoRecurso: (node.tipoRecurso ?? (node.recurso ? 'Insumo' : 'Valor cotado')) as string, quantity: node.quantity, unit: node.unit, price: node.price, recurso: node.recurso ?? '', recursoId: node.recursoId ?? '', insumoId: node.insumoId ?? '', composicaoId: node.composicaoId ?? '' };
     this.refreshVisibleNodes();
   }
 
@@ -589,7 +593,8 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
     if (!this.editForm.label.trim()) { this.notification.warning('O campo Nome e obrigatorio.'); return; }
     const idx = this.nodes.findIndex(n => n.id === this.editingId);
     if (idx > -1) {
-      const updated = { ...this.nodes[idx], ...this.editForm, tipoRecurso: this.editForm.tipoRecurso as TipoRecurso };
+      const editTipoRecurso: TipoRecurso = this.editForm.recursoId ? this.editForm.tipoRecurso as TipoRecurso : 'Valor cotado';
+      const updated = { ...this.nodes[idx], ...this.editForm, tipoRecurso: editTipoRecurso };
       const isLeaf = !this.nodes.some(n => n.parentId === updated.id);
       updated.value = isLeaf
         ? updated.quantity * updated.price

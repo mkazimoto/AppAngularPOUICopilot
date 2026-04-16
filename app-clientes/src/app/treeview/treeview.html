@@ -111,7 +111,7 @@
         @if (isVisible('tipoRecurso')) {
         <div class="td td-tipo-recurso" [style.order]="colOrder('tipoRecurso')">
           @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
-            <po-tag [p-value]="node.tipoRecurso!" p-text-color="White" [p-color]="tipoRecursoColor(node.tipoRecurso)"></po-tag>
+            <po-tag [p-value]="node.tipoRecurso || 'Valor cotado'" p-text-color="White" [p-color]="tipoRecursoColor(node.tipoRecurso)"></po-tag>
           }
           @if (node.id === editingId && editingIsLeaf) {
             <po-select
