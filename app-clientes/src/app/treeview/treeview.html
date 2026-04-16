@@ -319,14 +319,14 @@
           }
           @if (node.id === editingId) {
             <div class="actions-row">
-              <po-button p-icon="an an-check" p-kind="primary"  p-label="" p-size="small" (p-click)="saveEdit()" p-tooltip="Salvar"></po-button>
-              <po-button p-icon="an an-x"     p-kind="tertiary" p-label="" p-size="small" (p-click)="cancelEdit()" p-tooltip="Cancelar"></po-button>
+              <po-button p-icon="an an-check" p-kind="primary"  p-label="" p-size="small" (p-click)="saveEdit()" p-tooltip="Salvar" p-append-in-body="true"></po-button>
+              <po-button p-icon="an an-x"     p-kind="tertiary" p-label="" p-size="small" (p-click)="cancelEdit()" p-tooltip="Cancelar" p-append-in-body="true"></po-button>
             </div>
           }
           @if (node.id === SENTINEL) {
             <div class="actions-row">
-              <po-button p-icon="an an-check" p-kind="primary"  p-label="" p-size="small" (p-click)="saveAdd()" p-tooltip="Salvar"></po-button>
-              <po-button p-icon="an an-x"     p-kind="tertiary" p-label="" p-size="small" (p-click)="cancelAdd()" p-tooltip="Cancelar"></po-button>
+              <po-button p-icon="an an-check" p-kind="primary"  p-label="" p-size="small" (p-click)="saveAdd()" p-tooltip="Salvar" p-append-in-body="true"></po-button>
+              <po-button p-icon="an an-x"     p-kind="tertiary" p-label="" p-size="small" (p-click)="cancelAdd()" p-tooltip="Cancelar" p-append-in-body="true"></po-button>
             </div>
           }
         </div>
