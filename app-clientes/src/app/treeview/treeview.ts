@@ -546,6 +546,7 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
   saveAdd(): void {
     if (!this.addForm.label.trim()) { this.notification.warning('O campo Nome e obrigatorio.'); return; }
     const addParentId = this.pendingAdd!.parentId;
+    const parentWasLeaf = addParentId !== null && !this.nodes.some(n => n.parentId === addParentId);
     this.nodes = [...this.nodes, {
       id: Date.now().toString(), label: this.addForm.label,
       tipoRecurso: this.addForm.tipoRecurso as TipoRecurso,
@@ -556,6 +557,17 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
       composicaoId: this.addForm.composicaoId || undefined,
       parentId: addParentId, expanded: false,
     }];
+    if (parentWasLeaf) {
+      const parentIdx = this.nodes.findIndex(n => n.id === addParentId);
+      if (parentIdx > -1) {
+        this.nodes[parentIdx] = {
+          ...this.nodes[parentIdx],
+          quantity: 1, unit: 'UN', price: 0,
+          recurso: undefined, recursoId: undefined, insumoId: undefined, composicaoId: undefined,
+          tipoRecurso: undefined,
+        };
+      }
+    }
     this.recalculateAncestors(addParentId);
     this.pendingAdd = null;
     this.refreshVisibleNodes();
@@ -711,12 +723,10 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
     let currentId = startParentId;
     while (currentId !== null) {
       const children = this.nodes.filter(n => n.parentId === currentId);
-      if (children.length > 0) {
-        const total = children.reduce((sum, c) => sum + (c.value || 0), 0);
-        const idx = this.nodes.findIndex(n => n.id === currentId);
-        if (idx > -1) {
-          this.nodes[idx] = { ...this.nodes[idx], value: total };
-        }
+      const total = children.reduce((sum, c) => sum + (c.value || 0), 0);
+      const idx = this.nodes.findIndex(n => n.id === currentId);
+      if (idx > -1) {
+        this.nodes[idx] = { ...this.nodes[idx], value: total };
       }
       const node = this.nodes.find(n => n.id === currentId);
       currentId = node?.parentId ?? null;
