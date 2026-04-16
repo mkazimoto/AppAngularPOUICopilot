@@ -416,7 +416,12 @@ export class Treeview implements OnInit {
   };
 
   readonly pageActions: PoPageAction[] = [
-    { label: 'Adicionar Obra', action: () => this.startAdd(null), icon: 'an an-plus-circle' },
+    { label: 'Adicionar Tarefa', action: () => {
+        const parentId = this.selectedId
+          ? (this.nodes.find(n => n.id === this.selectedId)?.parentId ?? null)
+          : null;
+        this.startAdd(parentId);
+      }, icon: 'an an-plus-circle' },
     { label: 'Expandir Todos', action: () => this.expandAll(),   icon: 'an an-arrows-out'  },
     { label: 'Recolher Todos', action: () => this.collapseAll(), icon: 'an an-arrows-in'   },
   ];
