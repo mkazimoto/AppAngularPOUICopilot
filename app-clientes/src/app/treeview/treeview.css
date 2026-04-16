@@ -91,7 +91,6 @@
 
 /* ─── Virtual scroll viewport ───────────────────────────────── */
 .treeview-viewport {
-  height: 600px;
   width: 100%;
 }
 

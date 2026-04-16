@@ -7,7 +7,7 @@
     </div>
   </div>
 
-  <div class="treeview-grid">
+  <div class="treeview-grid" #treeviewGrid>
 
     <!-- ── Botão gerenciador de colunas ─────────────────── -->
     <po-button
@@ -21,7 +21,7 @@
     </po-button>
 
     <!-- ── Sticky header ─────────────────────────────────── -->
-    <div class="treeview-header" [style.grid-template-columns]="colTemplate">
+    <div class="treeview-header" #treeviewHeader [style.grid-template-columns]="colTemplate">
       <div class="th th-nome" [style.order]="colOrder('nome')">Nome<span class="col-resize-handle" (mousedown)="resizeStart($event, 'nome')"></span></div>
       @if (isVisible('tipoRecurso')) {
         <div class="th th-tipo-recurso" [style.order]="colOrder('tipoRecurso')">Tipo de Recurso<span class="col-resize-handle" (mousedown)="resizeStart($event, 'tipoRecurso')"></span></div>
@@ -45,7 +45,7 @@
     </div>
 
     <!-- ── Virtual scroll body ───────────────────────────── -->
-    <cdk-virtual-scroll-viewport [itemSize]="ROW_HEIGHT" class="treeview-viewport">
+    <cdk-virtual-scroll-viewport [itemSize]="ROW_HEIGHT" class="treeview-viewport" [style.height.px]="viewportHeight">
 
       <div
         *cdkVirtualFor="let node of visibleNodes; trackBy: trackById"

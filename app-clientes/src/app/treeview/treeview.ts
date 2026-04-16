@@ -1,6 +1,6 @@
 ﻿import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, NgZone, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PoButtonModule, PoFieldModule, PoLookupColumn, PoLookupFilter, PoLookupFilteredItemsParams, PoLookupResponseApi, PoNotificationService, PoPageAction, PoPageFilter, PoPageModule, PoPageSlideComponent, PoPageSlideModule, PoSwitchLabelPosition, PoTagModule, PoTooltipModule } from '@po-ui/ng-components';
 import { Observable, of } from 'rxjs';
@@ -227,12 +227,18 @@ function buildEapNodes(): TreeNode[] {
   templateUrl: './treeview.html',
   styleUrl: './treeview.css',
 })
-export class Treeview implements OnInit {
+export class Treeview implements OnInit, AfterViewInit, OnDestroy {
   readonly SENTINEL = SENTINEL_ID;
   readonly ROW_HEIGHT = 50;
 
   labelPosition: PoSwitchLabelPosition = PoSwitchLabelPosition.Right;
 
+
+  // ── Adaptive viewport height ─────────────────────────────
+  viewportHeight = 600;
+  @ViewChild('treeviewGrid') treeviewGridRef!: ElementRef<HTMLElement>;
+  @ViewChild('treeviewHeader') treeviewHeaderRef!: ElementRef<HTMLElement>;
+  private resizeObserver!: ResizeObserver;
 
   // ── Column manager ─────────────────────────────────────────
   @ViewChild('columnManagerSlide') columnManagerSlide!: PoPageSlideComponent;
@@ -432,6 +438,28 @@ export class Treeview implements OnInit {
     this.columns = this.loadColumns();
     this.recalculateAll();
     this.refreshVisibleNodes();
+  }
+
+  ngAfterViewInit(): void {
+    this.calculateViewportHeight();
+    this.resizeObserver = new ResizeObserver(() => {
+      this.ngZone.run(() => this.calculateViewportHeight());
+    });
+    this.resizeObserver.observe(document.documentElement);
+  }
+
+  ngOnDestroy(): void {
+    this.resizeObserver?.disconnect();
+  }
+
+  private calculateViewportHeight(): void {
+    const grid = this.treeviewGridRef?.nativeElement;
+    const header = this.treeviewHeaderRef?.nativeElement;
+    if (!grid || !header) return;
+    const gridTop = grid.getBoundingClientRect().top;
+    const headerH = header.getBoundingClientRect().height;
+    const bottomPadding = 24;
+    this.viewportHeight = Math.max(300, window.innerHeight - gridTop - headerH - bottomPadding);
   }
 
   onSearch(term: string | null): void {
