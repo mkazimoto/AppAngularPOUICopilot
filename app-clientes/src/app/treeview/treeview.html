@@ -313,7 +313,7 @@
           @if (node.id !== SENTINEL && node.id !== editingId) {
             <div class="actions-row">
               <po-button p-icon="an an-pencil" p-kind="tertiary" p-label="" p-size="small" (p-click)="startEdit(node)" p-tooltip="Editar" p-append-in-body="true"></po-button>
-              <po-button p-icon="an an-plus"   p-kind="tertiary" p-label="" p-size="small" (p-click)="startAdd(node.id)" p-tooltip="Adicionar" p-append-in-body="true"></po-button>
+              <po-button p-icon="an an-plus"   p-kind="tertiary" p-label="" p-size="small" (p-click)="startAdd(node.id)" p-tooltip="Adicionar filha" p-append-in-body="true"></po-button>
               <po-button p-icon="an an-trash"  p-kind="tertiary" [p-danger]="true" p-label="" p-size="small" (p-click)="deleteNode(node)" p-tooltip="Excluir" p-append-in-body="true"></po-button>
             </div>
           }
