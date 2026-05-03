@@ -14,7 +14,6 @@ import { Produtos } from './produtos/produtos';
 import { Tarefas } from './tarefas/tarefas';
 import { Treeview } from './treeview/treeview';
 import { Workflow } from './workflow/workflow';
-import { IfcViewer } from './ifc-viewer/ifc-viewer';
 
 export const routes: Routes = [
   { path: 'dashboard', component: Dashboard },
@@ -33,6 +32,10 @@ export const routes: Routes = [
   { path: 'workflow', component: Workflow },
   { path: 'organograma', component: Organograma },
   { path: 'treeview', component: Treeview },
-  { path: 'ifc-viewer', component: IfcViewer },
+  {
+    path: 'ifc-viewer',
+    loadComponent: () =>
+      import('./ifc-viewer/ifc-viewer').then((m) => m.IfcViewer),
+  },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 ];

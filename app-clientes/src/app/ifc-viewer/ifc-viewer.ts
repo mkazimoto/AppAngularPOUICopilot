@@ -25,6 +25,7 @@ export class IfcViewer implements OnInit, OnDestroy {
   protected modelLoaded = signal(false);
   protected loadingMessage = signal('');
   protected loadingProgress = signal(0);
+  protected loadedFileName = signal('');
   protected readonly tagType = PoTagType.Success;
   protected readonly progressStatus = PoProgressStatus.Default;
 
@@ -49,7 +50,20 @@ export class IfcViewer implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroyViewer();
+  }
+
+  private destroyViewer(): void {
     this.components?.dispose();
+    this.components = null;
+    this.world = null;
+    this.fragments = null;
+    this.ifcLoader = null;
+
+    const containerEl = this.containerRef()?.nativeElement;
+    if (containerEl) {
+      containerEl.innerHTML = '';
+    }
   }
 
   private async initViewer(): Promise<void> {
@@ -163,6 +177,7 @@ export class IfcViewer implements OnInit, OnDestroy {
 
       this.loadingProgress.set(100);
       this.modelLoaded.set(true);
+      this.loadedFileName.set(fileName);
     } catch (error) {
       this.notificationService.error({ message: 'Erro ao carregar o modelo padrão.' });
       console.error('Erro ao carregar modelo padrão:', error);
@@ -175,7 +190,7 @@ export class IfcViewer implements OnInit, OnDestroy {
   async onFileSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    if (!file || !this.ifcLoader || !this.fragments) return;
+    if (!file) return;
 
     if (!file.name.toLowerCase().endsWith('.ifc')) {
       this.notificationService.error({ message: 'Por favor, selecione um arquivo IFC válido.' });
@@ -184,20 +199,22 @@ export class IfcViewer implements OnInit, OnDestroy {
 
     this.isLoading.set(true);
     this.loadingProgress.set(0);
-    this.loadingMessage.set(`Carregando ${file.name}...`);
+    this.loadingMessage.set(`Reiniciando visualizador...`);
+    this.modelLoaded.set(false);
+    this.loadedFileName.set('');
 
     try {
-      // Limpa modelos anteriores sem destruir o FragmentsManager
-      for (const model of [...this.fragments.list.values()]) {
-        this.world?.scene.three.remove(model.object);
-        model.dispose();
-      }
+      // Reinicia o visualizador completamente antes de carregar o novo arquivo
+      this.destroyViewer();
+      await this.initViewer();
+
+      this.loadingMessage.set(`Carregando ${file.name}...`);
 
       const buffer = await file.arrayBuffer();
       const data = new Uint8Array(buffer);
       this.loadingProgress.set(10);
 
-      await this.ifcLoader.load(data, false, file.name.replace('.ifc', ''), {
+      await this.ifcLoader!.load(data, false, file.name.replace('.ifc', ''), {
         processData: {
           progressCallback: (progress: number) => {
             this.loadingProgress.set(10 + Math.round(progress * 90));
@@ -208,6 +225,7 @@ export class IfcViewer implements OnInit, OnDestroy {
 
       this.loadingProgress.set(100);
       this.modelLoaded.set(true);
+      this.loadedFileName.set(file.name);
       this.notificationService.success({ message: `Arquivo "${file.name}" carregado com sucesso!` });
     } catch (error) {
       this.notificationService.error({ message: 'Erro ao carregar o arquivo IFC. Verifique se o arquivo é válido.' });
