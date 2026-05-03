@@ -278,25 +278,30 @@ export class IfcViewer implements OnInit, OnDestroy {
     return s.replace(/^IFC/i, '').replace(/([A-Z])/g, ' $1').trim();
   }
 
-  /** Constrói os filhos de um nó, achatando nós sem categoria ("Item") para que
-   *  seus filhos apareçam no mesmo nível em que o nó "Item" estaria. */
-  private buildChildren(items: SpatialNode[], level: number): IfcNode[] {
+  /** Constrói os filhos de um nó, achatando nós agrupadores (sem localId) para que
+   *  os elementos reais apareçam diretamente no nível do pai. */
+  private buildChildren(items: SpatialNode[], level: number, parentCategory?: string): IfcNode[] {
     const result: IfcNode[] = [];
     for (const item of items) {
-      if (!item.category) {
-        // Nó sem categoria → promove os filhos ao nível atual
-        result.push(...this.buildChildren(item.children ?? [], level));
+      if (item.localId === null) {
+        // Nó sem localId → é um agrupador (de tipo ou de estrutura), promove os filhos ao nível atual
+        const catToPass = item.category ?? parentCategory;
+        result.push(...this.buildChildren(item.children ?? [], level, catToPass));
       } else {
-        result.push(this.buildTreeNode(item, level));
+        // Nó com localId → é um elemento real do IFC
+        const node = this.buildTreeNode(item, level, parentCategory);
+        result.push(node);
       }
     }
     return result;
   }
 
-  private buildTreeNode(item: SpatialNode, level: number): IfcNode {
+  private buildTreeNode(item: SpatialNode, level: number, parentCategory?: string): IfcNode {
     const id = `n${this.nodeCounter++}`;
-    const label = this.translateCategory(item.category);
-    const children = this.buildChildren(item.children ?? [], level + 1);
+    // Se não tem categoria, herda do pai. Se ainda não tiver, usa Item.
+    const effectiveCategory = item.category ?? parentCategory ?? null;
+    const label = this.translateCategory(effectiveCategory);
+    const children = this.buildChildren(item.children ?? [], level + 1, effectiveCategory ?? undefined);
     
     // Use the localId from the first child if this node doesn't have one
     // This helps us retrieve the name attributes for container elements like IFCSITE, IFCBUILDING
@@ -315,7 +320,7 @@ export class IfcViewer implements OnInit, OnDestroy {
       name: label,
       level,
       hasChildren: children.length > 0,
-      isExpanded: level < 2,
+      isExpanded: level < 3,
       children,
     };
     return node;
@@ -355,9 +360,15 @@ export class IfcViewer implements OnInit, OnDestroy {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const spatial: SpatialNode = await (model as any).getSpatialStructure();
+      
       this.nodeCounter = 0;
       const root = this.buildTreeNode(spatial, 0);
-      this.rootNodes = [root];
+      // Se a raiz é um IFCPROJECT, usa seus filhos como raízes diretas para evitar duplicação
+      if (root.children.length > 0 && root.category === this.translateCategory('IFCPROJECT')) {
+        this.rootNodes = root.children;
+      } else {
+        this.rootNodes = [root];
+      }
       this.updateFlatList();
 
       // Load Name attribute for nodes that have valid localIds
