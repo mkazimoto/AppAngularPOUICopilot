@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   OnDestroy,
   OnInit,
@@ -6,17 +7,38 @@ import {
   signal,
   ElementRef,
   viewChild,
+  inject,
+  PLATFORM_ID,
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import * as OBC from '@thatopen/components';
 import * as THREE from 'three';
+import { CdkVirtualScrollViewport, CdkVirtualForOf, CdkFixedSizeVirtualScroll } from '@angular/cdk/scrolling';
 import { PoLoadingModule, PoNotificationService, PoPageAction, PoPageModule, PoProgressModule, PoProgressStatus, PoTagModule, PoTagType } from '@po-ui/ng-components';
+
+export interface IfcNode {
+  id: string;
+  localId: number | null;
+  category: string;
+  name: string;
+  level: number;
+  hasChildren: boolean;
+  isExpanded: boolean;
+  children: IfcNode[];
+}
+
+interface SpatialNode {
+  category: string | null;
+  localId: number | null;
+  children?: SpatialNode[];
+}
 
 @Component({
   selector: 'app-ifc-viewer',
   templateUrl: './ifc-viewer.html',
   styleUrls: ['./ifc-viewer.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PoPageModule, PoLoadingModule, PoTagModule, PoProgressModule],
+  imports: [PoPageModule, PoLoadingModule, PoTagModule, PoProgressModule, CdkVirtualScrollViewport, CdkVirtualForOf, CdkFixedSizeVirtualScroll],
 })
 export class IfcViewer implements OnInit, OnDestroy {
   private containerRef = viewChild<ElementRef<HTMLDivElement>>('viewerContainer');
@@ -26,6 +48,16 @@ export class IfcViewer implements OnInit, OnDestroy {
   protected loadingMessage = signal('');
   protected loadingProgress = signal(0);
   protected loadedFileName = signal('');
+  protected treeNodes = signal<IfcNode[]>([]);
+  protected isTreeLoading = signal(false);
+  protected treePanelVisible = signal(true);
+
+  // Painel flutuante: posição e tamanho
+  protected panelX = signal(16);
+  protected panelY = signal(16);
+  protected panelW = signal(300);
+  protected panelH = signal(480);
+
   protected readonly tagType = PoTagType.Success;
   protected readonly progressStatus = PoProgressStatus.Default;
 
@@ -41,15 +73,88 @@ export class IfcViewer implements OnInit, OnDestroy {
   private world: OBC.SimpleWorld<OBC.SimpleScene, OBC.OrthoPerspectiveCamera, OBC.SimpleRenderer> | null = null;
   private fragments: OBC.FragmentsManager | null = null;
   private ifcLoader: OBC.IfcLoader | null = null;
+  private rootNodes: IfcNode[] = [];
+  private nodeCounter = 0;
+
+  // Drag state
+  private isDragging = false;
+  private dragStartX = 0;
+  private dragStartY = 0;
+  private dragOriginX = 0;
+  private dragOriginY = 0;
+
+  // Resize state
+  private isResizing = false;
+  private resizeStartX = 0;
+  private resizeStartY = 0;
+  private resizeOriginW = 0;
+  private resizeOriginH = 0;
+
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly cdr = inject(ChangeDetectorRef);
+
+  private readonly onMouseMove = (e: MouseEvent) => {
+    if (this.isDragging) {
+      this.panelX.set(this.dragOriginX + (e.clientX - this.dragStartX));
+      this.panelY.set(this.dragOriginY + (e.clientY - this.dragStartY));
+    }
+    if (this.isResizing) {
+      const newW = Math.max(200, this.resizeOriginW + (e.clientX - this.resizeStartX));
+      const newH = Math.max(150, this.resizeOriginH + (e.clientY - this.resizeStartY));
+      this.panelW.set(newW);
+      this.panelH.set(newH);
+    }
+  };
+
+  private readonly onMouseUp = () => {
+    this.isDragging = false;
+    this.isResizing = false;
+    document.body.style.userSelect = '';
+    document.body.style.cursor = '';
+  };
+
+  protected onDragStart(e: MouseEvent): void {
+    this.isDragging = true;
+    this.dragStartX = e.clientX;
+    this.dragStartY = e.clientY;
+    this.dragOriginX = this.panelX();
+    this.dragOriginY = this.panelY();
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  }
+
+  protected onResizeStart(e: MouseEvent): void {
+    this.isResizing = true;
+    this.resizeStartX = e.clientX;
+    this.resizeStartY = e.clientY;
+    this.resizeOriginW = this.panelW();
+    this.resizeOriginH = this.panelH();
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'nwse-resize';
+    e.stopPropagation();
+    e.preventDefault();
+  }
+
+  protected togglePanelVisible(): void {
+    this.treePanelVisible.set(!this.treePanelVisible());
+  }
 
   constructor(private readonly notificationService: PoNotificationService) {}
 
   async ngOnInit(): Promise<void> {
+    if (isPlatformBrowser(this.platformId)) {
+      document.addEventListener('mousemove', this.onMouseMove);
+      document.addEventListener('mouseup', this.onMouseUp);
+    }
     await this.initViewer();
     await this.loadDefaultModel();
   }
 
   ngOnDestroy(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      document.removeEventListener('mousemove', this.onMouseMove);
+      document.removeEventListener('mouseup', this.onMouseUp);
+    }
     this.destroyViewer();
   }
 
@@ -59,12 +164,221 @@ export class IfcViewer implements OnInit, OnDestroy {
     this.world = null;
     this.fragments = null;
     this.ifcLoader = null;
+    this.rootNodes = [];
+    this.nodeCounter = 0;
+    this.treeNodes.set([]);
 
     const containerEl = this.containerRef()?.nativeElement;
     if (containerEl) {
       containerEl.innerHTML = '';
     }
   }
+
+  // ── Tree helpers ─────────────────────────────────────────────────────────
+
+  private static readonly IFC_PT: Record<string, string> = {
+    IFCPROJECT: 'Projeto',
+    IFCSITE: 'Terreno',
+    IFCBUILDING: 'Construção',
+    IFCBUILDINGSTOREY: 'Pavimento',
+    IFCSPACE: 'Espaço',
+    IFCZONE: 'Zona',
+    IFCWALL: 'Parede',
+    IFCWALLSTANDARDCASE: 'Parede',
+    IFCSLAB: 'Laje',
+    IFCCOLUMN: 'Coluna',
+    IFCBEAM: 'Viga',
+    IFCDOOR: 'Porta',
+    IFCWINDOW: 'Janela',
+    IFCSTAIR: 'Escada',
+    IFCSTAIRSTEP: 'Degrau',
+    IFCSTAIRFLIGHT: 'Lanço de Escada',
+    IFCRAMP: 'Rampa',
+    IFCRAMPFLIGHT: 'Lanço de Rampa',
+    IFCROOF: 'Cobertura',
+    IFCFURNISHINGELEMENT: 'Mobiliário',
+    IFCFURNITURE: 'Mobiliário',
+    IFCSYSTEMFURNITUREELEMENT: 'Mobiliário de Sistema',
+    IFCPLATE: 'Placa',
+    IFCMEMBER: 'Estrutura',
+    IFCFOOTING: 'Fundação',
+    IFCPILE: 'Estaca',
+    IFCCURTAINWALL: 'Fachada Envidraçada',
+    IFCCOVERING: 'Revestimento',
+    IFCRAILING: 'Guarda-corpo',
+    IFCHANDRAIL: 'Corrimão',
+    IFCDUCT: 'Duto',
+    IFCDUCTFITTING: 'Conexão de Duto',
+    IFCDUCTSEGMENT: 'Segmento de Duto',
+    IFCPIPE: 'Tubulação',
+    IFCPIPEFITTING: 'Conexão de Tubulação',
+    IFCPIPESEGMENT: 'Segmento de Tubulação',
+    IFCCABLECARRIERSEGMENT: 'Eletrocalha',
+    IFCCABLECARRIERFITTING: 'Conexão de Eletrocalha',
+    IFCCABLESEGMENT: 'Cabo',
+    IFCAIRTERMINAL: 'Terminal de Ar',
+    IFCAIRTOAIRHEATRECOVERY: 'Recuperador de Calor',
+    IFCBOILER: 'Caldeira',
+    IFCCHILLER: 'Resfriador',
+    IFCCOIL: 'Serpentina',
+    IFCCOMPRESSOR: 'Compressor',
+    IFCCONDENSER: 'Condensador',
+    IFCFAN: 'Ventilador',
+    IFCFILTER: 'Filtro',
+    IFCHEATEXCHANGER: 'Trocador de Calor',
+    IFCHUMIDIFIER: 'Umidificador',
+    IFCPUMP: 'Bomba',
+    IFCTANK: 'Tanque',
+    IFCVALVE: 'Válvula',
+    IFCELECTRICAPPLIANCE: 'Eletrodoméstico',
+    IFCELECTRICDISTRIBUTIONBOARD: 'Quadro de Distribuição',
+    IFCELECTRICFLOWSTORAGEDEVICE: 'Bateria',
+    IFCELECTRICGENERATOR: 'Gerador',
+    IFCELECTRICMOTOR: 'Motor Elétrico',
+    IFCELECTRICTIMECONTROL: 'Temporizador',
+    IFCLAMP: 'Braçadeira',
+    IFCLIGHTFIXTURE: 'Luminária',
+    IFCOUTLET: 'Tomada/Ponto Elétrico',
+    IFCSENSOR: 'Sensor',
+    IFCACTUATOR: 'Atuador',
+    IFCALARM: 'Alarme',
+    IFCCOMMUNICATIONSAPPLIANCE: 'Equipamento de Comunicação',
+    IFCCONTROLLER: 'Controlador',
+    IFCFIRESUPRESSIONTERMINAL: 'Terminal de Supressão de Incêndio',
+    IFCMEDICALDEVICE: 'Equipamento Médico',
+    IFCPROTECTIVEDEVICE: 'Dispositivo de Proteção',
+    IFCSWITCHINGDEVICE: 'Dispositivo de Chaveamento',
+    IFCTRANSFORMER: 'Transformador',
+    IFCDISTRIBUTIONCHAMBER: 'Câmara de Distribuição',
+    IFCFLOWMETER: 'Medidor de Vazão',
+    IFCINTERCEPTOR: 'Separador',
+    IFCSANITARYTERMINAL: 'Ponto Sanitário',
+    IFCWASTETERMINAL: 'Ralo/Coletor',
+    IFCSTACKTERMINAL: 'Terminal de Coluna',
+    IFCELECTRICDISTRIBUTIONELEMENT: 'Distribuição Elétrica',
+    IFCBUILDINGELEMENTPART: 'Parte de Elemento',
+    IFCBUILDINGELEMENTPROXY: 'Elemento Genérico',
+    IFCOPENINGELEMENT: 'Abertura',
+    IFCVIRTUALELEMENT: 'Elemento Virtual',
+    IFCANNOTATION: 'Anotação',
+    IFCGRID: 'Malha de Eixos',
+    IFCTRANSPORTELEMENT: 'Equipamento de Transporte',
+    IFCELEVATOR: 'Elevador',
+    IFCESCALATOR: 'Escada Rolante',
+    IFCMOVINGWALKWAY: 'Esteira',
+    IFCGEOGRAPHICELEMENT: 'Elemento Geográfico',
+  };
+
+  private translateCategory(raw: string | null): string {
+    if (!raw) return 'Item';
+    return IfcViewer.IFC_PT[raw.toUpperCase()] ?? this.toTitleCase(raw);
+  }
+
+  private toTitleCase(s: string): string {
+    return s.replace(/^IFC/i, '').replace(/([A-Z])/g, ' $1').trim();
+  }
+
+  /** Constrói os filhos de um nó, achatando nós sem categoria ("Item") para que
+   *  seus filhos apareçam no mesmo nível em que o nó "Item" estaria. */
+  private buildChildren(items: SpatialNode[], level: number): IfcNode[] {
+    const result: IfcNode[] = [];
+    for (const item of items) {
+      if (!item.category) {
+        // Nó sem categoria → promove os filhos ao nível atual
+        result.push(...this.buildChildren(item.children ?? [], level));
+      } else {
+        result.push(this.buildTreeNode(item, level));
+      }
+    }
+    return result;
+  }
+
+  private buildTreeNode(item: SpatialNode, level: number): IfcNode {
+    const id = `n${this.nodeCounter++}`;
+    const label = this.translateCategory(item.category);
+    const children = this.buildChildren(item.children ?? [], level + 1);
+    const node: IfcNode = {
+      id,
+      localId: item.localId,
+      category: label,
+      name: label,
+      level,
+      hasChildren: children.length > 0,
+      isExpanded: level < 2,
+      children,
+    };
+    return node;
+  }
+
+  private getAllNodes(nodes: IfcNode[]): IfcNode[] {
+    const result: IfcNode[] = [];
+    const visit = (n: IfcNode) => { result.push(n); n.children.forEach(visit); };
+    nodes.forEach(visit);
+    return result;
+  }
+
+  private updateFlatList(): void {
+    const flat: IfcNode[] = [];
+    const visit = (node: IfcNode) => {
+      flat.push(node);
+      if (node.isExpanded && node.hasChildren) {
+        node.children.forEach(visit);
+      }
+    };
+    this.rootNodes.forEach(visit);
+    this.treeNodes.set([...flat]);
+  }
+
+  protected toggleNode(node: IfcNode): void {
+    node.isExpanded = !node.isExpanded;
+    this.updateFlatList();
+  }
+
+  protected trackByNodeId(_: number, node: IfcNode): string {
+    return node.id;
+  }
+
+  private async buildTree(model: ReturnType<OBC.FragmentsManager['list']['get']>): Promise<void> {
+    if (!model) return;
+    this.isTreeLoading.set(true);
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const spatial: SpatialNode = await (model as any).getSpatialStructure();
+      this.nodeCounter = 0;
+      const root = this.buildTreeNode(spatial, 0);
+      this.rootNodes = [root];
+      this.updateFlatList();
+
+      // Batch-load Name attribute for all nodes
+      const allNodes = this.getAllNodes(this.rootNodes);
+      const validNodes = allNodes.filter(n => n.localId !== null);
+      const ids = validNodes.map(n => n.localId as number);
+
+      if (ids.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data: any[] = await (model as any).getItemsData(ids, {
+          attributesDefault: false,
+          attributes: ['Name'],
+          relationsDefault: { attributes: false, relations: false },
+        });
+
+        validNodes.forEach((node, i) => {
+          const nameAttr = data[i]?.['Name'];
+          const val = nameAttr?.value != null ? String(nameAttr.value).trim() : null;
+          node.name = val ? `${node.category}: ${val}` : node.category;
+        });
+
+        this.updateFlatList();
+        this.cdr.detectChanges();
+      }
+    } catch (e) {
+      console.error('Erro ao construir árvore IFC:', e);
+    } finally {
+      this.isTreeLoading.set(false);
+    }
+  }
+
+  // ── Viewer init ──────────────────────────────────────────────────────────
 
   private async initViewer(): Promise<void> {
     const containerEl = this.containerRef()?.nativeElement;
@@ -154,7 +468,7 @@ export class IfcViewer implements OnInit, OnDestroy {
   private async loadDefaultModel(): Promise<void> {
     if (!this.ifcLoader || !this.fragments) return;
 
-    const fileName = 'OTC-Conference Center.ifc';
+    const fileName = 'SampleHouse.ifc';
     this.isLoading.set(true);
     this.loadingProgress.set(0);
     this.loadingMessage.set(`Carregando ${fileName}...`);
@@ -166,7 +480,7 @@ export class IfcViewer implements OnInit, OnDestroy {
       const data = new Uint8Array(buffer);
       this.loadingProgress.set(10);
 
-      await this.ifcLoader.load(data, false, fileName.replace('.ifc', ''), {
+      const defaultModel = await this.ifcLoader.load(data, false, fileName.replace('.ifc', ''), {
         processData: {
           progressCallback: (progress: number) => {
             this.loadingProgress.set(10 + Math.round(progress * 90));
@@ -178,6 +492,7 @@ export class IfcViewer implements OnInit, OnDestroy {
       this.loadingProgress.set(100);
       this.modelLoaded.set(true);
       this.loadedFileName.set(fileName);
+      this.buildTree(defaultModel);
     } catch (error) {
       this.notificationService.error({ message: 'Erro ao carregar o modelo padrão.' });
       console.error('Erro ao carregar modelo padrão:', error);
@@ -214,7 +529,7 @@ export class IfcViewer implements OnInit, OnDestroy {
       const data = new Uint8Array(buffer);
       this.loadingProgress.set(10);
 
-      await this.ifcLoader!.load(data, false, file.name.replace('.ifc', ''), {
+      const fileModel = await this.ifcLoader!.load(data, false, file.name.replace('.ifc', ''), {
         processData: {
           progressCallback: (progress: number) => {
             this.loadingProgress.set(10 + Math.round(progress * 90));
@@ -226,6 +541,7 @@ export class IfcViewer implements OnInit, OnDestroy {
       this.loadingProgress.set(100);
       this.modelLoaded.set(true);
       this.loadedFileName.set(file.name);
+      this.buildTree(fileModel);
       this.notificationService.success({ message: `Arquivo "${file.name}" carregado com sucesso!` });
     } catch (error) {
       this.notificationService.error({ message: 'Erro ao carregar o arquivo IFC. Verifique se o arquivo é válido.' });

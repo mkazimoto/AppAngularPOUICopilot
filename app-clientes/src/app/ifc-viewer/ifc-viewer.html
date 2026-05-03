@@ -13,32 +13,97 @@
   />
 
   <div class="viewer-wrapper">
-    <div #viewerContainer class="viewer-canvas"></div>
 
-    @if (isLoading()) {
-      <div class="loading-overlay">
-        <div class="loading-progress-box">
-          <div class="loading-header">
-            <span class="loading-spinner an an-circle-notch"></span>
-            <span class="loading-filename">{{ loadingMessage() }}</span>
+    <!-- Canvas 3D + overlays ocupa toda a área -->
+    <div class="canvas-area">
+      <div #viewerContainer class="viewer-canvas"></div>
+
+      @if (isLoading()) {
+        <div class="loading-overlay">
+          <div class="loading-progress-box">
+            <div class="loading-header">
+              <span class="loading-spinner an an-circle-notch"></span>
+              <span class="loading-filename">{{ loadingMessage() }}</span>
+            </div>
+            <po-progress
+              class="ifc-progress"
+              [p-value]="loadingProgress()"
+              p-show-percentage
+              p-disabled-cancel>
+            </po-progress>
           </div>
-          <po-progress
-            class="ifc-progress"
-            [p-value]="loadingProgress()"
-            p-show-percentage
-            p-disabled-cancel>
-          </po-progress>
         </div>
-      </div>
-    }
+      }
 
-    @if (!modelLoaded() && !isLoading()) {
-      <div class="empty-state">
-        <span class="empty-state-icon an an-building"></span>
-        <p>Nenhum modelo carregado</p>
-        <p>Clique em "Abrir arquivo IFC" para visualizar um modelo BIM</p>
+      @if (!modelLoaded() && !isLoading()) {
+        <div class="empty-state">
+          <span class="empty-state-icon an an-building"></span>
+          <p>Nenhum modelo carregado</p>
+          <p>Clique em "Abrir arquivo IFC" para visualizar um modelo BIM</p>
+        </div>
+      }
+    </div>
+
+    <!-- Painel flutuante: árvore estrutural IFC -->
+    <div
+      class="tree-panel"
+      [class.tree-panel--collapsed]="!treePanelVisible()"
+      [style.left.px]="panelX()"
+      [style.top.px]="panelY()"
+      [style.width.px]="panelW()"
+      [style.height.px]="treePanelVisible() ? panelH() : null">
+
+      <!-- Cabeçalho arrastável -->
+      <div class="tree-header" (mousedown)="onDragStart($event)">
+        <span class="an an-tree-structure"></span>
+        <span class="tree-header-title">Estrutura do Modelo</span>
+        <button class="tree-collapse-btn" (mousedown)="$event.stopPropagation()" (click)="togglePanelVisible()" [title]="treePanelVisible() ? 'Minimizar' : 'Expandir'">
+          <span [class]="treePanelVisible() ? 'an an-chevron-up' : 'an an-chevron-down'"></span>
+        </button>
       </div>
-    }
+
+      @if (treePanelVisible()) {
+        @if (isTreeLoading()) {
+          <div class="tree-loading">
+            <span class="an an-circle-notch tree-spin"></span>
+            Carregando estrutura...
+          </div>
+        }
+
+        @if (!isTreeLoading() && treeNodes().length === 0 && !modelLoaded()) {
+          <div class="tree-empty">
+            <span class="an an-info-circle"></span>
+            Nenhum modelo carregado
+          </div>
+        }
+
+        <cdk-virtual-scroll-viewport itemSize="36" class="tree-scroll">
+          <div
+            *cdkVirtualFor="let node of treeNodes(); trackBy: trackByNodeId"
+            class="tree-node"
+            [class.tree-node--has-children]="node.hasChildren"
+            [style.padding-left.px]="node.level * 14 + 8"
+            (click)="toggleNode(node)">
+
+            <span class="tree-toggle-icon">
+              @if (node.hasChildren) {
+                <span [class]="node.isExpanded ? 'an an-caret-down' : 'an an-caret-right'"></span>
+              } @else {
+                <span class="an an-minus tree-leaf-dash"></span>
+              }
+            </span>
+
+            <span class="tree-node-label" [title]="node.name">{{ node.name }}</span>
+          </div>
+        </cdk-virtual-scroll-viewport>
+
+        <!-- Alça de redimensionamento -->
+        <div class="resize-handle" (mousedown)="onResizeStart($event)">
+          <span class="an an-arrows-alt"></span>
+        </div>
+      }
+    </div>
+
   </div>
 
 </po-page-default>
