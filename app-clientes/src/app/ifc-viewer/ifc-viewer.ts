@@ -297,9 +297,20 @@ export class IfcViewer implements OnInit, OnDestroy {
     const id = `n${this.nodeCounter++}`;
     const label = this.translateCategory(item.category);
     const children = this.buildChildren(item.children ?? [], level + 1);
+    
+    // Use the localId from the first child if this node doesn't have one
+    // This helps us retrieve the name attributes for container elements like IFCSITE, IFCBUILDING
+    let localIdForAttrs = item.localId;
+    if (!localIdForAttrs && item.children && item.children.length > 0) {
+      const firstChild = item.children[0];
+      if (firstChild.localId !== null) {
+        localIdForAttrs = firstChild.localId;
+      }
+    }
+    
     const node: IfcNode = {
       id,
-      localId: item.localId,
+      localId: localIdForAttrs,
       category: label,
       name: label,
       level,
@@ -349,28 +360,39 @@ export class IfcViewer implements OnInit, OnDestroy {
       this.rootNodes = [root];
       this.updateFlatList();
 
-      // Batch-load Name attribute for all nodes
+      // Load Name attribute for nodes that have valid localIds
       const allNodes = this.getAllNodes(this.rootNodes);
       const validNodes = allNodes.filter(n => n.localId !== null);
       const ids = validNodes.map(n => n.localId as number);
 
       if (ids.length > 0) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const data: any[] = await (model as any).getItemsData(ids, {
-          attributesDefault: false,
-          attributes: ['Name'],
-          relationsDefault: { attributes: false, relations: false },
-        });
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const itemsData: any[] = await (model as any).getItemsData(ids, {
+            attributesDefault: true,
+            relationsDefault: false,
+          });
 
-        validNodes.forEach((node, i) => {
-          const nameAttr = data[i]?.['Name'];
-          const val = nameAttr?.value != null ? String(nameAttr.value).trim() : null;
-          node.name = val ? `${node.category}: ${val}` : node.category;
-        });
-
-        this.updateFlatList();
-        this.cdr.detectChanges();
+          validNodes.forEach((node, i) => {
+            const data = itemsData[i];
+            if (data && data['Name']) {
+              // The Name attribute might be a string or an object with a 'value' property
+              let nameValue = data['Name'];
+              if (typeof nameValue === 'object' && nameValue !== null && 'value' in nameValue) {
+                nameValue = (nameValue as any).value;
+              }
+              const val = nameValue ? String(nameValue).trim() : null;
+              node.name = val ? `${node.category}: ${val}` : node.category;
+            }
+          });
+        } catch (e) {
+          console.warn('Aviso ao carregar nomes dos items:', e);
+          // Continue without names if there's an error
+        }
       }
+
+      this.updateFlatList();
+      this.cdr.detectChanges();
     } catch (e) {
       console.error('Erro ao construir árvore IFC:', e);
     } finally {
