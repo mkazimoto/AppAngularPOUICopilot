@@ -1,41 +1,73 @@
 import { Routes } from '@angular/router';
-import { Agendamento } from './agendamento/agendamento';
-import { Carros } from './carros/carros';
-import { ClienteEdit } from './clientes/cliente-edit/cliente-edit';
-import { Clientes } from './clientes/clientes';
-import { Cursos } from './cursos/cursos';
-import { Dashboard } from './dashboard/dashboard';
-import { Imoveis } from './imoveis/imoveis';
-import { Kanban } from './kanban/kanban';
-import { Organograma } from './organograma/organograma';
-import { Passagens } from './passagens/passagens';
-import { Pets } from './pets/pets';
-import { Produtos } from './produtos/produtos';
-import { Tarefas } from './tarefas/tarefas';
-import { Treeview } from './treeview/treeview';
-import { Workflow } from './workflow/workflow';
 
 export const routes: Routes = [
-  { path: 'dashboard', component: Dashboard },
-  { path: 'clientes', component: Clientes },
-  { path: 'clientes/novo', component: ClienteEdit },
-  { path: 'clientes/editar/:id', component: ClienteEdit },
-  { path: 'produtos', component: Produtos },
-  { path: 'petsocial', component: Pets },
-  { path: 'passagens', component: Passagens },
-  { path: 'carros', component: Carros },
-  { path: 'cursos', component: Cursos },
-  { path: 'imoveis', component: Imoveis },
-  { path: 'kanban', component: Kanban },
-  { path: 'tarefas', component: Tarefas },
-  { path: 'agendamento', component: Agendamento },
-  { path: 'workflow', component: Workflow },
-  { path: 'organograma', component: Organograma },
-  { path: 'treeview', component: Treeview },
+  {
+    path: 'dashboard',
+    loadComponent: () => import('./dashboard/dashboard').then((m) => m.Dashboard),
+  },
+  {
+    path: 'clientes',
+    loadComponent: () => import('./clientes/clientes').then((m) => m.Clientes),
+  },
+  {
+    path: 'clientes/novo',
+    loadComponent: () => import('./clientes/cliente-edit/cliente-edit').then((m) => m.ClienteEdit),
+  },
+  {
+    path: 'clientes/editar/:id',
+    loadComponent: () => import('./clientes/cliente-edit/cliente-edit').then((m) => m.ClienteEdit),
+  },
+  {
+    path: 'produtos',
+    loadComponent: () => import('./produtos/produtos').then((m) => m.Produtos),
+  },
+  {
+    path: 'petsocial',
+    loadComponent: () => import('./pets/pets').then((m) => m.Pets),
+  },
+  {
+    path: 'passagens',
+    loadComponent: () => import('./passagens/passagens').then((m) => m.Passagens),
+  },
+  {
+    path: 'carros',
+    loadComponent: () => import('./carros/carros').then((m) => m.Carros),
+  },
+  {
+    path: 'cursos',
+    loadComponent: () => import('./cursos/cursos').then((m) => m.Cursos),
+  },
+  {
+    path: 'imoveis',
+    loadComponent: () => import('./imoveis/imoveis').then((m) => m.Imoveis),
+  },
+  {
+    path: 'kanban',
+    loadComponent: () => import('./kanban/kanban').then((m) => m.Kanban),
+  },
+  {
+    path: 'tarefas',
+    loadComponent: () => import('./tarefas/tarefas').then((m) => m.Tarefas),
+  },
+  {
+    path: 'agendamento',
+    loadComponent: () => import('./agendamento/agendamento').then((m) => m.Agendamento),
+  },
+  {
+    path: 'workflow',
+    loadComponent: () => import('./workflow/workflow').then((m) => m.Workflow),
+  },
+  {
+    path: 'organograma',
+    loadComponent: () => import('./organograma/organograma').then((m) => m.Organograma),
+  },
+  {
+    path: 'treeview',
+    loadComponent: () => import('./treeview/treeview').then((m) => m.Treeview),
+  },
   {
     path: 'ifc-viewer',
-    loadComponent: () =>
-      import('./ifc-viewer/ifc-viewer').then((m) => m.IfcViewer),
+    loadComponent: () => import('./ifc-viewer/ifc-viewer').then((m) => m.IfcViewer),
   },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 ];
