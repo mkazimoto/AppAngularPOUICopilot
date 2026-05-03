@@ -408,8 +408,8 @@ export class IfcViewer implements OnInit, OnDestroy {
     await this.ifcLoader.setup({
       autoSetWasm: false,
       wasm: {
-        path: '/',
-        absolute: false,
+        path: document.baseURI,
+        absolute: true,
       },
     });
 
