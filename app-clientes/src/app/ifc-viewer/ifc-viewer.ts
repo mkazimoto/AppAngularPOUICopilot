@@ -135,7 +135,7 @@ export class IfcViewer implements OnInit, OnDestroy {
       const index = this.filteredTreeNodes().findIndex(n => n.id === node.id);
       if (index >= 0) {
         setTimeout(() => {
-          this.treeViewport()?.scrollToIndex(index, 'smooth');
+          this.treeViewport()?.scrollToIndex(index, 'instant');
         }, 0);
       }
       this.cdr.detectChanges();
@@ -297,7 +297,7 @@ export class IfcViewer implements OnInit, OnDestroy {
   private destroyViewer(): void {
     if (this.viewerCanvas) {
       this.viewerCanvas.removeEventListener('mousemove', this.onViewerMouseMove);
-      this.viewerCanvas.removeEventListener('click', this.onViewerClick);
+      this.viewerCanvas.removeEventListener('dblclick', this.onViewerClick);
       this.viewerCanvas = null;
     }
     this.hoveredLocalId = null;
@@ -314,6 +314,8 @@ export class IfcViewer implements OnInit, OnDestroy {
     this.rootNodes = [];
     this.nodeCounter = 0;
     this.treeNodes.set([]);
+    this.filteredTreeNodes.set([]);
+    this.searchText.set('');
 
     const containerEl = this.containerRef()?.nativeElement;
     if (containerEl) {
@@ -756,7 +758,7 @@ export class IfcViewer implements OnInit, OnDestroy {
     // Registra listeners de interação no canvas do renderer
     this.viewerCanvas = this.world.renderer.three.domElement;
     this.viewerCanvas.addEventListener('mousemove', this.onViewerMouseMove);
-    this.viewerCanvas.addEventListener('click', this.onViewerClick);
+    this.viewerCanvas.addEventListener('dblclick', this.onViewerClick);
 
     // Configura o IfcLoader
     this.ifcLoader = this.components.get(OBC.IfcLoader);
