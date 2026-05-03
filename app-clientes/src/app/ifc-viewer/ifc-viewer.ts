@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import * as OBC from '@thatopen/components';
+import * as FRAGS from '@thatopen/fragments';
 import * as THREE from 'three';
 import { CdkVirtualScrollViewport, CdkVirtualForOf, CdkFixedSizeVirtualScroll } from '@angular/cdk/scrolling';
 import { PoLoadingModule, PoNotificationService, PoPageAction, PoPageModule, PoProgressModule, PoProgressStatus, PoTagModule, PoTagType } from '@po-ui/ng-components';
@@ -77,6 +78,9 @@ export class IfcViewer implements OnInit, OnDestroy {
   private ifcLoader: OBC.IfcLoader | null = null;
   private rootNodes: IfcNode[] = [];
   private nodeCounter = 0;
+  private currentLoadedModel: ReturnType<OBC.FragmentsManager['list']['get']> | null = null;
+  private selectedFragments = new Set<string>();
+  private selectedLocalIds: number[] = [];
 
   // Drag state
   private isDragging = false;
@@ -201,6 +205,9 @@ export class IfcViewer implements OnInit, OnDestroy {
     this.world = null;
     this.fragments = null;
     this.ifcLoader = null;
+    this.currentLoadedModel = null;
+    this.selectedFragments.clear();
+    this.selectedLocalIds = [];
     this.rootNodes = [];
     this.nodeCounter = 0;
     this.treeNodes.set([]);
@@ -413,6 +420,80 @@ export class IfcViewer implements OnInit, OnDestroy {
   protected toggleNode(node: IfcNode): void {
     node.isExpanded = !node.isExpanded;
     this.updateFlatList();
+    this.selectNodeInModel(node);
+  }
+
+  private async selectNodeInModel(node: IfcNode): Promise<void> {
+    if (!this.currentLoadedModel) return;
+
+    const model = this.currentLoadedModel;
+
+    try {
+      // Reset highlight de todos os itens anteriores
+      if (this.selectedLocalIds.length > 0) {
+        await model.resetHighlight(this.selectedLocalIds);
+        await model.resetOpacity(undefined);
+      }
+
+      // Coleta todos os localIds do nó e seus descendentes
+      const localIds = this.collectLocalIds(node);
+      if (localIds.length === 0) return;
+
+      this.selectedLocalIds = localIds;
+
+      // Aplica highlight azul escuro com depthTest=false para sobrepor demais elementos
+      const highlightMaterial: FRAGS.MaterialDefinition = {
+        color: new THREE.Color(0x003eb3),
+        opacity: 1,
+        transparent: false,
+        renderedFaces: FRAGS.RenderedFaces.TWO,
+        depthTest: false,
+      };
+      await model.highlight(localIds, highlightMaterial);
+
+      // Faz zoom no bounding box do(s) item(s) selecionado(s)
+      if (this.world) {
+        const box = await model.getMergedBox(localIds);
+        if (box && !box.isEmpty()) {
+          const center = new THREE.Vector3();
+          box.getCenter(center);
+          const size = new THREE.Vector3();
+          box.getSize(size);
+          const maxDim = Math.max(size.x, size.y, size.z);
+
+          // Cria objeto auxiliar temporário para o fitToBox
+          const helperMesh = new THREE.Mesh(
+            new THREE.BoxGeometry(size.x, size.y, size.z),
+            new THREE.MeshBasicMaterial(),
+          );
+          helperMesh.position.copy(center);
+          this.world.scene.three.add(helperMesh);
+
+          await this.world.camera.controls.fitToBox(helperMesh, true, {
+            paddingLeft: maxDim * 0.3,
+            paddingRight: maxDim * 0.3,
+            paddingTop: maxDim * 0.3,
+            paddingBottom: maxDim * 0.3,
+          });
+
+          this.world.scene.three.remove(helperMesh);
+          helperMesh.geometry.dispose();
+          (helperMesh.material as THREE.Material).dispose();
+        }
+      }
+    } catch (e) {
+      console.warn('Aviso ao selecionar objeto no modelo:', e);
+    }
+  }
+
+  private collectLocalIds(node: IfcNode): number[] {
+    const ids: number[] = [];
+    const collect = (n: IfcNode) => {
+      if (n.localId !== null) ids.push(n.localId);
+      n.children.forEach(collect);
+    };
+    collect(node);
+    return ids;
   }
 
   protected expandAll(): void {
@@ -443,6 +524,7 @@ export class IfcViewer implements OnInit, OnDestroy {
 
   private async buildTree(model: ReturnType<OBC.FragmentsManager['list']['get']>): Promise<void> {
     if (!model) return;
+    this.currentLoadedModel = model;
     this.isTreeLoading.set(true);
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
