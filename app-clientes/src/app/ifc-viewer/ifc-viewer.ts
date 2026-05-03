@@ -474,7 +474,7 @@ export class IfcViewer implements OnInit, OnDestroy {
     this.loadingMessage.set(`Carregando ${fileName}...`);
 
     try {
-      const response = await fetch(`/ifc/${fileName}`);
+      const response = await fetch(`ifc/${fileName}`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const buffer = await response.arrayBuffer();
       const data = new Uint8Array(buffer);
