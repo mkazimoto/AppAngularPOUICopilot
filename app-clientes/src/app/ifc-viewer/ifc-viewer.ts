@@ -49,6 +49,8 @@ export class IfcViewer implements OnInit, OnDestroy {
   protected loadingProgress = signal(0);
   protected loadedFileName = signal('');
   protected treeNodes = signal<IfcNode[]>([]);
+  protected filteredTreeNodes = signal<IfcNode[]>([]);
+  protected searchText = signal('');
   protected isTreeLoading = signal(false);
   protected treePanelVisible = signal(true);
 
@@ -89,6 +91,9 @@ export class IfcViewer implements OnInit, OnDestroy {
   private resizeStartY = 0;
   private resizeOriginW = 0;
   private resizeOriginH = 0;
+  private resizeOriginX = 0;
+  private resizeOriginY = 0;
+  private resizeDirection: 'corner' | 'left' | 'right' | 'top' | 'bottom' = 'corner';
 
   private readonly platformId = inject(PLATFORM_ID);
   private readonly cdr = inject(ChangeDetectorRef);
@@ -99,10 +104,31 @@ export class IfcViewer implements OnInit, OnDestroy {
       this.panelY.set(this.dragOriginY + (e.clientY - this.dragStartY));
     }
     if (this.isResizing) {
-      const newW = Math.max(200, this.resizeOriginW + (e.clientX - this.resizeStartX));
-      const newH = Math.max(150, this.resizeOriginH + (e.clientY - this.resizeStartY));
-      this.panelW.set(newW);
-      this.panelH.set(newH);
+      const deltaX = e.clientX - this.resizeStartX;
+      const deltaY = e.clientY - this.resizeStartY;
+
+      if (this.resizeDirection === 'corner') {
+        const newW = Math.max(200, this.resizeOriginW + deltaX);
+        const newH = Math.max(150, this.resizeOriginH + deltaY);
+        this.panelW.set(newW);
+        this.panelH.set(newH);
+      } else if (this.resizeDirection === 'left') {
+        const newW = Math.max(200, this.resizeOriginW - deltaX);
+        const newX = this.resizeOriginX + deltaX;
+        this.panelW.set(newW);
+        this.panelX.set(newX);
+      } else if (this.resizeDirection === 'right') {
+        const newW = Math.max(200, this.resizeOriginW + deltaX);
+        this.panelW.set(newW);
+      } else if (this.resizeDirection === 'top') {
+        const newH = Math.max(150, this.resizeOriginH - deltaY);
+        const newY = this.resizeOriginY + deltaY;
+        this.panelH.set(newH);
+        this.panelY.set(newY);
+      } else if (this.resizeDirection === 'bottom') {
+        const newH = Math.max(150, this.resizeOriginH + deltaY);
+        this.panelH.set(newH);
+      }
     }
   };
 
@@ -123,14 +149,25 @@ export class IfcViewer implements OnInit, OnDestroy {
     e.preventDefault();
   }
 
-  protected onResizeStart(e: MouseEvent): void {
+  protected onResizeStart(direction: 'corner' | 'left' | 'right' | 'top' | 'bottom', e: MouseEvent): void {
     this.isResizing = true;
+    this.resizeDirection = direction;
     this.resizeStartX = e.clientX;
     this.resizeStartY = e.clientY;
     this.resizeOriginW = this.panelW();
     this.resizeOriginH = this.panelH();
+    this.resizeOriginX = this.panelX();
+    this.resizeOriginY = this.panelY();
     document.body.style.userSelect = 'none';
-    document.body.style.cursor = 'nwse-resize';
+
+    if (direction === 'corner') {
+      document.body.style.cursor = 'nwse-resize';
+    } else if (direction === 'left' || direction === 'right') {
+      document.body.style.cursor = 'ew-resize';
+    } else if (direction === 'top' || direction === 'bottom') {
+      document.body.style.cursor = 'ns-resize';
+    }
+
     e.stopPropagation();
     e.preventDefault();
   }
@@ -313,6 +350,12 @@ export class IfcViewer implements OnInit, OnDestroy {
       }
     }
     
+    // Determina se o nó deve iniciar expandido
+    // Expande níveis iniciais (até 3) E elementos estruturais como BUILDING, BUILDINGSTOREY
+    const structuralElements = ['IFCBUILDING', 'IFCBUILDINGSTOREY', 'IFCSITE', 'IFCPROJECT'];
+    const isStructural = effectiveCategory ? structuralElements.includes(effectiveCategory.toUpperCase()) : false;
+    const shouldExpand = level < 3 || isStructural;
+    
     const node: IfcNode = {
       id,
       localId: localIdForAttrs,
@@ -320,7 +363,7 @@ export class IfcViewer implements OnInit, OnDestroy {
       name: label,
       level,
       hasChildren: children.length > 0,
-      isExpanded: level < 3,
+      isExpanded: shouldExpand,
       children,
     };
     return node;
@@ -343,10 +386,54 @@ export class IfcViewer implements OnInit, OnDestroy {
     };
     this.rootNodes.forEach(visit);
     this.treeNodes.set([...flat]);
+    this.filterNodes();
+  }
+
+  protected onSearchChange(text: string): void {
+    this.searchText.set(text);
+    this.filterNodes();
+  }
+
+  private filterNodes(): void {
+    const search = this.searchText().toLowerCase().trim();
+    if (!search) {
+      this.filteredTreeNodes.set(this.treeNodes());
+      return;
+    }
+
+    const filtered = this.treeNodes().filter(node => {
+      const name = node.name.toLowerCase();
+      const category = node.category.toLowerCase();
+      return name.includes(search) || category.includes(search);
+    });
+
+    this.filteredTreeNodes.set(filtered);
   }
 
   protected toggleNode(node: IfcNode): void {
     node.isExpanded = !node.isExpanded;
+    this.updateFlatList();
+  }
+
+  protected expandAll(): void {
+    const expandNodeRecursive = (node: IfcNode) => {
+      if (node.hasChildren) {
+        node.isExpanded = true;
+        node.children.forEach(expandNodeRecursive);
+      }
+    };
+    this.rootNodes.forEach(expandNodeRecursive);
+    this.updateFlatList();
+  }
+
+  protected collapseAll(): void {
+    const collapseNodeRecursive = (node: IfcNode) => {
+      if (node.hasChildren) {
+        node.isExpanded = false;
+        node.children.forEach(collapseNodeRecursive);
+      }
+    };
+    this.rootNodes.forEach(collapseNodeRecursive);
     this.updateFlatList();
   }
 

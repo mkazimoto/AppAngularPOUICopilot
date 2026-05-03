@@ -97,6 +97,127 @@
   color: #fff;
 }
 
+.tree-collapse-icons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.tree-collapse-main {
+  display: flex;
+  font-size: 0.75rem;
+}
+
+.tree-collapse-secondary {
+  display: flex;
+  position: absolute;
+  font-size: 0.5rem;
+  bottom: -2px;
+  right: -3px;
+  opacity: 0.7;
+}
+
+/* ── Campo de busca ──────────────────────────────────────────────────── */
+
+.tree-search {
+  position: relative;
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.tree-search-input {
+  width: 100%;
+  padding: 6px 8px 6px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 0.8rem;
+  outline: none;
+  transition: all 0.15s;
+  box-sizing: border-box;
+}
+
+.tree-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.tree-search-input:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.tree-search-input:focus {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.tree-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+}
+
+/* ── Botões de ações (Expandir/Recolher) ─────────────────────────────── */
+
+.tree-actions {
+  display: flex;
+  gap: 4px;
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.tree-action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tree-action-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+.tree-action-btn:active {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.tree-action-btn span {
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.tree-action-label {
+  font-size: 0.7rem;
+}
+
 /* ── Conteúdo da árvore ──────────────────────────────────────────────── */
 
 .tree-loading,
@@ -167,24 +288,70 @@
 
 .resize-handle {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 22px;
-  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: nwse-resize;
   color: rgba(255, 255, 255, 0.3);
   font-size: 0.65rem;
   z-index: 1;
-  border-top-left-radius: 4px;
-  transition: color 0.15s;
+  transition: all 0.15s;
 }
 
 .resize-handle:hover {
   color: rgba(255, 255, 255, 0.7);
   background: rgba(255, 255, 255, 0.06);
+}
+
+/* Canto inferior direito */
+.resize-handle--corner {
+  bottom: 0;
+  right: 0;
+  width: 22px;
+  height: 22px;
+  cursor: nwse-resize;
+  border-top-left-radius: 4px;
+}
+
+/* Lateral esquerda */
+.resize-handle--left {
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: ew-resize;
+  border-radius: 4px 0 0 4px;
+}
+
+/* Lateral direita */
+.resize-handle--right {
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: ew-resize;
+  border-radius: 0 4px 4px 0;
+}
+
+/* Topo */
+.resize-handle--top {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  cursor: ns-resize;
+  border-radius: 4px 4px 0 0;
+}
+
+/* Inferior (não precisa porque já tem o canto) */
+.resize-handle--bottom {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  cursor: ns-resize;
+  border-radius: 0 0 4px 4px;
+  /* Excluir a área do canto para não sobrepor */
+  right: 22px;
 }
 
 /* ── Loading overlay ──────────────────────────────────────────────────── */

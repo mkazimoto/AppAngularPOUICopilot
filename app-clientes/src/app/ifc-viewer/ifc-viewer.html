@@ -58,11 +58,49 @@
         <span class="an an-tree-structure"></span>
         <span class="tree-header-title">Estrutura do Modelo</span>
         <button class="tree-collapse-btn" (mousedown)="$event.stopPropagation()" (click)="togglePanelVisible()" [title]="treePanelVisible() ? 'Minimizar' : 'Expandir'">
-          <span [class]="treePanelVisible() ? 'an an-chevron-up' : 'an an-chevron-down'"></span>
+          <span class="tree-collapse-icons">
+            @if (treePanelVisible()) {
+              <span class="an an-chevron-up tree-collapse-main"></span>
+              <span class="an an-window-minimize tree-collapse-secondary"></span>
+            } @else {
+              <span class="an an-chevron-down tree-collapse-main"></span>
+              <span class="an an-window-maximize tree-collapse-secondary"></span>
+            }
+          </span>
         </button>
       </div>
 
       @if (treePanelVisible()) {
+        <!-- Campo de busca -->
+        <div class="tree-search">
+          <input
+            type="text"
+            class="tree-search-input"
+            placeholder="Pesquisar..."
+            [value]="searchText()"
+            (input)="onSearchChange($event.target.value)"
+            (keydown)="$event.stopPropagation()" />
+          <span class="tree-search-icon an an-search"></span>
+        </div>
+
+        <!-- Botões de expansão/colapse -->
+        <div class="tree-actions">
+          <button 
+            class="tree-action-btn" 
+            (click)="expandAll()" 
+            [title]="'Expandir tudo'">
+            <span class="an an-angle-down"></span>
+            <span class="tree-action-label">Expandir</span>
+          </button>
+          <button 
+            class="tree-action-btn" 
+            (click)="collapseAll()" 
+            [title]="'Recolher tudo'">
+            <span class="an an-angle-up"></span>
+            <span class="tree-action-label">Recolher</span>
+          </button>
+        </div>
+
         @if (isTreeLoading()) {
           <div class="tree-loading">
             <span class="an an-circle-notch tree-spin"></span>
@@ -79,7 +117,7 @@
 
         <cdk-virtual-scroll-viewport itemSize="36" class="tree-scroll">
           <div
-            *cdkVirtualFor="let node of treeNodes(); trackBy: trackByNodeId"
+            *cdkVirtualFor="let node of filteredTreeNodes(); trackBy: trackByNodeId"
             class="tree-node"
             [class.tree-node--has-children]="node.hasChildren"
             [style.padding-left.px]="node.level * 14 + 8"
@@ -97,10 +135,14 @@
           </div>
         </cdk-virtual-scroll-viewport>
 
-        <!-- Alça de redimensionamento -->
-        <div class="resize-handle" (mousedown)="onResizeStart($event)">
+        <!-- Alças de redimensionamento -->
+        <div class="resize-handle resize-handle--corner" (mousedown)="onResizeStart('corner', $event)">
           <span class="an an-arrows-alt"></span>
         </div>
+        <div class="resize-handle resize-handle--left" (mousedown)="onResizeStart('left', $event)"></div>
+        <div class="resize-handle resize-handle--right" (mousedown)="onResizeStart('right', $event)"></div>
+        <div class="resize-handle resize-handle--top" (mousedown)="onResizeStart('top', $event)"></div>
+        <div class="resize-handle resize-handle--bottom" (mousedown)="onResizeStart('bottom', $event)"></div>
       }
     </div>
 
