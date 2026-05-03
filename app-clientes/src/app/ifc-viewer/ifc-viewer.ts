@@ -43,6 +43,7 @@ interface SpatialNode {
 })
 export class IfcViewer implements OnInit, OnDestroy {
   private containerRef = viewChild<ElementRef<HTMLDivElement>>('viewerContainer');
+  private treeViewport = viewChild<CdkVirtualScrollViewport>('treeViewport');
 
   protected isLoading = signal(false);
   protected modelLoaded = signal(false);
@@ -82,6 +83,10 @@ export class IfcViewer implements OnInit, OnDestroy {
   private selectedFragments = new Set<string>();
   private selectedLocalIds: number[] = [];
   private selectedNodeId: string | null = null;
+  private hoveredLocalId: number | null = null;
+  private viewerCanvas: HTMLCanvasElement | null = null;
+  private hoverRafId: number | null = null;
+  private localIdToNode = new Map<number, IfcNode>();
 
   // Drag state
   private isDragging = false;
@@ -102,6 +107,91 @@ export class IfcViewer implements OnInit, OnDestroy {
 
   private readonly platformId = inject(PLATFORM_ID);
   private readonly cdr = inject(ChangeDetectorRef);
+
+  private readonly onViewerClick = async (e: MouseEvent) => {
+    if (!this.currentLoadedModel || !this.world || !this.viewerCanvas) return;
+    const mouse = new THREE.Vector2(e.clientX, e.clientY);
+    try {
+      const result = await this.currentLoadedModel.raycast({
+        camera: this.world.camera.three,
+        mouse,
+        dom: this.viewerCanvas,
+      });
+      if (result === null) return;
+      const node = this.localIdToNode.get(result.localId);
+      if (!node) return;
+
+      // Expande ancestrais para o nó ficar visível na lista
+      this.expandToNode(node);
+
+      // Seleciona no modelo 3D
+      this.selectedNodeId = node.id;
+      await this.highlightNodeInModel(node);
+
+      // Garante que a lista plana está atualizada no viewport antes do scroll
+      this.cdr.detectChanges();
+
+      // Scroll na tree view até o nó selecionado (aguarda o próximo frame para o viewport processar os dados)
+      const index = this.filteredTreeNodes().findIndex(n => n.id === node.id);
+      if (index >= 0) {
+        setTimeout(() => {
+          this.treeViewport()?.scrollToIndex(index, 'smooth');
+        }, 0);
+      }
+      this.cdr.detectChanges();
+    } catch {
+      // ignora erros de raycast
+    }
+  };
+
+  private readonly onViewerMouseMove = (e: MouseEvent) => {
+    if (this.hoverRafId !== null) return;
+    this.hoverRafId = requestAnimationFrame(() => {
+      this.hoverRafId = null;
+      this.processHover(e);
+    });
+  };
+
+  private async processHover(e: MouseEvent): Promise<void> {
+    if (!this.currentLoadedModel || !this.world || !this.viewerCanvas) return;
+
+    const mouse = new THREE.Vector2(e.clientX, e.clientY);
+
+    try {
+      const result = await this.currentLoadedModel.raycast({
+        camera: this.world.camera.three,
+        mouse,
+        dom: this.viewerCanvas,
+      });
+
+      const newHoveredId = result?.localId ?? null;
+
+      if (newHoveredId === this.hoveredLocalId) return;
+
+      // Reset highlight do item anterior (apenas se não estiver selecionado)
+      if (this.hoveredLocalId !== null && !this.selectedLocalIds.includes(this.hoveredLocalId)) {
+        await this.currentLoadedModel.resetHighlight([this.hoveredLocalId]);
+        this.fragments?.core.update(true);
+      }
+
+      this.hoveredLocalId = newHoveredId;
+
+      // Aplica destaque verde limão no item sob o cursor
+      if (newHoveredId !== null && !this.selectedLocalIds.includes(newHoveredId)) {
+        const hoverMaterial: FRAGS.MaterialDefinition = {
+          color: new THREE.Color(0x32cd32),
+          opacity: 1,
+          transparent: false,
+          renderedFaces: FRAGS.RenderedFaces.TWO,
+          depthTest: false,
+        };
+        await this.currentLoadedModel.highlight([newHoveredId], hoverMaterial);
+        this.fragments?.core.update(true);
+      }
+    } catch {
+      // Ignora erros de raycast silenciosamente
+    }
+  }
 
   private readonly onMouseMove = (e: MouseEvent) => {
     if (this.isDragging) {
@@ -197,10 +287,21 @@ export class IfcViewer implements OnInit, OnDestroy {
       document.removeEventListener('mousemove', this.onMouseMove);
       document.removeEventListener('mouseup', this.onMouseUp);
     }
+    if (this.hoverRafId !== null) {
+      cancelAnimationFrame(this.hoverRafId);
+      this.hoverRafId = null;
+    }
     this.destroyViewer();
   }
 
   private destroyViewer(): void {
+    if (this.viewerCanvas) {
+      this.viewerCanvas.removeEventListener('mousemove', this.onViewerMouseMove);
+      this.viewerCanvas.removeEventListener('click', this.onViewerClick);
+      this.viewerCanvas = null;
+    }
+    this.hoveredLocalId = null;
+    this.localIdToNode.clear();
     this.components?.dispose();
     this.components = null;
     this.world = null;
@@ -539,6 +640,27 @@ export class IfcViewer implements OnInit, OnDestroy {
     return node.id;
   }
 
+  /** Expande todos os ancestrais de um nó para que ele fique visível na lista plana. */
+  private expandToNode(target: IfcNode): void {
+    const findPath = (nodes: IfcNode[], path: IfcNode[]): boolean => {
+      for (const node of nodes) {
+        if (node.id === target.id) return true;
+        if (node.hasChildren) {
+          path.push(node);
+          if (findPath(node.children, path)) return true;
+          path.pop();
+        }
+      }
+      return false;
+    };
+    const path: IfcNode[] = [];
+    findPath(this.rootNodes, path);
+    for (const ancestor of path) {
+      ancestor.isExpanded = true;
+    }
+    this.updateFlatList();
+  }
+
   private async buildTree(model: ReturnType<OBC.FragmentsManager['list']['get']>): Promise<void> {
     if (!model) return;
     this.currentLoadedModel = model;
@@ -589,6 +711,15 @@ export class IfcViewer implements OnInit, OnDestroy {
       }
 
       this.updateFlatList();
+
+      // Reconstrói o mapa localId → IfcNode com os nomes já carregados
+      this.localIdToNode.clear();
+      for (const node of this.getAllNodes(this.rootNodes)) {
+        if (node.localId !== null) {
+          this.localIdToNode.set(node.localId, node);
+        }
+      }
+
       this.cdr.detectChanges();
     } catch (e) {
       console.error('Erro ao construir árvore IFC:', e);
@@ -621,6 +752,11 @@ export class IfcViewer implements OnInit, OnDestroy {
 
     this.components.init();
     this.components.get(OBC.Grids).create(this.world);
+
+    // Registra listeners de interação no canvas do renderer
+    this.viewerCanvas = this.world.renderer.three.domElement;
+    this.viewerCanvas.addEventListener('mousemove', this.onViewerMouseMove);
+    this.viewerCanvas.addEventListener('click', this.onViewerClick);
 
     // Configura o IfcLoader
     this.ifcLoader = this.components.get(OBC.IfcLoader);
@@ -711,6 +847,7 @@ export class IfcViewer implements OnInit, OnDestroy {
       this.loadingProgress.set(100);
       this.modelLoaded.set(true);
       this.loadedFileName.set(fileName);
+      await this.hideIfcSpaces(defaultModel);
       this.buildTree(defaultModel);
     } catch (error) {
       this.notificationService.error({ message: 'Erro ao carregar o modelo padrão.' });
@@ -760,6 +897,7 @@ export class IfcViewer implements OnInit, OnDestroy {
       this.loadingProgress.set(100);
       this.modelLoaded.set(true);
       this.loadedFileName.set(file.name);
+      await this.hideIfcSpaces(fileModel);
       this.buildTree(fileModel);
       this.notificationService.success({ message: `Arquivo "${file.name}" carregado com sucesso!` });
     } catch (error) {
@@ -776,5 +914,21 @@ export class IfcViewer implements OnInit, OnDestroy {
   protected triggerFileInput(): void {
     const input = document.getElementById('ifc-file-input') as HTMLInputElement;
     input?.click();
+  }
+
+  private async hideIfcSpaces(model: ReturnType<OBC.FragmentsManager['list']['get']>): Promise<void> {
+    if (!model) return;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const byCategory = await (model as any).getItemsOfCategories([/IFCSPACE/i]) as Record<string, number[]>;
+      const ids = Object.values(byCategory).flat();
+      if (ids.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (model as any).setVisible(ids, false);
+        this.fragments?.core.update(true);
+      }
+    } catch (e) {
+      console.warn('Aviso ao ocultar IFCSPACE:', e);
+    }
   }
 }

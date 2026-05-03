@@ -115,7 +115,7 @@
           </div>
         }
 
-        <cdk-virtual-scroll-viewport itemSize="36" class="tree-scroll">
+        <cdk-virtual-scroll-viewport #treeViewport itemSize="36" class="tree-scroll">
           <div
             *cdkVirtualFor="let node of filteredTreeNodes(); trackBy: trackByNodeId"
             class="tree-node"
