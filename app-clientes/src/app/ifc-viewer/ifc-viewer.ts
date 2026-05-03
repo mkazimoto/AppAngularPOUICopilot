@@ -59,7 +59,7 @@ export class IfcViewer implements OnInit, OnDestroy {
   protected panelX = signal(16);
   protected panelY = signal(16);
   protected panelW = signal(300);
-  protected panelH = signal(480);
+  protected panelH = signal(700);
 
   protected readonly tagType = PoTagType.Success;
   protected readonly progressStatus = PoProgressStatus.Default;
@@ -81,6 +81,7 @@ export class IfcViewer implements OnInit, OnDestroy {
   private currentLoadedModel: ReturnType<OBC.FragmentsManager['list']['get']> | null = null;
   private selectedFragments = new Set<string>();
   private selectedLocalIds: number[] = [];
+  private selectedNodeId: string | null = null;
 
   // Drag state
   private isDragging = false;
@@ -208,6 +209,7 @@ export class IfcViewer implements OnInit, OnDestroy {
     this.currentLoadedModel = null;
     this.selectedFragments.clear();
     this.selectedLocalIds = [];
+    this.selectedNodeId = null;
     this.rootNodes = [];
     this.nodeCounter = 0;
     this.treeNodes.set([]);
@@ -417,22 +419,35 @@ export class IfcViewer implements OnInit, OnDestroy {
     this.filteredTreeNodes.set(filtered);
   }
 
-  protected toggleNode(node: IfcNode): void {
-    node.isExpanded = !node.isExpanded;
-    this.updateFlatList();
-    this.selectNodeInModel(node);
+  protected onNodeClick(node: IfcNode): void {
+    this.selectedNodeId = node.id;
+    if (node.hasChildren) {
+      node.isExpanded = !node.isExpanded;
+      this.updateFlatList();
+    }
+    this.highlightNodeInModel(node);
   }
 
-  private async selectNodeInModel(node: IfcNode): Promise<void> {
+  protected zoomToNode(node: IfcNode): void {
+    this.selectedNodeId = node.id;
+    this.highlightNodeInModel(node, true);
+  }
+
+  protected isNodeSelected(node: IfcNode): boolean {
+    return this.selectedNodeId === node.id;
+  }
+
+  private async highlightNodeInModel(node: IfcNode, zoomTo = false): Promise<void> {
     if (!this.currentLoadedModel) return;
 
     const model = this.currentLoadedModel;
 
     try {
-      // Reset highlight de todos os itens anteriores
+      // Reset highlight dos itens anteriores
       if (this.selectedLocalIds.length > 0) {
         await model.resetHighlight(this.selectedLocalIds);
         await model.resetOpacity(undefined);
+        this.fragments?.core.update(true);
       }
 
       // Coleta todos os localIds do nó e seus descendentes
@@ -451,8 +466,11 @@ export class IfcViewer implements OnInit, OnDestroy {
       };
       await model.highlight(localIds, highlightMaterial);
 
-      // Faz zoom no bounding box do(s) item(s) selecionado(s)
-      if (this.world) {
+      // Força o re-render do modelo após o highlight
+      this.fragments?.core.update(true);
+
+      // Faz zoom apenas no duplo clique
+      if (zoomTo && this.world) {
         const box = await model.getMergedBox(localIds);
         if (box && !box.isEmpty()) {
           const center = new THREE.Vector3();
@@ -461,7 +479,6 @@ export class IfcViewer implements OnInit, OnDestroy {
           box.getSize(size);
           const maxDim = Math.max(size.x, size.y, size.z);
 
-          // Cria objeto auxiliar temporário para o fitToBox
           const helperMesh = new THREE.Mesh(
             new THREE.BoxGeometry(size.x, size.y, size.z),
             new THREE.MeshBasicMaterial(),

@@ -120,8 +120,10 @@
             *cdkVirtualFor="let node of filteredTreeNodes(); trackBy: trackByNodeId"
             class="tree-node"
             [class.tree-node--has-children]="node.hasChildren"
+            [class.tree-node--selected]="isNodeSelected(node)"
             [style.padding-left.px]="node.level * 14 + 8"
-            (click)="toggleNode(node)">
+            (click)="onNodeClick(node)"
+            (dblclick)="zoomToNode(node); $event.preventDefault()">
 
             <span class="tree-toggle-icon">
               @if (node.hasChildren) {

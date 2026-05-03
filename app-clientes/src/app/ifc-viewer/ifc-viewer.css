@@ -284,6 +284,16 @@
   color: rgba(255, 255, 255, 0.92);
 }
 
+.tree-node--selected {
+  background: rgba(0, 62, 179, 0.35);
+  border-left: 3px solid #003eb3;
+}
+
+.tree-node--selected .tree-node-label {
+  color: #fff;
+  font-weight: 600;
+}
+
 /* ── Alça de redimensionamento ────────────────────────────────────────── */
 
 .resize-handle {
