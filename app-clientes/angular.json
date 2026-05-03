@@ -48,6 +48,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "*.wasm",
+                "input": "node_modules/web-ifc",
+                "output": "/"
               }
             ],
             "styles": [

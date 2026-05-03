@@ -30,6 +30,7 @@ export class App {
     { label: 'Workflow', link: '/workflow', icon: 'an an-git-branch' },
     { label: 'Organograma', link: '/organograma', icon: 'an an-users' },
     { label: 'Tree View Editável', link: '/treeview', icon: 'an an-tree-structure' },
+    { label: 'Visualizador IFC', link: '/ifc-viewer', icon: 'an an-cube' },
   ];
 
 
