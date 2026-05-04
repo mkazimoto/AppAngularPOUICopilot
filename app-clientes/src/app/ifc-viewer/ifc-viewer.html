@@ -182,13 +182,13 @@
                 <div class="props-group-header" (click)="togglePropertyGroup(group)">
                   <span class="props-group-icon an" [class.an-caret-down]="group.isExpanded" [class.an-caret-right]="!group.isExpanded"></span>
                   <span class="props-group-name">{{ group.name }}</span>
-                  <span class="props-group-count">{{ group.properties.length }}</span>
                 </div>
                 @if (group.isExpanded) {
                   @for (prop of group.properties; track prop.name) {
                     <div class="props-row">
                       <span class="props-key" [title]="prop.name">{{ prop.name }}</span>
                       <span class="props-value" [title]="prop.value">{{ prop.value }}</span>
+                      <span class="props-unit" [title]="prop.unit ?? ''">{{ prop.unit ?? '' }}</span>
                     </div>
                   }
                 }

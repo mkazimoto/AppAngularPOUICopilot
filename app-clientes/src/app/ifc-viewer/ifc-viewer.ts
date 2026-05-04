@@ -20,6 +20,7 @@ import { PoLoadingModule, PoNotificationService, PoPageAction, PoPageModule, PoP
 export interface IfcProperty {
   name: string;
   value: string;
+  unit?: string;
   type?: string;
 }
 
@@ -73,7 +74,7 @@ export class IfcViewer implements OnInit, OnDestroy {
   protected propPanelX = signal(16);
   protected propPanelY = signal(16);
   protected propPanelW = signal(320);
-  protected propPanelH = signal(500);
+  protected propPanelH = signal(700);
   protected propertyGroups = signal<IfcPropertyGroup[]>([]);
   protected isPropsLoading = signal(false);
   protected selectedObjectName = signal('');
@@ -81,7 +82,7 @@ export class IfcViewer implements OnInit, OnDestroy {
   // Painel flutuante: posição e tamanho
   protected panelX = signal(16);
   protected panelY = signal(16);
-  protected panelW = signal(300);
+  protected panelW = signal(420);
   protected panelH = signal(700);
 
   protected readonly tagType = PoTagType.Success;
@@ -1010,23 +1011,59 @@ export class IfcViewer implements OnInit, OnDestroy {
       const pName = p['Name']?.value ?? p['Name'] ?? '?';
       const pVal  = p['NominalValue']?.value ?? p['Value']?.value ?? p['NominalValue'] ?? p['Value'];
       if (pVal !== undefined && pVal !== null) {
-        props.push({ name: String(pName), value: String(pVal), type: p['NominalValue']?.type ?? p['type'] });
+        const unit = this.resolveUnit(p['Unit']);
+        props.push({ name: String(pName), value: String(pVal), unit, type: p['NominalValue']?.type ?? p['type'] });
       }
     }
 
     // Quantities (IfcElementQuantity)
+    const qUnit = this.resolveUnit(pset['Unit']);
     const quantities: Record<string, any>[] = pset['Quantities'] ?? [];
     for (const q of quantities) {
       const qName = q['Name']?.value ?? q['Name'] ?? '?';
-      const qVal  = q['LengthValue']?.value ?? q['AreaValue']?.value
-        ?? q['VolumeValue']?.value ?? q['WeightValue']?.value
-        ?? q['CountValue']?.value ?? q['TimeValue']?.value;
-      if (qVal !== undefined && qVal !== null) {
-        props.push({ name: String(qName), value: String(qVal), type: q['type'] });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const qEntry = (['LengthValue','AreaValue','VolumeValue','WeightValue','CountValue','TimeValue'] as const)
+        .map(k => ({ k, v: (q as any)[k]?.value ?? (q as any)[k] }))
+        .find(e => e.v !== undefined && e.v !== null);
+      if (qEntry) {
+        const unit = this.resolveUnit(q['Unit']) ?? qUnit ?? this.quantityUnit(qEntry.k);
+        props.push({ name: String(qName), value: String(qEntry.v), unit, type: q['type'] });
       }
     }
 
     return props;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private resolveUnit(unit: any): string | undefined {
+    if (!unit) return undefined;
+    // IfcSIUnit: { type: 'IFCSIUNIT', UnitType: {value:...}, Name: {value:...}, Prefix: {value:...} }
+    const prefix: string = unit['Prefix']?.value ?? '';
+    const name: string   = unit['Name']?.value ?? unit['value'] ?? '';
+    if (!name) return undefined;
+    const map: Record<string, string> = {
+      METRE: 'm', SQUARE_METRE: 'm²', CUBIC_METRE: 'm³',
+      KILOGRAM: 'kg', GRAM: 'g',
+      SECOND: 's', MINUTE: 'min', HOUR: 'h',
+      DEGREE: '°', RADIAN: 'rad',
+      PASCAL: 'Pa', NEWTON: 'N', JOULE: 'J', WATT: 'W',
+      LUMEN: 'lm', LUX: 'lx', HERTZ: 'Hz', KELVIN: 'K',
+      AMPERE: 'A', VOLT: 'V', OHM: 'Ω', FARAD: 'F',
+    };
+    const prefixMap: Record<string, string> = {
+      MILLI: 'm', CENTI: 'c', KILO: 'k', MEGA: 'M', GIGA: 'G',
+    };
+    const sym = map[name.toUpperCase()] ?? name;
+    const pre = prefix ? (prefixMap[prefix.toUpperCase()] ?? prefix) : '';
+    return `${pre}${sym}`;
+  }
+
+  private quantityUnit(key: string): string | undefined {
+    const m: Record<string, string> = {
+      LengthValue: 'm', AreaValue: 'm²', VolumeValue: 'm³',
+      WeightValue: 'kg', TimeValue: 's',
+    };
+    return m[key];
   }
 
   private async loadProperties(localId: number, nodeName: string): Promise<void> {
