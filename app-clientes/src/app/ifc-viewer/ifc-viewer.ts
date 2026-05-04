@@ -244,6 +244,17 @@ export class IfcViewer implements OnInit, OnDestroy {
     }
   }
 
+  private readonly onTouchMove = (e: TouchEvent) => {
+    if (e.touches.length === 0) return;
+    const touch = e.touches[0];
+    this.onMouseMove({ clientX: touch.clientX, clientY: touch.clientY } as MouseEvent);
+    if (this.isDragging || this.isResizing) e.preventDefault();
+  };
+
+  private readonly onTouchEnd = () => {
+    this.onMouseUp();
+  };
+
   private readonly onMouseMove = (e: MouseEvent) => {
     if (this.isDragging) {
       if (this.activeDragPanel === 'tree') {
@@ -305,23 +316,29 @@ export class IfcViewer implements OnInit, OnDestroy {
     document.body.style.cursor = '';
   };
 
-  protected onDragStart(panel: 'tree' | 'props', e: MouseEvent): void {
+  protected onDragStart(panel: 'tree' | 'props', e: MouseEvent | TouchEvent): void {
+    const coords = e instanceof TouchEvent
+      ? (e.touches[0] ?? e.changedTouches[0])
+      : e;
     this.isDragging = true;
     this.activeDragPanel = panel;
-    this.dragStartX = e.clientX;
-    this.dragStartY = e.clientY;
+    this.dragStartX = coords.clientX;
+    this.dragStartY = coords.clientY;
     this.dragOriginX = panel === 'tree' ? this.panelX() : this.propPanelX();
     this.dragOriginY = panel === 'tree' ? this.panelY() : this.propPanelY();
     document.body.style.userSelect = 'none';
     e.preventDefault();
   }
 
-  protected onResizeStart(panel: 'tree' | 'props', direction: 'corner' | 'left' | 'right' | 'top' | 'bottom', e: MouseEvent): void {
+  protected onResizeStart(panel: 'tree' | 'props', direction: 'corner' | 'left' | 'right' | 'top' | 'bottom', e: MouseEvent | TouchEvent): void {
+    const coords = e instanceof TouchEvent
+      ? (e.touches[0] ?? e.changedTouches[0])
+      : e;
     this.isResizing = true;
     this.activeResizePanel = panel;
     this.resizeDirection = direction;
-    this.resizeStartX = e.clientX;
-    this.resizeStartY = e.clientY;
+    this.resizeStartX = coords.clientX;
+    this.resizeStartY = coords.clientY;
     this.resizeOriginW = panel === 'tree' ? this.panelW() : this.propPanelW();
     this.resizeOriginH = panel === 'tree' ? this.panelH() : this.propPanelH();
     this.resizeOriginX = panel === 'tree' ? this.panelX() : this.propPanelX();
@@ -367,6 +384,8 @@ export class IfcViewer implements OnInit, OnDestroy {
     if (isPlatformBrowser(this.platformId)) {
       document.addEventListener('mousemove', this.onMouseMove);
       document.addEventListener('mouseup', this.onMouseUp);
+      document.addEventListener('touchmove', this.onTouchMove, { passive: false });
+      document.addEventListener('touchend', this.onTouchEnd);
     }
     await this.initViewer();
     await this.loadDefaultModel();
@@ -376,6 +395,8 @@ export class IfcViewer implements OnInit, OnDestroy {
     if (isPlatformBrowser(this.platformId)) {
       document.removeEventListener('mousemove', this.onMouseMove);
       document.removeEventListener('mouseup', this.onMouseUp);
+      document.removeEventListener('touchmove', this.onTouchMove);
+      document.removeEventListener('touchend', this.onTouchEnd);
     }
     if (this.hoverRafId !== null) {
       cancelAnimationFrame(this.hoverRafId);
