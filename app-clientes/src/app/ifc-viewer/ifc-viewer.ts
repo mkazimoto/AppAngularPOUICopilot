@@ -314,11 +314,36 @@ export class IfcViewer implements OnInit, OnDestroy {
     document.body.style.cursor = '';
   };
 
+  private readonly onTouchMove = (e: TouchEvent) => {
+    if (!this.isDragging && !this.isResizing) return;
+    if (e.touches.length !== 1) return;
+    const touch = e.touches[0];
+    this.onMouseMove({ clientX: touch.clientX, clientY: touch.clientY } as MouseEvent);
+    e.preventDefault();
+  };
+
+  private readonly onTouchEnd = () => {
+    this.onMouseUp();
+  };
+
   protected onDragStart(panel: 'tree' | 'props', e: MouseEvent): void {
     this.isDragging = true;
     this.activeDragPanel = panel;
     this.dragStartX = e.clientX;
     this.dragStartY = e.clientY;
+    this.dragOriginX = panel === 'tree' ? this.panelX() : this.propPanelX();
+    this.dragOriginY = panel === 'tree' ? this.panelY() : this.propPanelY();
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  }
+
+  protected onDragStartTouch(panel: 'tree' | 'props', e: TouchEvent): void {
+    if (e.touches.length !== 1) return;
+    const touch = e.touches[0];
+    this.isDragging = true;
+    this.activeDragPanel = panel;
+    this.dragStartX = touch.clientX;
+    this.dragStartY = touch.clientY;
     this.dragOriginX = panel === 'tree' ? this.panelX() : this.propPanelX();
     this.dragOriginY = panel === 'tree' ? this.panelY() : this.propPanelY();
     document.body.style.userSelect = 'none';
@@ -345,6 +370,23 @@ export class IfcViewer implements OnInit, OnDestroy {
       document.body.style.cursor = 'ns-resize';
     }
 
+    e.stopPropagation();
+    e.preventDefault();
+  }
+
+  protected onResizeStartTouch(panel: 'tree' | 'props', direction: 'corner' | 'left' | 'right' | 'top' | 'bottom', e: TouchEvent): void {
+    if (e.touches.length !== 1) return;
+    const touch = e.touches[0];
+    this.isResizing = true;
+    this.activeResizePanel = panel;
+    this.resizeDirection = direction;
+    this.resizeStartX = touch.clientX;
+    this.resizeStartY = touch.clientY;
+    this.resizeOriginW = panel === 'tree' ? this.panelW() : this.propPanelW();
+    this.resizeOriginH = panel === 'tree' ? this.panelH() : this.propPanelH();
+    this.resizeOriginX = panel === 'tree' ? this.panelX() : this.propPanelX();
+    this.resizeOriginY = panel === 'tree' ? this.panelY() : this.propPanelY();
+    document.body.style.userSelect = 'none';
     e.stopPropagation();
     e.preventDefault();
   }
@@ -380,6 +422,8 @@ export class IfcViewer implements OnInit, OnDestroy {
     if (isPlatformBrowser(this.platformId)) {
       document.addEventListener('mousemove', this.onMouseMove);
       document.addEventListener('mouseup', this.onMouseUp);
+      document.addEventListener('touchmove', this.onTouchMove, { passive: false });
+      document.addEventListener('touchend', this.onTouchEnd);
     }
     await this.initViewer();
     await this.loadDefaultModel();
@@ -389,6 +433,8 @@ export class IfcViewer implements OnInit, OnDestroy {
     if (isPlatformBrowser(this.platformId)) {
       document.removeEventListener('mousemove', this.onMouseMove);
       document.removeEventListener('mouseup', this.onMouseUp);
+      document.removeEventListener('touchmove', this.onTouchMove);
+      document.removeEventListener('touchend', this.onTouchEnd);
     }
     if (this.hoverRafId !== null) {
       cancelAnimationFrame(this.hoverRafId);

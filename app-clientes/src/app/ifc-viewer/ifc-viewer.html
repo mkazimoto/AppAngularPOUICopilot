@@ -59,10 +59,10 @@
       [style.height.px]="treePanelVisible() ? panelH() : null">
 
       <!-- Cabeçalho arrastável -->
-      <div class="tree-header" (mousedown)="onDragStart('tree', $event)">
+      <div class="tree-header" (mousedown)="onDragStart('tree', $event)" (touchstart)="onDragStartTouch('tree', $event)">
         <span class="an an-tree-structure"></span>
         <span class="tree-header-title">Estrutura do Modelo</span>
-        <button class="tree-collapse-btn" (mousedown)="$event.stopPropagation()" (click)="togglePanelVisible()" [title]="treePanelVisible() ? 'Minimizar' : 'Expandir'">
+        <button class="tree-collapse-btn" (mousedown)="$event.stopPropagation()" (touchstart)="$event.stopPropagation()" (click)="togglePanelVisible()" [title]="treePanelVisible() ? 'Minimizar' : 'Expandir'">
           <span class="tree-collapse-icons">
             @if (treePanelVisible()) {
               <span class="an an-chevron-up tree-collapse-main"></span>
@@ -143,13 +143,13 @@
         </cdk-virtual-scroll-viewport>
 
         <!-- Alças de redimensionamento -->
-        <div class="resize-handle resize-handle--corner" (mousedown)="onResizeStart('tree', 'corner', $event)">
+        <div class="resize-handle resize-handle--corner" (mousedown)="onResizeStart('tree', 'corner', $event)" (touchstart)="onResizeStartTouch('tree', 'corner', $event)">
           <span class="an an-arrows-alt"></span>
         </div>
-        <div class="resize-handle resize-handle--left" (mousedown)="onResizeStart('tree', 'left', $event)"></div>
-        <div class="resize-handle resize-handle--right" (mousedown)="onResizeStart('tree', 'right', $event)"></div>
-        <div class="resize-handle resize-handle--top" (mousedown)="onResizeStart('tree', 'top', $event)"></div>
-        <div class="resize-handle resize-handle--bottom" (mousedown)="onResizeStart('tree', 'bottom', $event)"></div>
+        <div class="resize-handle resize-handle--left" (mousedown)="onResizeStart('tree', 'left', $event)" (touchstart)="onResizeStartTouch('tree', 'left', $event)"></div>
+        <div class="resize-handle resize-handle--right" (mousedown)="onResizeStart('tree', 'right', $event)" (touchstart)="onResizeStartTouch('tree', 'right', $event)"></div>
+        <div class="resize-handle resize-handle--top" (mousedown)="onResizeStart('tree', 'top', $event)" (touchstart)="onResizeStartTouch('tree', 'top', $event)"></div>
+        <div class="resize-handle resize-handle--bottom" (mousedown)="onResizeStart('tree', 'bottom', $event)" (touchstart)="onResizeStartTouch('tree', 'bottom', $event)"></div>
       }
     </div>
 
@@ -164,10 +164,10 @@
         [style.height.px]="propPanelMinimized() ? null : propPanelH()">
 
         <!-- Cabeçalho arrastável -->
-        <div class="tree-header" (mousedown)="onDragStart('props', $event)">
+        <div class="tree-header" (mousedown)="onDragStart('props', $event)" (touchstart)="onDragStartTouch('props', $event)">
           <span class="an an-list"></span>
           <span class="tree-header-title">Propriedades</span>
-          <button class="tree-collapse-btn" (mousedown)="$event.stopPropagation()" (click)="togglePropPanelMinimized()" [title]="propPanelMinimized() ? 'Expandir' : 'Minimizar'">
+          <button class="tree-collapse-btn" (mousedown)="$event.stopPropagation()" (touchstart)="$event.stopPropagation()" (click)="togglePropPanelMinimized()" [title]="propPanelMinimized() ? 'Expandir' : 'Minimizar'">
             <span class="tree-collapse-icons">
               @if (propPanelMinimized()) {
                 <span class="an an-chevron-down tree-collapse-main"></span>
@@ -219,13 +219,13 @@
         }
 
         <!-- Alças de redimensionamento -->
-        <div class="resize-handle resize-handle--corner" (mousedown)="onResizeStart('props', 'corner', $event)">
+        <div class="resize-handle resize-handle--corner" (mousedown)="onResizeStart('props', 'corner', $event)" (touchstart)="onResizeStartTouch('props', 'corner', $event)">
           <span class="an an-arrows-alt"></span>
         </div>
-        <div class="resize-handle resize-handle--left" (mousedown)="onResizeStart('props', 'left', $event)"></div>
-        <div class="resize-handle resize-handle--right" (mousedown)="onResizeStart('props', 'right', $event)"></div>
-        <div class="resize-handle resize-handle--top" (mousedown)="onResizeStart('props', 'top', $event)"></div>
-        <div class="resize-handle resize-handle--bottom" (mousedown)="onResizeStart('props', 'bottom', $event)"></div>
+        <div class="resize-handle resize-handle--left" (mousedown)="onResizeStart('props', 'left', $event)" (touchstart)="onResizeStartTouch('props', 'left', $event)"></div>
+        <div class="resize-handle resize-handle--right" (mousedown)="onResizeStart('props', 'right', $event)" (touchstart)="onResizeStartTouch('props', 'right', $event)"></div>
+        <div class="resize-handle resize-handle--top" (mousedown)="onResizeStart('props', 'top', $event)" (touchstart)="onResizeStartTouch('props', 'top', $event)"></div>
+        <div class="resize-handle resize-handle--bottom" (mousedown)="onResizeStart('props', 'bottom', $event)" (touchstart)="onResizeStartTouch('props', 'bottom', $event)"></div>
         } <!-- fim @if (!propPanelMinimized()) -->
       </div>
     }
