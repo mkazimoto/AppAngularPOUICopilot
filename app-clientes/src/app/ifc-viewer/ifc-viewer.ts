@@ -1,21 +1,21 @@
+import { CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
+import { isPlatformBrowser } from '@angular/common';
 import {
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
+  inject,
   OnDestroy,
   OnInit,
-  ChangeDetectionStrategy,
-  signal,
-  ElementRef,
-  viewChild,
-  inject,
   PLATFORM_ID,
+  signal,
+  viewChild,
 } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { PoLoadingModule, PoNotificationService, PoPageAction, PoPageModule, PoProgressModule, PoProgressStatus, PoTagModule, PoTagType } from '@po-ui/ng-components';
 import * as OBC from '@thatopen/components';
 import * as FRAGS from '@thatopen/fragments';
 import * as THREE from 'three';
-import { CdkVirtualScrollViewport, CdkVirtualForOf, CdkFixedSizeVirtualScroll } from '@angular/cdk/scrolling';
-import { PoLoadingModule, PoNotificationService, PoPageAction, PoPageModule, PoProgressModule, PoProgressStatus, PoTagModule, PoTagType } from '@po-ui/ng-components';
 
 export interface IfcProperty {
   name: string;
@@ -68,10 +68,11 @@ export class IfcViewer implements OnInit, OnDestroy {
   protected searchText = signal('');
   protected isTreeLoading = signal(false);
   protected treePanelVisible = signal(true);
-  protected darkBackground = signal(false);
+  protected darkBackground = signal(true);
 
   // Painel de propriedades (propPanelX = distância da borda direita)
   protected propPanelVisible = signal(false);
+  protected propPanelMinimized = signal(false);
   protected propPanelX = signal(16);
   protected propPanelY = signal(16);
   protected propPanelW = signal(320);
@@ -94,6 +95,14 @@ export class IfcViewer implements OnInit, OnDestroy {
       label: 'Abrir arquivo IFC',
       icon: 'an an-upload',
       action: () => this.triggerFileInput(),
+    },
+    {
+      label: 'OTC-Conference Center.ifc',
+      icon: 'an an-cloud-download',
+      action: () => this.loadFromUrl(
+        'https://mkazimoto.github.io/AppAngularPOUICopilot/ifc/OTC-Conference%20Center.ifc',
+        'OTC-Conference Center.ifc'
+      ),
     },
   ];
 
@@ -244,17 +253,6 @@ export class IfcViewer implements OnInit, OnDestroy {
     }
   }
 
-  private readonly onTouchMove = (e: TouchEvent) => {
-    if (e.touches.length === 0) return;
-    const touch = e.touches[0];
-    this.onMouseMove({ clientX: touch.clientX, clientY: touch.clientY } as MouseEvent);
-    if (this.isDragging || this.isResizing) e.preventDefault();
-  };
-
-  private readonly onTouchEnd = () => {
-    this.onMouseUp();
-  };
-
   private readonly onMouseMove = (e: MouseEvent) => {
     if (this.isDragging) {
       if (this.activeDragPanel === 'tree') {
@@ -316,29 +314,23 @@ export class IfcViewer implements OnInit, OnDestroy {
     document.body.style.cursor = '';
   };
 
-  protected onDragStart(panel: 'tree' | 'props', e: MouseEvent | TouchEvent): void {
-    const coords = e instanceof TouchEvent
-      ? (e.touches[0] ?? e.changedTouches[0])
-      : e;
+  protected onDragStart(panel: 'tree' | 'props', e: MouseEvent): void {
     this.isDragging = true;
     this.activeDragPanel = panel;
-    this.dragStartX = coords.clientX;
-    this.dragStartY = coords.clientY;
+    this.dragStartX = e.clientX;
+    this.dragStartY = e.clientY;
     this.dragOriginX = panel === 'tree' ? this.panelX() : this.propPanelX();
     this.dragOriginY = panel === 'tree' ? this.panelY() : this.propPanelY();
     document.body.style.userSelect = 'none';
     e.preventDefault();
   }
 
-  protected onResizeStart(panel: 'tree' | 'props', direction: 'corner' | 'left' | 'right' | 'top' | 'bottom', e: MouseEvent | TouchEvent): void {
-    const coords = e instanceof TouchEvent
-      ? (e.touches[0] ?? e.changedTouches[0])
-      : e;
+  protected onResizeStart(panel: 'tree' | 'props', direction: 'corner' | 'left' | 'right' | 'top' | 'bottom', e: MouseEvent): void {
     this.isResizing = true;
     this.activeResizePanel = panel;
     this.resizeDirection = direction;
-    this.resizeStartX = coords.clientX;
-    this.resizeStartY = coords.clientY;
+    this.resizeStartX = e.clientX;
+    this.resizeStartY = e.clientY;
     this.resizeOriginW = panel === 'tree' ? this.panelW() : this.propPanelW();
     this.resizeOriginH = panel === 'tree' ? this.panelH() : this.propPanelH();
     this.resizeOriginX = panel === 'tree' ? this.panelX() : this.propPanelX();
@@ -373,6 +365,10 @@ export class IfcViewer implements OnInit, OnDestroy {
     this.propPanelVisible.set(!this.propPanelVisible());
   }
 
+  protected togglePropPanelMinimized(): void {
+    this.propPanelMinimized.set(!this.propPanelMinimized());
+  }
+
   protected togglePropertyGroup(group: IfcPropertyGroup): void {
     group.isExpanded = !group.isExpanded;
     this.propertyGroups.set([...this.propertyGroups()]);
@@ -384,8 +380,6 @@ export class IfcViewer implements OnInit, OnDestroy {
     if (isPlatformBrowser(this.platformId)) {
       document.addEventListener('mousemove', this.onMouseMove);
       document.addEventListener('mouseup', this.onMouseUp);
-      document.addEventListener('touchmove', this.onTouchMove, { passive: false });
-      document.addEventListener('touchend', this.onTouchEnd);
     }
     await this.initViewer();
     await this.loadDefaultModel();
@@ -395,8 +389,6 @@ export class IfcViewer implements OnInit, OnDestroy {
     if (isPlatformBrowser(this.platformId)) {
       document.removeEventListener('mousemove', this.onMouseMove);
       document.removeEventListener('mouseup', this.onMouseUp);
-      document.removeEventListener('touchmove', this.onTouchMove);
-      document.removeEventListener('touchend', this.onTouchEnd);
     }
     if (this.hoverRafId !== null) {
       cancelAnimationFrame(this.hoverRafId);
@@ -773,6 +765,9 @@ export class IfcViewer implements OnInit, OnDestroy {
 
   protected onSearchChange(text: string): void {
     this.searchText.set(text);
+    if (text.trim()) {
+      this.expandAll();
+    }
     this.filterNodes();
   }
 
@@ -1020,7 +1015,7 @@ export class IfcViewer implements OnInit, OnDestroy {
 
     this.world.scene = new OBC.SimpleScene(this.components);
     this.world.scene.setup();
-    this.world.scene.three.background = new THREE.Color('#dce8f7');
+    this.world.scene.three.background = new THREE.Color('#1a2634');
 
     this.world.renderer = new OBC.SimpleRenderer(this.components, containerEl);
     this.world.camera = new OBC.OrthoPerspectiveCamera(this.components);
@@ -1190,6 +1185,53 @@ export class IfcViewer implements OnInit, OnDestroy {
   protected triggerFileInput(): void {
     const input = document.getElementById('ifc-file-input') as HTMLInputElement;
     input?.click();
+  }
+
+  async loadFromUrl(url: string, fileName: string): Promise<void> {
+    this.isLoading.set(true);
+    this.loadingProgress.set(0);
+    this.loadingMessage.set(`Reiniciando visualizador...`);
+    this.modelLoaded.set(false);
+    this.loadedFileName.set('');
+
+    try {
+      this.destroyViewer();
+      await this.initViewer();
+
+      this.loadingMessage.set(`Baixando ${fileName}...`);
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Falha ao baixar arquivo: ${response.status} ${response.statusText}`);
+      }
+      this.loadingProgress.set(10);
+
+      const buffer = await response.arrayBuffer();
+      const data = new Uint8Array(buffer);
+      this.loadingProgress.set(20);
+
+      const modelName = fileName.replace('.ifc', '');
+      const fileModel = await this.ifcLoader!.load(data, false, modelName, {
+        processData: {
+          progressCallback: (progress: number) => {
+            this.loadingProgress.set(20 + Math.round(progress * 80));
+            this.loadingMessage.set(`Convertendo modelo: ${Math.round(progress * 100)}%`);
+          },
+        },
+      });
+
+      this.loadingProgress.set(100);
+      this.modelLoaded.set(true);
+      this.loadedFileName.set(fileName);
+      await this.hideIfcSpaces(fileModel);
+      this.buildTree(fileModel);
+      this.notificationService.success({ message: `Arquivo "${fileName}" carregado com sucesso!` });
+    } catch (error) {
+      this.notificationService.error({ message: 'Erro ao carregar o arquivo IFC a partir da URL.' });
+      console.error('Erro ao carregar IFC da URL:', error);
+    } finally {
+      this.isLoading.set(false);
+      this.loadingMessage.set('');
+    }
   }
 
   private async hideIfcSpaces(model: ReturnType<OBC.FragmentsManager['list']['get']>): Promise<void> {
