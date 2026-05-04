@@ -1,21 +1,21 @@
+import { CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
+import { isPlatformBrowser } from '@angular/common';
 import {
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ElementRef,
+  inject,
   OnDestroy,
   OnInit,
-  ChangeDetectionStrategy,
-  signal,
-  ElementRef,
-  viewChild,
-  inject,
   PLATFORM_ID,
+  signal,
+  viewChild,
 } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { PoLoadingModule, PoNotificationService, PoPageAction, PoPageModule, PoProgressModule, PoProgressStatus, PoTagModule, PoTagType } from '@po-ui/ng-components';
 import * as OBC from '@thatopen/components';
 import * as FRAGS from '@thatopen/fragments';
 import * as THREE from 'three';
-import { CdkVirtualScrollViewport, CdkVirtualForOf, CdkFixedSizeVirtualScroll } from '@angular/cdk/scrolling';
-import { PoLoadingModule, PoNotificationService, PoPageAction, PoPageModule, PoProgressModule, PoProgressStatus, PoTagModule, PoTagType } from '@po-ui/ng-components';
 
 export interface IfcProperty {
   name: string;
@@ -68,7 +68,7 @@ export class IfcViewer implements OnInit, OnDestroy {
   protected searchText = signal('');
   protected isTreeLoading = signal(false);
   protected treePanelVisible = signal(true);
-  protected darkBackground = signal(false);
+  protected darkBackground = signal(true);
 
   // Painel de propriedades (propPanelX = distância da borda direita)
   protected propPanelVisible = signal(false);
@@ -999,7 +999,7 @@ export class IfcViewer implements OnInit, OnDestroy {
 
     this.world.scene = new OBC.SimpleScene(this.components);
     this.world.scene.setup();
-    this.world.scene.three.background = new THREE.Color('#dce8f7');
+    this.world.scene.three.background = new THREE.Color('#1a2634');
 
     this.world.renderer = new OBC.SimpleRenderer(this.components, containerEl);
     this.world.camera = new OBC.OrthoPerspectiveCamera(this.components);
