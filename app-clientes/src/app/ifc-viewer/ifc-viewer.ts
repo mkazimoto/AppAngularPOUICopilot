@@ -95,6 +95,14 @@ export class IfcViewer implements OnInit, OnDestroy {
       icon: 'an an-upload',
       action: () => this.triggerFileInput(),
     },
+    {
+      label: 'OTC-Conference Center.ifc',
+      icon: 'an an-cloud-download',
+      action: () => this.loadFromUrl(
+        'https://mkazimoto.github.io/AppAngularPOUICopilot/ifc/OTC-Conference%20Center.ifc',
+        'OTC-Conference Center.ifc'
+      ),
+    },
   ];
 
   private components: OBC.Components | null = null;
@@ -1169,6 +1177,53 @@ export class IfcViewer implements OnInit, OnDestroy {
   protected triggerFileInput(): void {
     const input = document.getElementById('ifc-file-input') as HTMLInputElement;
     input?.click();
+  }
+
+  async loadFromUrl(url: string, fileName: string): Promise<void> {
+    this.isLoading.set(true);
+    this.loadingProgress.set(0);
+    this.loadingMessage.set(`Reiniciando visualizador...`);
+    this.modelLoaded.set(false);
+    this.loadedFileName.set('');
+
+    try {
+      this.destroyViewer();
+      await this.initViewer();
+
+      this.loadingMessage.set(`Baixando ${fileName}...`);
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Falha ao baixar arquivo: ${response.status} ${response.statusText}`);
+      }
+      this.loadingProgress.set(10);
+
+      const buffer = await response.arrayBuffer();
+      const data = new Uint8Array(buffer);
+      this.loadingProgress.set(20);
+
+      const modelName = fileName.replace('.ifc', '');
+      const fileModel = await this.ifcLoader!.load(data, false, modelName, {
+        processData: {
+          progressCallback: (progress: number) => {
+            this.loadingProgress.set(20 + Math.round(progress * 80));
+            this.loadingMessage.set(`Convertendo modelo: ${Math.round(progress * 100)}%`);
+          },
+        },
+      });
+
+      this.loadingProgress.set(100);
+      this.modelLoaded.set(true);
+      this.loadedFileName.set(fileName);
+      await this.hideIfcSpaces(fileModel);
+      this.buildTree(fileModel);
+      this.notificationService.success({ message: `Arquivo "${fileName}" carregado com sucesso!` });
+    } catch (error) {
+      this.notificationService.error({ message: 'Erro ao carregar o arquivo IFC a partir da URL.' });
+      console.error('Erro ao carregar IFC da URL:', error);
+    } finally {
+      this.isLoading.set(false);
+      this.loadingMessage.set('');
+    }
   }
 
   private async hideIfcSpaces(model: ReturnType<OBC.FragmentsManager['list']['get']>): Promise<void> {
