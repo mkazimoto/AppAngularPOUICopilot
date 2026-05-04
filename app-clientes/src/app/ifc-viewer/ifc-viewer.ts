@@ -183,8 +183,24 @@ export class IfcViewer implements OnInit, OnDestroy {
     });
   };
 
+  private readonly onViewerMouseLeave = async () => {
+    if (this.hoveredLocalId !== null && this.currentLoadedModel) {
+      if (!this.selectedLocalIds.includes(this.hoveredLocalId)) {
+        try {
+          await this.currentLoadedModel.resetHighlight([this.hoveredLocalId]);
+          this.fragments?.core.update(true);
+        } catch { /* ignora */ }
+      }
+      this.hoveredLocalId = null;
+    }
+  };
+
+  private hoverProcessing = false;
+
   private async processHover(e: MouseEvent): Promise<void> {
     if (!this.currentLoadedModel || !this.world || !this.viewerCanvas) return;
+    if (this.hoverProcessing) return;
+    this.hoverProcessing = true;
 
     const mouse = new THREE.Vector2(e.clientX, e.clientY);
 
@@ -199,15 +215,17 @@ export class IfcViewer implements OnInit, OnDestroy {
 
       if (newHoveredId === this.hoveredLocalId) return;
 
-      // Reset highlight do item anterior (apenas se não estiver selecionado)
-      if (this.hoveredLocalId !== null && !this.selectedLocalIds.includes(this.hoveredLocalId)) {
-        await this.currentLoadedModel.resetHighlight([this.hoveredLocalId]);
-        this.fragments?.core.update(true);
+      // Limpa highlight de TODOS os objetos que não estão selecionados
+      const toReset = this.hoveredLocalId !== null && !this.selectedLocalIds.includes(this.hoveredLocalId)
+        ? [this.hoveredLocalId]
+        : [];
+      if (toReset.length > 0) {
+        await this.currentLoadedModel.resetHighlight(toReset);
       }
 
       this.hoveredLocalId = newHoveredId;
 
-      // Aplica destaque verde limão no item sob o cursor
+      // Aplica destaque verde limão apenas no item sob o cursor
       if (newHoveredId !== null && !this.selectedLocalIds.includes(newHoveredId)) {
         const hoverMaterial: FRAGS.MaterialDefinition = {
           color: new THREE.Color(0x32cd32),
@@ -217,10 +235,12 @@ export class IfcViewer implements OnInit, OnDestroy {
           depthTest: false,
         };
         await this.currentLoadedModel.highlight([newHoveredId], hoverMaterial);
-        this.fragments?.core.update(true);
       }
+      this.fragments?.core.update(true);
     } catch {
       // Ignora erros de raycast silenciosamente
+    } finally {
+      this.hoverProcessing = false;
     }
   }
 
@@ -367,6 +387,7 @@ export class IfcViewer implements OnInit, OnDestroy {
   private destroyViewer(): void {
     if (this.viewerCanvas) {
       this.viewerCanvas.removeEventListener('mousemove', this.onViewerMouseMove);
+      this.viewerCanvas.removeEventListener('mouseleave', this.onViewerMouseLeave);
       this.viewerCanvas.removeEventListener('dblclick', this.onViewerClick);
       this.viewerCanvas = null;
     }
@@ -834,6 +855,7 @@ export class IfcViewer implements OnInit, OnDestroy {
     // Registra listeners de interação no canvas do renderer
     this.viewerCanvas = this.world.renderer.three.domElement;
     this.viewerCanvas.addEventListener('mousemove', this.onViewerMouseMove);
+    this.viewerCanvas.addEventListener('mouseleave', this.onViewerMouseLeave);
     this.viewerCanvas.addEventListener('dblclick', this.onViewerClick);
 
     // Configura o IfcLoader
