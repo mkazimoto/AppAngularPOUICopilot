@@ -157,20 +157,30 @@
     @if (propPanelVisible()) {
       <div
         class="tree-panel"
+        [class.tree-panel--collapsed]="propPanelMinimized()"
         [style.right.px]="propPanelX()"
         [style.top.px]="propPanelY()"
         [style.width.px]="propPanelW()"
-        [style.height.px]="propPanelH()">
+        [style.height.px]="propPanelMinimized() ? null : propPanelH()">
 
         <!-- Cabeçalho arrastável -->
         <div class="tree-header" (mousedown)="onDragStart('props', $event)">
           <span class="an an-list"></span>
           <span class="tree-header-title">Propriedades</span>
-          <button class="tree-collapse-btn" (mousedown)="$event.stopPropagation()" (click)="togglePropPanelVisible()" title="Fechar">
-            <span class="an an-times"></span>
+          <button class="tree-collapse-btn" (mousedown)="$event.stopPropagation()" (click)="togglePropPanelMinimized()" [title]="propPanelMinimized() ? 'Expandir' : 'Minimizar'">
+            <span class="tree-collapse-icons">
+              @if (propPanelMinimized()) {
+                <span class="an an-chevron-down tree-collapse-main"></span>
+                <span class="an an-window-maximize tree-collapse-secondary"></span>
+              } @else {
+                <span class="an an-chevron-up tree-collapse-main"></span>
+                <span class="an an-window-minimize tree-collapse-secondary"></span>
+              }
+            </span>
           </button>
         </div>
 
+        @if (!propPanelMinimized()) {
         @if (isPropsLoading()) {
           <div class="tree-loading">
             <span class="an an-circle-notch tree-spin"></span>
@@ -216,6 +226,7 @@
         <div class="resize-handle resize-handle--right" (mousedown)="onResizeStart('props', 'right', $event)"></div>
         <div class="resize-handle resize-handle--top" (mousedown)="onResizeStart('props', 'top', $event)"></div>
         <div class="resize-handle resize-handle--bottom" (mousedown)="onResizeStart('props', 'bottom', $event)"></div>
+        } <!-- fim @if (!propPanelMinimized()) -->
       </div>
     }
 

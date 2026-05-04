@@ -72,6 +72,7 @@ export class IfcViewer implements OnInit, OnDestroy {
 
   // Painel de propriedades (propPanelX = distância da borda direita)
   protected propPanelVisible = signal(false);
+  protected propPanelMinimized = signal(false);
   protected propPanelX = signal(16);
   protected propPanelY = signal(16);
   protected propPanelW = signal(320);
@@ -362,6 +363,10 @@ export class IfcViewer implements OnInit, OnDestroy {
 
   protected togglePropPanelVisible(): void {
     this.propPanelVisible.set(!this.propPanelVisible());
+  }
+
+  protected togglePropPanelMinimized(): void {
+    this.propPanelMinimized.set(!this.propPanelMinimized());
   }
 
   protected togglePropertyGroup(group: IfcPropertyGroup): void {
@@ -760,6 +765,9 @@ export class IfcViewer implements OnInit, OnDestroy {
 
   protected onSearchChange(text: string): void {
     this.searchText.set(text);
+    if (text.trim()) {
+      this.expandAll();
+    }
     this.filterNodes();
   }
 
