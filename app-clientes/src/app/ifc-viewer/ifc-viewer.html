@@ -54,7 +54,7 @@
       [style.height.px]="treePanelVisible() ? panelH() : null">
 
       <!-- Cabeçalho arrastável -->
-      <div class="tree-header" (mousedown)="onDragStart($event)">
+      <div class="tree-header" (mousedown)="onDragStart('tree', $event)">
         <span class="an an-tree-structure"></span>
         <span class="tree-header-title">Estrutura do Modelo</span>
         <button class="tree-collapse-btn" (mousedown)="$event.stopPropagation()" (click)="togglePanelVisible()" [title]="treePanelVisible() ? 'Minimizar' : 'Expandir'">
@@ -138,15 +138,81 @@
         </cdk-virtual-scroll-viewport>
 
         <!-- Alças de redimensionamento -->
-        <div class="resize-handle resize-handle--corner" (mousedown)="onResizeStart('corner', $event)">
+        <div class="resize-handle resize-handle--corner" (mousedown)="onResizeStart('tree', 'corner', $event)">
           <span class="an an-arrows-alt"></span>
         </div>
-        <div class="resize-handle resize-handle--left" (mousedown)="onResizeStart('left', $event)"></div>
-        <div class="resize-handle resize-handle--right" (mousedown)="onResizeStart('right', $event)"></div>
-        <div class="resize-handle resize-handle--top" (mousedown)="onResizeStart('top', $event)"></div>
-        <div class="resize-handle resize-handle--bottom" (mousedown)="onResizeStart('bottom', $event)"></div>
+        <div class="resize-handle resize-handle--left" (mousedown)="onResizeStart('tree', 'left', $event)"></div>
+        <div class="resize-handle resize-handle--right" (mousedown)="onResizeStart('tree', 'right', $event)"></div>
+        <div class="resize-handle resize-handle--top" (mousedown)="onResizeStart('tree', 'top', $event)"></div>
+        <div class="resize-handle resize-handle--bottom" (mousedown)="onResizeStart('tree', 'bottom', $event)"></div>
       }
     </div>
+
+    <!-- Painel flutuante: propriedades do objeto selecionado -->
+    @if (propPanelVisible()) {
+      <div
+        class="tree-panel"
+        [style.right.px]="propPanelX()"
+        [style.top.px]="propPanelY()"
+        [style.width.px]="propPanelW()"
+        [style.height.px]="propPanelH()">
+
+        <!-- Cabeçalho arrastável -->
+        <div class="tree-header" (mousedown)="onDragStart('props', $event)">
+          <span class="an an-list"></span>
+          <span class="tree-header-title">Propriedades</span>
+          <button class="tree-collapse-btn" (mousedown)="$event.stopPropagation()" (click)="togglePropPanelVisible()" title="Fechar">
+            <span class="an an-times"></span>
+          </button>
+        </div>
+
+        @if (isPropsLoading()) {
+          <div class="tree-loading">
+            <span class="an an-circle-notch tree-spin"></span>
+            Carregando propriedades...
+          </div>
+        }
+
+        @if (!isPropsLoading()) {
+          <div class="props-object-name" [title]="selectedObjectName()">{{ selectedObjectName() }}</div>
+
+          <div class="props-scroll">
+            @for (group of propertyGroups(); track group.name) {
+              <div class="props-group">
+                <div class="props-group-header" (click)="togglePropertyGroup(group)">
+                  <span class="props-group-icon an" [class.an-caret-down]="group.isExpanded" [class.an-caret-right]="!group.isExpanded"></span>
+                  <span class="props-group-name">{{ group.name }}</span>
+                  <span class="props-group-count">{{ group.properties.length }}</span>
+                </div>
+                @if (group.isExpanded) {
+                  @for (prop of group.properties; track prop.name) {
+                    <div class="props-row">
+                      <span class="props-key" [title]="prop.name">{{ prop.name }}</span>
+                      <span class="props-value" [title]="prop.value">{{ prop.value }}</span>
+                    </div>
+                  }
+                }
+              </div>
+            }
+            @if (propertyGroups().length === 0) {
+              <div class="tree-empty">
+                <span class="an an-info-circle"></span>
+                Sem propriedades disponíveis
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Alças de redimensionamento -->
+        <div class="resize-handle resize-handle--corner" (mousedown)="onResizeStart('props', 'corner', $event)">
+          <span class="an an-arrows-alt"></span>
+        </div>
+        <div class="resize-handle resize-handle--left" (mousedown)="onResizeStart('props', 'left', $event)"></div>
+        <div class="resize-handle resize-handle--right" (mousedown)="onResizeStart('props', 'right', $event)"></div>
+        <div class="resize-handle resize-handle--top" (mousedown)="onResizeStart('props', 'top', $event)"></div>
+        <div class="resize-handle resize-handle--bottom" (mousedown)="onResizeStart('props', 'bottom', $event)"></div>
+      </div>
+    }
 
   </div>
 

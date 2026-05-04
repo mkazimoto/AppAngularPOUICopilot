@@ -450,3 +450,115 @@
   display: none;
 }
 
+/* ── Painel de propriedades ───────────────────────────────────────────── */
+
+.props-object-name {
+  padding: 8px 12px 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #fff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+.props-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.props-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.props-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.props-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+}
+
+.props-group {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.props-group-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(160, 200, 255, 0.8);
+  background: rgba(255, 255, 255, 0.04);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.12s;
+}
+
+.props-group-header:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.props-group-icon {
+  font-size: 0.6rem;
+  flex-shrink: 0;
+  color: rgba(160, 200, 255, 0.6);
+}
+
+.props-group-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.props-group-count {
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  flex-shrink: 0;
+}
+
+.props-row {
+  display: flex;
+  gap: 6px;
+  padding: 4px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  min-height: 28px;
+  align-items: flex-start;
+}
+
+.props-row:last-child {
+  border-bottom: none;
+}
+
+.props-key {
+  font-size: 0.73rem;
+  color: rgba(255, 255, 255, 0.5);
+  flex: 0 0 45%;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.props-value {
+  font-size: 0.73rem;
+  color: rgba(255, 255, 255, 0.88);
+  flex: 1;
+  word-break: break-word;
+  line-height: 1.4;
+}
+

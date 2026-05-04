@@ -17,6 +17,18 @@ import * as THREE from 'three';
 import { CdkVirtualScrollViewport, CdkVirtualForOf, CdkFixedSizeVirtualScroll } from '@angular/cdk/scrolling';
 import { PoLoadingModule, PoNotificationService, PoPageAction, PoPageModule, PoProgressModule, PoProgressStatus, PoTagModule, PoTagType } from '@po-ui/ng-components';
 
+export interface IfcProperty {
+  name: string;
+  value: string;
+  type?: string;
+}
+
+export interface IfcPropertyGroup {
+  name: string;
+  properties: IfcProperty[];
+  isExpanded: boolean;
+}
+
 export interface IfcNode {
   id: string;
   localId: number | null;
@@ -56,6 +68,16 @@ export class IfcViewer implements OnInit, OnDestroy {
   protected isTreeLoading = signal(false);
   protected treePanelVisible = signal(true);
 
+  // Painel de propriedades (propPanelX = distância da borda direita)
+  protected propPanelVisible = signal(false);
+  protected propPanelX = signal(16);
+  protected propPanelY = signal(16);
+  protected propPanelW = signal(320);
+  protected propPanelH = signal(500);
+  protected propertyGroups = signal<IfcPropertyGroup[]>([]);
+  protected isPropsLoading = signal(false);
+  protected selectedObjectName = signal('');
+
   // Painel flutuante: posição e tamanho
   protected panelX = signal(16);
   protected panelY = signal(16);
@@ -88,14 +110,16 @@ export class IfcViewer implements OnInit, OnDestroy {
   private hoverRafId: number | null = null;
   private localIdToNode = new Map<number, IfcNode>();
 
-  // Drag state
+  // Drag state (shared between panels)
+  private activeDragPanel: 'tree' | 'props' | null = null;
   private isDragging = false;
   private dragStartX = 0;
   private dragStartY = 0;
   private dragOriginX = 0;
   private dragOriginY = 0;
 
-  // Resize state
+  // Resize state (shared between panels)
+  private activeResizePanel: 'tree' | 'props' | null = null;
   private isResizing = false;
   private resizeStartX = 0;
   private resizeStartY = 0;
@@ -127,6 +151,11 @@ export class IfcViewer implements OnInit, OnDestroy {
       // Seleciona no modelo 3D
       this.selectedNodeId = node.id;
       await this.highlightNodeInModel(node);
+
+      // Carrega propriedades do objeto selecionado
+      if (node.localId !== null) {
+        this.loadProperties(node.localId, node.name);
+      }
 
       // Garante que a lista plana está atualizada no viewport antes do scroll
       this.cdr.detectChanges();
@@ -195,34 +224,54 @@ export class IfcViewer implements OnInit, OnDestroy {
 
   private readonly onMouseMove = (e: MouseEvent) => {
     if (this.isDragging) {
-      this.panelX.set(this.dragOriginX + (e.clientX - this.dragStartX));
-      this.panelY.set(this.dragOriginY + (e.clientY - this.dragStartY));
+      if (this.activeDragPanel === 'tree') {
+        this.panelX.set(this.dragOriginX + (e.clientX - this.dragStartX));
+        this.panelY.set(this.dragOriginY + (e.clientY - this.dragStartY));
+      } else if (this.activeDragPanel === 'props') {
+        // propPanelX é distância da borda direita: arrastar para esquerda aumenta o valor
+        this.propPanelX.set(Math.max(0, this.dragOriginX - (e.clientX - this.dragStartX)));
+        this.propPanelY.set(this.dragOriginY + (e.clientY - this.dragStartY));
+      }
     }
     if (this.isResizing) {
       const deltaX = e.clientX - this.resizeStartX;
       const deltaY = e.clientY - this.resizeStartY;
+      const xSignal = this.activeResizePanel === 'props' ? this.propPanelX : this.panelX;
+      const ySignal = this.activeResizePanel === 'props' ? this.propPanelY : this.panelY;
+      const wSignal = this.activeResizePanel === 'props' ? this.propPanelW : this.panelW;
+      const hSignal = this.activeResizePanel === 'props' ? this.propPanelH : this.panelH;
 
       if (this.resizeDirection === 'corner') {
-        const newW = Math.max(200, this.resizeOriginW + deltaX);
+        const newW = Math.max(200, this.resizeOriginW + (this.activeResizePanel === 'props' ? -deltaX : deltaX));
         const newH = Math.max(150, this.resizeOriginH + deltaY);
-        this.panelW.set(newW);
-        this.panelH.set(newH);
+        wSignal.set(newW);
+        hSignal.set(newH);
       } else if (this.resizeDirection === 'left') {
-        const newW = Math.max(200, this.resizeOriginW - deltaX);
-        const newX = this.resizeOriginX + deltaX;
-        this.panelW.set(newW);
-        this.panelX.set(newX);
+        if (this.activeResizePanel === 'props') {
+          // ancora direita: expandir esquerda só aumenta a largura
+          wSignal.set(Math.max(200, this.resizeOriginW - deltaX));
+        } else {
+          const newW = Math.max(200, this.resizeOriginW - deltaX);
+          const newX = this.resizeOriginX + deltaX;
+          wSignal.set(newW);
+          xSignal.set(newX);
+        }
       } else if (this.resizeDirection === 'right') {
-        const newW = Math.max(200, this.resizeOriginW + deltaX);
-        this.panelW.set(newW);
+        if (this.activeResizePanel === 'props') {
+          // ancora direita: expandir direita aumenta right e a largura
+          wSignal.set(Math.max(200, this.resizeOriginW - deltaX));
+          xSignal.set(Math.max(0, this.resizeOriginX + deltaX));
+        } else {
+          wSignal.set(Math.max(200, this.resizeOriginW + deltaX));
+        }
       } else if (this.resizeDirection === 'top') {
         const newH = Math.max(150, this.resizeOriginH - deltaY);
         const newY = this.resizeOriginY + deltaY;
-        this.panelH.set(newH);
-        this.panelY.set(newY);
+        hSignal.set(newH);
+        ySignal.set(newY);
       } else if (this.resizeDirection === 'bottom') {
         const newH = Math.max(150, this.resizeOriginH + deltaY);
-        this.panelH.set(newH);
+        hSignal.set(newH);
       }
     }
   };
@@ -234,25 +283,27 @@ export class IfcViewer implements OnInit, OnDestroy {
     document.body.style.cursor = '';
   };
 
-  protected onDragStart(e: MouseEvent): void {
+  protected onDragStart(panel: 'tree' | 'props', e: MouseEvent): void {
     this.isDragging = true;
+    this.activeDragPanel = panel;
     this.dragStartX = e.clientX;
     this.dragStartY = e.clientY;
-    this.dragOriginX = this.panelX();
-    this.dragOriginY = this.panelY();
+    this.dragOriginX = panel === 'tree' ? this.panelX() : this.propPanelX();
+    this.dragOriginY = panel === 'tree' ? this.panelY() : this.propPanelY();
     document.body.style.userSelect = 'none';
     e.preventDefault();
   }
 
-  protected onResizeStart(direction: 'corner' | 'left' | 'right' | 'top' | 'bottom', e: MouseEvent): void {
+  protected onResizeStart(panel: 'tree' | 'props', direction: 'corner' | 'left' | 'right' | 'top' | 'bottom', e: MouseEvent): void {
     this.isResizing = true;
+    this.activeResizePanel = panel;
     this.resizeDirection = direction;
     this.resizeStartX = e.clientX;
     this.resizeStartY = e.clientY;
-    this.resizeOriginW = this.panelW();
-    this.resizeOriginH = this.panelH();
-    this.resizeOriginX = this.panelX();
-    this.resizeOriginY = this.panelY();
+    this.resizeOriginW = panel === 'tree' ? this.panelW() : this.propPanelW();
+    this.resizeOriginH = panel === 'tree' ? this.panelH() : this.propPanelH();
+    this.resizeOriginX = panel === 'tree' ? this.panelX() : this.propPanelX();
+    this.resizeOriginY = panel === 'tree' ? this.panelY() : this.propPanelY();
     document.body.style.userSelect = 'none';
 
     if (direction === 'corner') {
@@ -269,6 +320,15 @@ export class IfcViewer implements OnInit, OnDestroy {
 
   protected togglePanelVisible(): void {
     this.treePanelVisible.set(!this.treePanelVisible());
+  }
+
+  protected togglePropPanelVisible(): void {
+    this.propPanelVisible.set(!this.propPanelVisible());
+  }
+
+  protected togglePropertyGroup(group: IfcPropertyGroup): void {
+    group.isExpanded = !group.isExpanded;
+    this.propertyGroups.set([...this.propertyGroups()]);
   }
 
   constructor(private readonly notificationService: PoNotificationService) {}
@@ -316,6 +376,9 @@ export class IfcViewer implements OnInit, OnDestroy {
     this.treeNodes.set([]);
     this.filteredTreeNodes.set([]);
     this.searchText.set('');
+    this.propertyGroups.set([]);
+    this.selectedObjectName.set('');
+    this.propPanelVisible.set(false);
 
     const containerEl = this.containerRef()?.nativeElement;
     if (containerEl) {
@@ -529,6 +592,9 @@ export class IfcViewer implements OnInit, OnDestroy {
       this.updateFlatList();
     }
     this.highlightNodeInModel(node);
+    if (node.localId !== null) {
+      this.loadProperties(node.localId, node.name);
+    }
   }
 
   protected zoomToNode(node: IfcNode): void {
@@ -931,6 +997,135 @@ export class IfcViewer implements OnInit, OnDestroy {
       }
     } catch (e) {
       console.warn('Aviso ao ocultar IFCSPACE:', e);
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private extractPsetProps(pset: Record<string, any>): IfcProperty[] {
+    const props: IfcProperty[] = [];
+
+    // HasProperties (IfcPropertySet / IfcPropertySingleValue)
+    const hasProp: Record<string, any>[] = pset['HasProperties'] ?? [];
+    for (const p of hasProp) {
+      const pName = p['Name']?.value ?? p['Name'] ?? '?';
+      const pVal  = p['NominalValue']?.value ?? p['Value']?.value ?? p['NominalValue'] ?? p['Value'];
+      if (pVal !== undefined && pVal !== null) {
+        props.push({ name: String(pName), value: String(pVal), type: p['NominalValue']?.type ?? p['type'] });
+      }
+    }
+
+    // Quantities (IfcElementQuantity)
+    const quantities: Record<string, any>[] = pset['Quantities'] ?? [];
+    for (const q of quantities) {
+      const qName = q['Name']?.value ?? q['Name'] ?? '?';
+      const qVal  = q['LengthValue']?.value ?? q['AreaValue']?.value
+        ?? q['VolumeValue']?.value ?? q['WeightValue']?.value
+        ?? q['CountValue']?.value ?? q['TimeValue']?.value;
+      if (qVal !== undefined && qVal !== null) {
+        props.push({ name: String(qName), value: String(qVal), type: q['type'] });
+      }
+    }
+
+    return props;
+  }
+
+  private async loadProperties(localId: number, nodeName: string): Promise<void> {
+    if (!this.currentLoadedModel) return;
+    this.isPropsLoading.set(true);
+    this.propertyGroups.set([]);
+    this.selectedObjectName.set(nodeName);
+    this.propPanelVisible.set(true);
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const model = this.currentLoadedModel as any;
+      const [itemData] = await model.getItemsData([localId], {
+        attributesDefault: true,
+        relations: {
+          IsDefinedBy: { attributes: true, relations: true },
+          IsTypedBy:   { attributes: true, relations: true },
+        },
+        relationsDefault: false,
+      }) as Record<string, any>[];
+
+      if (!itemData) return;
+
+      const groups: IfcPropertyGroup[] = [];
+
+      // ── Atributos diretos (valores simples) ─────────────────────────
+      const mainProps: IfcProperty[] = [];
+      for (const [key, val] of Object.entries(itemData)) {
+        if (Array.isArray(val)) continue;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const attr = val as { value?: any; type?: string };
+        const raw = attr?.value !== undefined ? attr.value : val;
+        if (raw === null || raw === undefined) continue;
+        mainProps.push({ name: key, value: String(raw), type: attr?.type });
+      }
+      if (mainProps.length > 0) {
+        groups.push({ name: 'Atributos', properties: mainProps, isExpanded: true });
+      }
+
+      // ── Property Sets / Quantity Sets (via IsDefinedBy) ─────────────
+      // A biblioteca pode retornar a lista como:
+      //   [IfcRelDefinesByProperties { RelatingPropertyDefinition: IfcPropertySet }]
+      // ou diretamente:
+      //   [IfcPropertySet { HasProperties: [...] }]
+      const definedBy: Record<string, any>[] = itemData['IsDefinedBy'] ?? [];
+      for (const entry of definedBy) {
+        // Resolve o PropertySet: pode vir embrulhado em IfcRelDefinesByProperties
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const candidates: Record<string, any>[] = [];
+
+        if (entry['RelatingPropertyDefinition']) {
+          candidates.push(entry['RelatingPropertyDefinition']);
+        } else if (entry['HasProperties'] || entry['Quantities']) {
+          // já é o PropertySet diretamente
+          candidates.push(entry);
+        }
+
+        for (const pset of candidates) {
+          const setName = pset['Name']?.value ?? pset['Name'] ?? pset['LongName']?.value ?? pset['type'] ?? 'PropertySet';
+          const props = this.extractPsetProps(pset);
+          if (props.length > 0) {
+            groups.push({ name: String(setName), properties: props, isExpanded: true });
+          }
+        }
+      }
+
+      // ── Type properties (via IsTypedBy) ──────────────────────────────
+      const typedBy: Record<string, any>[] = itemData['IsTypedBy'] ?? [];
+      for (const rel of typedBy) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const typeDef: Record<string, any> = rel['RelatingType'] ?? rel;
+        const typeName = typeDef['Name']?.value ?? typeDef['Name'] ?? typeDef['type'] ?? 'Tipo';
+        const typeProps: IfcProperty[] = [];
+
+        for (const [k, v] of Object.entries(typeDef)) {
+          if (k === 'type' || k === 'GlobalId' || Array.isArray(v)) continue;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const attr = v as { value?: any; type?: string };
+          const raw = attr?.value !== undefined ? attr.value : v;
+          if (raw !== null && raw !== undefined) {
+            typeProps.push({ name: k, value: String(raw), type: attr?.type });
+          }
+        }
+
+        if (typeProps.length > 0) {
+          groups.push({ name: `Tipo: ${typeName}`, properties: typeProps, isExpanded: false });
+        }
+      }
+
+      this.propertyGroups.set(groups);
+
+      // Debug: inspecionar estrutura crua no console durante desenvolvimento
+      console.debug('[IFC Props] itemData:', itemData);
+      console.debug('[IFC Props] grupos gerados:', groups.map(g => `${g.name} (${g.properties.length})`));
+    } catch (e) {
+      console.warn('Aviso ao carregar propriedades:', e);
+    } finally {
+      this.isPropsLoading.set(false);
+      this.cdr.detectChanges();
     }
   }
 }
