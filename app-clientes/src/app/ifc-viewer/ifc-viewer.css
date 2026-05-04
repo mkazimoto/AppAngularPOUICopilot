@@ -9,8 +9,52 @@
   /* cancela o padding lateral e inferior do po-page-default */
   margin: 0 -24px -16px -24px;
   overflow: hidden;
-  background: #1a2634;
+  background: linear-gradient(135deg, #0d1b2a 0%, #1a2e4a 40%, #0f3460 75%, #16213e 100%);
   border-radius: 0;
+  transition: background 0.4s ease;
+}
+
+.viewer-wrapper--light {
+  background: linear-gradient(135deg, #e8f0fe 0%, #dce8f7 35%, #c9daf8 70%, #e3ecfa 100%);
+}
+
+/* ── Botão flutuante toggle de fundo ─────────────────────────────────── */
+
+.bg-toggle-btn {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  z-index: 30;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  transition: background 0.2s, transform 0.15s;
+}
+
+.bg-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+  transform: scale(1.1);
+}
+
+.viewer-wrapper--light .bg-toggle-btn {
+  background: rgba(0, 0, 0, 0.12);
+  color: #1a2e4a;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.viewer-wrapper--light .bg-toggle-btn:hover {
+  background: rgba(0, 0, 0, 0.2);
 }
 
 /* ── Canvas ocupa toda a área ─────────────────────────────────────────── */
@@ -18,7 +62,7 @@
 .canvas-area {
   position: absolute;
   inset: 0;
-  background: #1a2634;
+  background: transparent;
 }
 
 .viewer-canvas {
@@ -34,7 +78,7 @@
   z-index: 20;
   display: flex;
   flex-direction: column;
-  background: rgba(9, 20, 32, 0.94);
+  background: rgba(9, 20, 32, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);

@@ -12,7 +12,12 @@
     (change)="onFileSelected($event)"
   />
 
-  <div class="viewer-wrapper">
+  <div class="viewer-wrapper" [class.viewer-wrapper--light]="!darkBackground()">
+
+    <!-- Botão flutuante: alternar fundo -->
+    <button class="bg-toggle-btn" (click)="toggleBackground()" [title]="darkBackground() ? 'Mudar para fundo claro' : 'Mudar para fundo escuro'">
+      <span [class]="darkBackground() ? 'an an-sun' : 'an an-moon'"></span>
+    </button>
 
     <!-- Canvas 3D + overlays ocupa toda a área -->
     <div class="canvas-area">

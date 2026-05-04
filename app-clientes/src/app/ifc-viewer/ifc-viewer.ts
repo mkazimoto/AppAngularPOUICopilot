@@ -68,6 +68,7 @@ export class IfcViewer implements OnInit, OnDestroy {
   protected searchText = signal('');
   protected isTreeLoading = signal(false);
   protected treePanelVisible = signal(true);
+  protected darkBackground = signal(false);
 
   // Painel de propriedades (propPanelX = distância da borda direita)
   protected propPanelVisible = signal(false);
@@ -321,6 +322,14 @@ export class IfcViewer implements OnInit, OnDestroy {
 
   protected togglePanelVisible(): void {
     this.treePanelVisible.set(!this.treePanelVisible());
+  }
+
+  protected toggleBackground(): void {
+    const isDark = !this.darkBackground();
+    this.darkBackground.set(isDark);
+    if (this.world) {
+      this.world.scene.three.background = new THREE.Color(isDark ? '#1a2634' : '#dce8f7');
+    }
   }
 
   protected togglePropPanelVisible(): void {
@@ -814,7 +823,7 @@ export class IfcViewer implements OnInit, OnDestroy {
 
     this.world.scene = new OBC.SimpleScene(this.components);
     this.world.scene.setup();
-    this.world.scene.three.background = new THREE.Color('#1a2634');
+    this.world.scene.three.background = new THREE.Color('#dce8f7');
 
     this.world.renderer = new OBC.SimpleRenderer(this.components, containerEl);
     this.world.camera = new OBC.OrthoPerspectiveCamera(this.components);
