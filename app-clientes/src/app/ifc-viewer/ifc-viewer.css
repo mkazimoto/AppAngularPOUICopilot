@@ -616,3 +616,155 @@
   overflow: hidden;
 }
 
+/* ── Painel de filtro de tipos ────────────────────────────────────────── */
+
+.filter-panel {
+  min-width: 280px;
+}
+
+.filter-quick-actions {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.filter-action-btn {
+  flex: 1;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-weight: 500;
+  transition: background 0.2s;
+  min-height: 28px;
+}
+
+.filter-action-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.filter-action-btn span {
+  line-height: 1;
+}
+
+.filter-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 0;
+}
+
+.filter-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.filter-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.filter-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+}
+
+.filter-item {
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+}
+
+.filter-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  flex: 1;
+  min-width: 0;
+  user-select: none;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.filter-checkbox-label:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.filter-checkbox {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  width: 0;
+  height: 0;
+}
+
+.filter-checkbox-checkmark {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.15s;
+  position: relative;
+}
+
+.filter-checkbox:checked + .filter-checkbox-checkmark {
+  background: #4a9eff;
+  border-color: #4a9eff;
+  box-shadow: 0 0 6px rgba(74, 158, 255, 0.3);
+}
+
+.filter-checkbox:checked + .filter-checkbox-checkmark::after {
+  content: '✓';
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.filter-type-name {
+  flex: 1;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.filter-count {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  color: rgba(160, 200, 255, 0.6);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-left: 4px;
+  font-weight: 500;
+}
+
+.filter-empty {
+  padding: 24px 12px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.85rem;
+}
+
+.filter-empty span {
+  display: block;
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+

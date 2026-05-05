@@ -30,10 +30,20 @@ export interface IfcPropertyGroup {
   isExpanded: boolean;
 }
 
+export interface ObjectTypeFilter {
+  type: string;
+  typeCode: string;
+  typeCodes: string[];
+  displayName: string;
+  count: number;
+  isVisible: boolean;
+}
+
 export interface IfcNode {
   id: string;
   localId: number | null;
   category: string;
+  categoryCode: string | null;
   name: string;
   level: number;
   hasChildren: boolean;
@@ -81,6 +91,16 @@ export class IfcViewer implements OnInit, OnDestroy {
   protected isPropsLoading = signal(false);
   protected selectedObjectName = signal('');
 
+  // Painel de filtro de tipos (right = propPanelX + propPanelW + gap)
+  protected filterPanelVisible = signal(true);
+  protected filterPanelMinimized = signal(true);
+  protected filterPanelX = signal(344); // right offset: 16 (margin) + 320 (props width) + 8 (gap)
+  protected filterPanelY = signal(16);
+  protected filterPanelW = signal(300);
+  protected filterPanelH = signal(700);
+  protected objectTypeFilters = signal<ObjectTypeFilter[]>([]);
+  protected selectedTypeFilter = signal<string | null>(null);
+
   // Painel flutuante: posição e tamanho
   protected panelX = signal(16);
   protected panelY = signal(16);
@@ -122,7 +142,7 @@ export class IfcViewer implements OnInit, OnDestroy {
   private localIdToNode = new Map<number, IfcNode>();
 
   // Drag state (shared between panels)
-  private activeDragPanel: 'tree' | 'props' | null = null;
+  private activeDragPanel: 'tree' | 'props' | 'filter' | null = null;
   private isDragging = false;
   private dragStartX = 0;
   private dragStartY = 0;
@@ -130,7 +150,7 @@ export class IfcViewer implements OnInit, OnDestroy {
   private dragOriginY = 0;
 
   // Resize state (shared between panels)
-  private activeResizePanel: 'tree' | 'props' | null = null;
+  private activeResizePanel: 'tree' | 'props' | 'filter' | null = null;
   private isResizing = false;
   private resizeStartX = 0;
   private resizeStartY = 0;
@@ -262,24 +282,28 @@ export class IfcViewer implements OnInit, OnDestroy {
         // propPanelX é distância da borda direita: arrastar para esquerda aumenta o valor
         this.propPanelX.set(Math.max(0, this.dragOriginX - (e.clientX - this.dragStartX)));
         this.propPanelY.set(this.dragOriginY + (e.clientY - this.dragStartY));
+      } else if (this.activeDragPanel === 'filter') {
+        // filterPanelX é distância da borda direita: arrastar para esquerda aumenta o valor
+        this.filterPanelX.set(Math.max(0, this.dragOriginX - (e.clientX - this.dragStartX)));
+        this.filterPanelY.set(this.dragOriginY + (e.clientY - this.dragStartY));
       }
     }
     if (this.isResizing) {
       const deltaX = e.clientX - this.resizeStartX;
       const deltaY = e.clientY - this.resizeStartY;
-      const xSignal = this.activeResizePanel === 'props' ? this.propPanelX : this.panelX;
-      const ySignal = this.activeResizePanel === 'props' ? this.propPanelY : this.panelY;
-      const wSignal = this.activeResizePanel === 'props' ? this.propPanelW : this.panelW;
-      const hSignal = this.activeResizePanel === 'props' ? this.propPanelH : this.panelH;
+      const xSignal = this.activeResizePanel === 'props' ? this.propPanelX : (this.activeResizePanel === 'filter' ? this.filterPanelX : this.panelX);
+      const ySignal = this.activeResizePanel === 'props' ? this.propPanelY : (this.activeResizePanel === 'filter' ? this.filterPanelY : this.panelY);
+      const wSignal = this.activeResizePanel === 'props' ? this.propPanelW : (this.activeResizePanel === 'filter' ? this.filterPanelW : this.panelW);
+      const hSignal = this.activeResizePanel === 'props' ? this.propPanelH : (this.activeResizePanel === 'filter' ? this.filterPanelH : this.panelH);
 
       if (this.resizeDirection === 'corner') {
-        const newW = Math.max(200, this.resizeOriginW + (this.activeResizePanel === 'props' ? -deltaX : deltaX));
+        const newW = Math.max(200, this.resizeOriginW + (this.activeResizePanel === 'props' || this.activeResizePanel === 'filter' ? -deltaX : deltaX));
         const newH = Math.max(150, this.resizeOriginH + deltaY);
         wSignal.set(newW);
         hSignal.set(newH);
       } else if (this.resizeDirection === 'left') {
-        if (this.activeResizePanel === 'props') {
-          // ancora direita: expandir esquerda só aumenta a largura
+        if (this.activeResizePanel === 'props' || this.activeResizePanel === 'filter') {
+          // ancora direita: handle esquerdo só aumenta a largura
           wSignal.set(Math.max(200, this.resizeOriginW - deltaX));
         } else {
           const newW = Math.max(200, this.resizeOriginW - deltaX);
@@ -288,10 +312,10 @@ export class IfcViewer implements OnInit, OnDestroy {
           xSignal.set(newX);
         }
       } else if (this.resizeDirection === 'right') {
-        if (this.activeResizePanel === 'props') {
-          // ancora direita: expandir direita aumenta right e a largura
-          wSignal.set(Math.max(200, this.resizeOriginW - deltaX));
-          xSignal.set(Math.max(0, this.resizeOriginX + deltaX));
+        if (this.activeResizePanel === 'props' || this.activeResizePanel === 'filter') {
+          // ancora direita: arrastar direita → right decresce, largura cresce
+          wSignal.set(Math.max(200, this.resizeOriginW + deltaX));
+          xSignal.set(Math.max(0, this.resizeOriginX - deltaX));
         } else {
           wSignal.set(Math.max(200, this.resizeOriginW + deltaX));
         }
@@ -326,40 +350,68 @@ export class IfcViewer implements OnInit, OnDestroy {
     this.onMouseUp();
   };
 
-  protected onDragStart(panel: 'tree' | 'props', e: MouseEvent): void {
+  protected onDragStart(panel: 'tree' | 'props' | 'filter', e: MouseEvent): void {
     this.isDragging = true;
     this.activeDragPanel = panel;
     this.dragStartX = e.clientX;
     this.dragStartY = e.clientY;
-    this.dragOriginX = panel === 'tree' ? this.panelX() : this.propPanelX();
-    this.dragOriginY = panel === 'tree' ? this.panelY() : this.propPanelY();
+    if (panel === 'tree') {
+      this.dragOriginX = this.panelX();
+      this.dragOriginY = this.panelY();
+    } else if (panel === 'props') {
+      this.dragOriginX = this.propPanelX();
+      this.dragOriginY = this.propPanelY();
+    } else if (panel === 'filter') {
+      this.dragOriginX = this.filterPanelX();
+      this.dragOriginY = this.filterPanelY();
+    }
     document.body.style.userSelect = 'none';
     e.preventDefault();
   }
 
-  protected onDragStartTouch(panel: 'tree' | 'props', e: TouchEvent): void {
+  protected onDragStartTouch(panel: 'tree' | 'props' | 'filter', e: TouchEvent): void {
     if (e.touches.length !== 1) return;
     const touch = e.touches[0];
     this.isDragging = true;
     this.activeDragPanel = panel;
     this.dragStartX = touch.clientX;
     this.dragStartY = touch.clientY;
-    this.dragOriginX = panel === 'tree' ? this.panelX() : this.propPanelX();
-    this.dragOriginY = panel === 'tree' ? this.panelY() : this.propPanelY();
+    if (panel === 'tree') {
+      this.dragOriginX = this.panelX();
+      this.dragOriginY = this.panelY();
+    } else if (panel === 'props') {
+      this.dragOriginX = this.propPanelX();
+      this.dragOriginY = this.propPanelY();
+    } else if (panel === 'filter') {
+      this.dragOriginX = this.filterPanelX();
+      this.dragOriginY = this.filterPanelY();
+    }
     document.body.style.userSelect = 'none';
     e.preventDefault();
   }
 
-  protected onResizeStart(panel: 'tree' | 'props', direction: 'corner' | 'left' | 'right' | 'top' | 'bottom', e: MouseEvent): void {
+  protected onResizeStart(panel: 'tree' | 'props' | 'filter', direction: 'corner' | 'left' | 'right' | 'top' | 'bottom', e: MouseEvent): void {
     this.isResizing = true;
     this.activeResizePanel = panel;
     this.resizeDirection = direction;
     this.resizeStartX = e.clientX;
     this.resizeStartY = e.clientY;
-    this.resizeOriginW = panel === 'tree' ? this.panelW() : this.propPanelW();
-    this.resizeOriginH = panel === 'tree' ? this.panelH() : this.propPanelH();
-    this.resizeOriginX = panel === 'tree' ? this.panelX() : this.propPanelX();
-    this.resizeOriginY = panel === 'tree' ? this.panelY() : this.propPanelY();
+    if (panel === 'tree') {
+      this.resizeOriginW = this.panelW();
+      this.resizeOriginH = this.panelH();
+      this.resizeOriginX = this.panelX();
+      this.resizeOriginY = this.panelY();
+    } else if (panel === 'props') {
+      this.resizeOriginW = this.propPanelW();
+      this.resizeOriginH = this.propPanelH();
+      this.resizeOriginX = this.propPanelX();
+      this.resizeOriginY = this.propPanelY();
+    } else if (panel === 'filter') {
+      this.resizeOriginW = this.filterPanelW();
+      this.resizeOriginH = this.filterPanelH();
+      this.resizeOriginX = this.filterPanelX();
+      this.resizeOriginY = this.filterPanelY();
+    }
     document.body.style.userSelect = 'none';
 
     if (direction === 'corner') {
@@ -374,7 +426,7 @@ export class IfcViewer implements OnInit, OnDestroy {
     e.preventDefault();
   }
 
-  protected onResizeStartTouch(panel: 'tree' | 'props', direction: 'corner' | 'left' | 'right' | 'top' | 'bottom', e: TouchEvent): void {
+  protected onResizeStartTouch(panel: 'tree' | 'props' | 'filter', direction: 'corner' | 'left' | 'right' | 'top' | 'bottom', e: TouchEvent): void {
     if (e.touches.length !== 1) return;
     const touch = e.touches[0];
     this.isResizing = true;
@@ -382,10 +434,22 @@ export class IfcViewer implements OnInit, OnDestroy {
     this.resizeDirection = direction;
     this.resizeStartX = touch.clientX;
     this.resizeStartY = touch.clientY;
-    this.resizeOriginW = panel === 'tree' ? this.panelW() : this.propPanelW();
-    this.resizeOriginH = panel === 'tree' ? this.panelH() : this.propPanelH();
-    this.resizeOriginX = panel === 'tree' ? this.panelX() : this.propPanelX();
-    this.resizeOriginY = panel === 'tree' ? this.panelY() : this.propPanelY();
+    if (panel === 'tree') {
+      this.resizeOriginW = this.panelW();
+      this.resizeOriginH = this.panelH();
+      this.resizeOriginX = this.panelX();
+      this.resizeOriginY = this.panelY();
+    } else if (panel === 'props') {
+      this.resizeOriginW = this.propPanelW();
+      this.resizeOriginH = this.propPanelH();
+      this.resizeOriginX = this.propPanelX();
+      this.resizeOriginY = this.propPanelY();
+    } else if (panel === 'filter') {
+      this.resizeOriginW = this.filterPanelW();
+      this.resizeOriginH = this.filterPanelH();
+      this.resizeOriginX = this.filterPanelX();
+      this.resizeOriginY = this.filterPanelY();
+    }
     document.body.style.userSelect = 'none';
     e.stopPropagation();
     e.preventDefault();
@@ -414,6 +478,148 @@ export class IfcViewer implements OnInit, OnDestroy {
   protected togglePropertyGroup(group: IfcPropertyGroup): void {
     group.isExpanded = !group.isExpanded;
     this.propertyGroups.set([...this.propertyGroups()]);
+  }
+
+  protected toggleFilterPanelVisible(): void {
+    this.filterPanelVisible.set(!this.filterPanelVisible());
+  }
+
+  protected toggleFilterPanelMinimized(): void {
+    this.filterPanelMinimized.set(!this.filterPanelMinimized());
+  }
+
+  protected toggleTypeFilter(filter: ObjectTypeFilter): void {
+    filter.isVisible = !filter.isVisible;
+    this.objectTypeFilters.set([...this.objectTypeFilters()]);
+    this.applyTypeFilters();
+  }
+
+  protected toggleAllTypeFilters(visible: boolean): void {
+    const filters = this.objectTypeFilters();
+    filters.forEach(f => f.isVisible = visible);
+    this.objectTypeFilters.set([...filters]);
+    this.applyTypeFilters();
+  }
+
+  private async applyTypeFilters(): Promise<void> {
+    if (!this.currentLoadedModel || !this.fragments) return;
+
+    const filters = this.objectTypeFilters();
+    const visibleFilters = filters.filter(f => f.isVisible);
+    const hiddenFilters = filters.filter(f => !f.isVisible);
+
+    try {
+      // Coleta todos os localIds dos tipos ocultos
+      const hiddenIds: number[] = [];
+      for (const filter of hiddenFilters) {
+        const nodes = this.getNodesByCategories(filter.typeCodes);
+        nodes.forEach(node => {
+          if (node.localId !== null) {
+            hiddenIds.push(node.localId);
+          }
+        });
+      }
+
+      // Coleta todos os localIds dos tipos visíveis
+      const visibleIds: number[] = [];
+      for (const filter of visibleFilters) {
+        const nodes = this.getNodesByCategories(filter.typeCodes);
+        nodes.forEach(node => {
+          if (node.localId !== null) {
+            visibleIds.push(node.localId);
+          }
+        });
+      }
+
+      // Aplica as mudanças de visibilidade
+      if (visibleIds.length > 0) {
+        await this.currentLoadedModel.setVisible(visibleIds, true);
+      }
+      if (hiddenIds.length > 0) {
+        await this.currentLoadedModel.setVisible(hiddenIds, false);
+      }
+
+      this.fragments?.core.update(true);
+    } catch (e) {
+      console.warn('Aviso ao aplicar filtros de tipo:', e);
+    }
+  }
+
+  private getNodesByCategories(categoryCodes: string[]): IfcNode[] {
+    const codeSet = new Set(categoryCodes);
+    const result: IfcNode[] = [];
+    const allNodes = this.getAllNodes(this.rootNodes);
+    allNodes.forEach(node => {
+      if (node.categoryCode && codeSet.has(node.categoryCode)) {
+        result.push(node);
+      }
+    });
+    return result;
+  }
+
+  private static readonly BUILDING_ELEMENT_TYPES = new Set([
+    'IFCWALL', 'IFCWALLSTANDARDCASE', 'IFCWALLELEMENTEDCASE',
+    'IFCFURNITURE', 'IFCFURNISHINGELEMENT', 'IFCSYSTEMFURNITUREELEMENT',
+    'IFCSLAB', 'IFCSLABSTANDARDCASE', 'IFCSLABELEMENTEDCASE',
+    'IFCCOLUMN', 'IFCCOLUMNSTANDARDCASE',
+    'IFCBEAM', 'IFCBEAMSTANDARDCASE',
+    'IFCDOOR', 'IFCDOORSTANDARDCASE',
+    'IFCWINDOW', 'IFCWINDOWSTANDARDCASE',
+    'IFCSTAIR', 'IFCSTAIRSTEP', 'IFCSTAIRFLIGHT',
+    'IFCRAMP', 'IFCRAMPFLIGHT',
+    'IFCROOF', 'IFCPLATE', 'IFCPLATESTANDARDCASE',
+    'IFCMEMBER', 'IFCMEMBERSTANDARDCASE', 'IFCMEMBERFASTENINGCASE',
+    'IFCFOOTING', 'IFCPILE',
+    'IFCCURTAINWALL', 'IFCCOVERING',
+    'IFCRAILING', 'IFCHANDRAIL',
+    'IFCCHIMNEY', 'IFCSHADINGDEVICE',
+    'IFCSURFACEFEATURE',
+    'IFCWINDOWPANEL', 'IFCDOORPANEL',
+    'IFCBUILDINGELEMENTPART', 'IFCBUILDINGELEMENTPROXY', 'IFCBUILDINGELEMENTCOMPONENT',
+    'IFCOPENINGELEMENT', 'IFCVIRTUALELEMENT',
+    // Elementos MEP (hidráulica, elétrica, AVAC)
+    'IFCFLOWTERMINAL', 'IFCFLOWSEGMENT', 'IFCFLOWFITTING', 'IFCFLOWCONTROLLER',
+    'IFCFLOWMOVINGDEVICE', 'IFCFLOWSTORAGEDEVICE', 'IFCFLOWTREATMENTDEVICE',
+    'IFCENERGYCONVERSIONDEVICE', 'IFCDISTRIBUTIONELEMENT', 'IFCDISTRIBUTIONFLOWELEMENT',
+    'IFCDISTRIBUTIONCONTROLELEMENT'
+  ]);
+
+  private extractUniqueTypes(): void {
+    // Agrupa por nome traduzido, coletando TODOS os códigos IFC do grupo (ex: IFCWALL + IFCWALLSTANDARDCASE → "Parede")
+    const typeMap = new Map<string, { displayName: string; codes: Set<string>; count: number }>();
+    const allNodes = this.getAllNodes(this.rootNodes);
+
+    allNodes.forEach(node => {
+      // Apenas nós folha (sem filhos) com localId próprio têm representação gráfica 3D
+      if (node.localId !== null &&
+          !node.hasChildren &&
+          node.categoryCode &&
+          node.categoryCode !== 'IFCSPACE' &&
+          IfcViewer.BUILDING_ELEMENT_TYPES.has(node.categoryCode)) {
+        const key = node.category; // agrupa por nome traduzido
+        const existing = typeMap.get(key);
+        if (existing) {
+          existing.codes.add(node.categoryCode);
+          existing.count++;
+        } else {
+          typeMap.set(key, { displayName: node.category, codes: new Set([node.categoryCode]), count: 1 });
+        }
+      }
+    });
+
+    // Cria os filtros ordenados por nome
+    const filters: ObjectTypeFilter[] = Array.from(typeMap.entries())
+      .map(([type, data]) => ({
+        type,
+        typeCode: [...data.codes][0],
+        typeCodes: [...data.codes],
+        displayName: data.displayName,
+        count: data.count,
+        isVisible: true,
+      }))
+      .sort((a, b) => a.displayName.localeCompare(b.displayName));
+
+    this.objectTypeFilters.set(filters);
   }
 
   constructor(private readonly notificationService: PoNotificationService) {}
@@ -468,6 +674,8 @@ export class IfcViewer implements OnInit, OnDestroy {
     this.searchText.set('');
     this.propertyGroups.set([]);
     this.selectedObjectName.set('');
+    this.objectTypeFilters.set([]);
+    this.selectedTypeFilter.set(null);
     this.propPanelVisible.set(false);
 
     const containerEl = this.containerRef()?.nativeElement;
@@ -505,7 +713,7 @@ export class IfcViewer implements OnInit, OnDestroy {
 
     // ── Elementos de Construção ──────────────────────────────────────
     IFCWALL: 'Parede',
-    IFCWALLSTANDARDCASE: 'Parede',
+    IFCWALLSTANDARDCASE: 'Parede Padrão',
     IFCWALLELEMENTEDCASE: 'Parede Composta',
     IFCSLAB: 'Laje',
     IFCSLABSTANDARDCASE: 'Laje',
@@ -610,8 +818,6 @@ export class IfcViewer implements OnInit, OnDestroy {
     IFCDISTRIBUTIONCIRCUIT: 'Circuito de Distribuição',
     IFCDISTRIBUTIONSYSTEM: 'Sistema de Distribuição',
     IFCDISTRIBUTIONFLOWSEGMENT: 'Segmento de Fluxo',
-    IFCFLOWSEGMENT: 'Segmento de Fluxo',
-    IFCFLOWFITTING: 'Conexão de Fluxo',
 
     // ── HVAC ─────────────────────────────────────────────────────────
     IFCAIRTERMINAL: 'Terminal de Ar',
@@ -677,6 +883,12 @@ export class IfcViewer implements OnInit, OnDestroy {
     IFCWASTETERMINAL: 'Ralo/Coletor',
     IFCSTACKTERMINAL: 'Terminal de Coluna',
     IFCFLOWTERMINAL: 'Terminal de Fluxo',
+    IFCFLOWSEGMENT: 'Segmento de Duto/Tubo',
+    IFCFLOWFITTING: 'Conexão de Duto/Tubo',
+    IFCFLOWCONTROLLER: 'Controlador de Fluxo',
+    IFCFLOWSTORAGEDEVICE: 'Reservatório/Tanque',
+    IFCFLOWTREATMENTDEVICE: 'Dispositivo de Tratamento',
+    IFCENERGYCONVERSIONDEVICE: 'Equipamento de Conversão de Energia',
     IFCFLOWMOVINGDEVICE: 'Dispositivo de Movimentação de Fluido',
     IFCINTERCEPTOR: 'Separador',
     IFCFLOWMETER: 'Medidor de Vazão',
@@ -780,6 +992,7 @@ export class IfcViewer implements OnInit, OnDestroy {
       id,
       localId: localIdForAttrs,
       category: label,
+      categoryCode: effectiveCategory?.toUpperCase() ?? null,
       name: label,
       level,
       hasChildren: children.length > 0,
@@ -994,6 +1207,9 @@ export class IfcViewer implements OnInit, OnDestroy {
         this.rootNodes = [root];
       }
       this.updateFlatList();
+
+      // Extrai tipos únicos para o painel de filtro
+      this.extractUniqueTypes();
 
       // Load Name attribute for nodes that have valid localIds
       const allNodes = this.getAllNodes(this.rootNodes);
