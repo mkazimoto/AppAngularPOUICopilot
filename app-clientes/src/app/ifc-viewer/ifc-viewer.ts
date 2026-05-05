@@ -39,12 +39,20 @@ export interface ObjectTypeFilter {
   isVisible: boolean;
 }
 
+export interface FloorFilter {
+  storeyId: string;
+  storeyLocalId: number | null;
+  displayName: string;
+  isVisible: boolean;
+}
+
 export interface IfcNode {
   id: string;
   localId: number | null;
   category: string;
   categoryCode: string | null;
   name: string;
+  longName?: string;
   level: number;
   hasChildren: boolean;
   isExpanded: boolean;
@@ -101,6 +109,15 @@ export class IfcViewer implements OnInit, OnDestroy {
   protected objectTypeFilters = signal<ObjectTypeFilter[]>([]);
   protected selectedTypeFilter = signal<string | null>(null);
 
+  // Painel de filtro de pavimentos (right = filterPanelX + filterPanelW + gap)
+  protected floorPanelVisible = signal(true);
+  protected floorPanelMinimized = signal(true);
+  protected floorPanelX = signal(652); // right offset: 344 + 300 + 8
+  protected floorPanelY = signal(16);
+  protected floorPanelW = signal(260);
+  protected floorPanelH = signal(700);
+  protected floorFilters = signal<FloorFilter[]>([]);
+
   // Painel flutuante: posição e tamanho
   protected panelX = signal(16);
   protected panelY = signal(16);
@@ -142,7 +159,7 @@ export class IfcViewer implements OnInit, OnDestroy {
   private localIdToNode = new Map<number, IfcNode>();
 
   // Drag state (shared between panels)
-  private activeDragPanel: 'tree' | 'props' | 'filter' | null = null;
+  private activeDragPanel: 'tree' | 'props' | 'filter' | 'floor' | null = null;
   private isDragging = false;
   private dragStartX = 0;
   private dragStartY = 0;
@@ -150,7 +167,7 @@ export class IfcViewer implements OnInit, OnDestroy {
   private dragOriginY = 0;
 
   // Resize state (shared between panels)
-  private activeResizePanel: 'tree' | 'props' | 'filter' | null = null;
+  private activeResizePanel: 'tree' | 'props' | 'filter' | 'floor' | null = null;
   private isResizing = false;
   private resizeStartX = 0;
   private resizeStartY = 0;
@@ -286,23 +303,40 @@ export class IfcViewer implements OnInit, OnDestroy {
         // filterPanelX é distância da borda direita: arrastar para esquerda aumenta o valor
         this.filterPanelX.set(Math.max(0, this.dragOriginX - (e.clientX - this.dragStartX)));
         this.filterPanelY.set(this.dragOriginY + (e.clientY - this.dragStartY));
+      } else if (this.activeDragPanel === 'floor') {
+        // floorPanelX é distância da borda direita
+        this.floorPanelX.set(Math.max(0, this.dragOriginX - (e.clientX - this.dragStartX)));
+        this.floorPanelY.set(this.dragOriginY + (e.clientY - this.dragStartY));
       }
     }
     if (this.isResizing) {
       const deltaX = e.clientX - this.resizeStartX;
       const deltaY = e.clientY - this.resizeStartY;
-      const xSignal = this.activeResizePanel === 'props' ? this.propPanelX : (this.activeResizePanel === 'filter' ? this.filterPanelX : this.panelX);
-      const ySignal = this.activeResizePanel === 'props' ? this.propPanelY : (this.activeResizePanel === 'filter' ? this.filterPanelY : this.panelY);
-      const wSignal = this.activeResizePanel === 'props' ? this.propPanelW : (this.activeResizePanel === 'filter' ? this.filterPanelW : this.panelW);
-      const hSignal = this.activeResizePanel === 'props' ? this.propPanelH : (this.activeResizePanel === 'filter' ? this.filterPanelH : this.panelH);
+      const rightAnchored = this.activeResizePanel === 'props' || this.activeResizePanel === 'filter' || this.activeResizePanel === 'floor';
+      const xSignal = this.activeResizePanel === 'props' ? this.propPanelX
+        : this.activeResizePanel === 'filter' ? this.filterPanelX
+        : this.activeResizePanel === 'floor' ? this.floorPanelX
+        : this.panelX;
+      const ySignal = this.activeResizePanel === 'props' ? this.propPanelY
+        : this.activeResizePanel === 'filter' ? this.filterPanelY
+        : this.activeResizePanel === 'floor' ? this.floorPanelY
+        : this.panelY;
+      const wSignal = this.activeResizePanel === 'props' ? this.propPanelW
+        : this.activeResizePanel === 'filter' ? this.filterPanelW
+        : this.activeResizePanel === 'floor' ? this.floorPanelW
+        : this.panelW;
+      const hSignal = this.activeResizePanel === 'props' ? this.propPanelH
+        : this.activeResizePanel === 'filter' ? this.filterPanelH
+        : this.activeResizePanel === 'floor' ? this.floorPanelH
+        : this.panelH;
 
       if (this.resizeDirection === 'corner') {
-        const newW = Math.max(200, this.resizeOriginW + (this.activeResizePanel === 'props' || this.activeResizePanel === 'filter' ? -deltaX : deltaX));
+        const newW = Math.max(200, this.resizeOriginW + (rightAnchored ? -deltaX : deltaX));
         const newH = Math.max(150, this.resizeOriginH + deltaY);
         wSignal.set(newW);
         hSignal.set(newH);
       } else if (this.resizeDirection === 'left') {
-        if (this.activeResizePanel === 'props' || this.activeResizePanel === 'filter') {
+        if (rightAnchored) {
           // ancora direita: handle esquerdo só aumenta a largura
           wSignal.set(Math.max(200, this.resizeOriginW - deltaX));
         } else {
@@ -312,7 +346,7 @@ export class IfcViewer implements OnInit, OnDestroy {
           xSignal.set(newX);
         }
       } else if (this.resizeDirection === 'right') {
-        if (this.activeResizePanel === 'props' || this.activeResizePanel === 'filter') {
+        if (rightAnchored) {
           // ancora direita: arrastar direita → right decresce, largura cresce
           wSignal.set(Math.max(200, this.resizeOriginW + deltaX));
           xSignal.set(Math.max(0, this.resizeOriginX - deltaX));
@@ -350,7 +384,7 @@ export class IfcViewer implements OnInit, OnDestroy {
     this.onMouseUp();
   };
 
-  protected onDragStart(panel: 'tree' | 'props' | 'filter', e: MouseEvent): void {
+  protected onDragStart(panel: 'tree' | 'props' | 'filter' | 'floor', e: MouseEvent): void {
     this.isDragging = true;
     this.activeDragPanel = panel;
     this.dragStartX = e.clientX;
@@ -364,12 +398,15 @@ export class IfcViewer implements OnInit, OnDestroy {
     } else if (panel === 'filter') {
       this.dragOriginX = this.filterPanelX();
       this.dragOriginY = this.filterPanelY();
+    } else if (panel === 'floor') {
+      this.dragOriginX = this.floorPanelX();
+      this.dragOriginY = this.floorPanelY();
     }
     document.body.style.userSelect = 'none';
     e.preventDefault();
   }
 
-  protected onDragStartTouch(panel: 'tree' | 'props' | 'filter', e: TouchEvent): void {
+  protected onDragStartTouch(panel: 'tree' | 'props' | 'filter' | 'floor', e: TouchEvent): void {
     if (e.touches.length !== 1) return;
     const touch = e.touches[0];
     this.isDragging = true;
@@ -385,12 +422,15 @@ export class IfcViewer implements OnInit, OnDestroy {
     } else if (panel === 'filter') {
       this.dragOriginX = this.filterPanelX();
       this.dragOriginY = this.filterPanelY();
+    } else if (panel === 'floor') {
+      this.dragOriginX = this.floorPanelX();
+      this.dragOriginY = this.floorPanelY();
     }
     document.body.style.userSelect = 'none';
     e.preventDefault();
   }
 
-  protected onResizeStart(panel: 'tree' | 'props' | 'filter', direction: 'corner' | 'left' | 'right' | 'top' | 'bottom', e: MouseEvent): void {
+  protected onResizeStart(panel: 'tree' | 'props' | 'filter' | 'floor', direction: 'corner' | 'left' | 'right' | 'top' | 'bottom', e: MouseEvent): void {
     this.isResizing = true;
     this.activeResizePanel = panel;
     this.resizeDirection = direction;
@@ -411,6 +451,11 @@ export class IfcViewer implements OnInit, OnDestroy {
       this.resizeOriginH = this.filterPanelH();
       this.resizeOriginX = this.filterPanelX();
       this.resizeOriginY = this.filterPanelY();
+    } else if (panel === 'floor') {
+      this.resizeOriginW = this.floorPanelW();
+      this.resizeOriginH = this.floorPanelH();
+      this.resizeOriginX = this.floorPanelX();
+      this.resizeOriginY = this.floorPanelY();
     }
     document.body.style.userSelect = 'none';
 
@@ -426,7 +471,7 @@ export class IfcViewer implements OnInit, OnDestroy {
     e.preventDefault();
   }
 
-  protected onResizeStartTouch(panel: 'tree' | 'props' | 'filter', direction: 'corner' | 'left' | 'right' | 'top' | 'bottom', e: TouchEvent): void {
+  protected onResizeStartTouch(panel: 'tree' | 'props' | 'filter' | 'floor', direction: 'corner' | 'left' | 'right' | 'top' | 'bottom', e: TouchEvent): void {
     if (e.touches.length !== 1) return;
     const touch = e.touches[0];
     this.isResizing = true;
@@ -449,6 +494,11 @@ export class IfcViewer implements OnInit, OnDestroy {
       this.resizeOriginH = this.filterPanelH();
       this.resizeOriginX = this.filterPanelX();
       this.resizeOriginY = this.filterPanelY();
+    } else if (panel === 'floor') {
+      this.resizeOriginW = this.floorPanelW();
+      this.resizeOriginH = this.floorPanelH();
+      this.resizeOriginX = this.floorPanelX();
+      this.resizeOriginY = this.floorPanelY();
     }
     document.body.style.userSelect = 'none';
     e.stopPropagation();
@@ -488,61 +538,106 @@ export class IfcViewer implements OnInit, OnDestroy {
     this.filterPanelMinimized.set(!this.filterPanelMinimized());
   }
 
+  protected toggleFloorPanelVisible(): void {
+    this.floorPanelVisible.set(!this.floorPanelVisible());
+  }
+
+  protected toggleFloorPanelMinimized(): void {
+    this.floorPanelMinimized.set(!this.floorPanelMinimized());
+  }
+
+  protected toggleFloorFilter(filter: FloorFilter): void {
+    filter.isVisible = !filter.isVisible;
+    this.floorFilters.set([...this.floorFilters()]);
+    this.applyAllFilters();
+  }
+
+  protected toggleAllFloorFilters(visible: boolean): void {
+    const filters = this.floorFilters();
+    filters.forEach(f => f.isVisible = visible);
+    this.floorFilters.set([...filters]);
+    this.applyAllFilters();
+  }
+
   protected toggleTypeFilter(filter: ObjectTypeFilter): void {
     filter.isVisible = !filter.isVisible;
     this.objectTypeFilters.set([...this.objectTypeFilters()]);
-    this.applyTypeFilters();
+    this.applyAllFilters();
   }
 
   protected toggleAllTypeFilters(visible: boolean): void {
     const filters = this.objectTypeFilters();
     filters.forEach(f => f.isVisible = visible);
     this.objectTypeFilters.set([...filters]);
-    this.applyTypeFilters();
+    this.applyAllFilters();
   }
 
-  private async applyTypeFilters(): Promise<void> {
+  private getDescendantLocalIds(node: IfcNode): number[] {
+    const ids: number[] = [];
+    const visit = (n: IfcNode) => {
+      if (n.localId !== null) ids.push(n.localId);
+      n.children.forEach(visit);
+    };
+    node.children.forEach(visit);
+    return ids;
+  }
+
+  private async applyAllFilters(): Promise<void> {
     if (!this.currentLoadedModel || !this.fragments) return;
 
-    const filters = this.objectTypeFilters();
-    const visibleFilters = filters.filter(f => f.isVisible);
-    const hiddenFilters = filters.filter(f => !f.isVisible);
+    const typeFilters = this.objectTypeFilters();
+    const floorFilters = this.floorFilters();
+
+    // Códigos IFC dos tipos ocultos
+    const hiddenTypeCodes = new Set<string>();
+    typeFilters.filter(f => !f.isVisible).forEach(f => f.typeCodes.forEach(c => hiddenTypeCodes.add(c)));
+
+    // LocalIds dos elementos em pavimentos ocultos
+    const hiddenFloorIds = new Set<number>();
+    const allNodes = this.getAllNodes(this.rootNodes);
+    const storeyNodes = allNodes.filter(n => n.categoryCode === 'IFCBUILDINGSTOREY');
+    for (const ff of floorFilters.filter(f => !f.isVisible)) {
+      const storeyNode = storeyNodes.find(s => s.id === ff.storeyId);
+      if (storeyNode) {
+        this.getDescendantLocalIds(storeyNode).forEach(id => hiddenFloorIds.add(id));
+      }
+    }
+
+    // Um elemento é visível apenas se passar em AMBOS os filtros e não for IFCSPACE
+    const ALWAYS_HIDDEN = new Set(['IFCSPACE']);
+    const visibleIds: number[] = [];
+    const hiddenIds: number[] = [];
+    allNodes.forEach(node => {
+      if (node.localId === null) return;
+      const alwaysHidden = node.categoryCode ? ALWAYS_HIDDEN.has(node.categoryCode) : false;
+      const hiddenByType = node.categoryCode ? hiddenTypeCodes.has(node.categoryCode) : false;
+      const hiddenByFloor = hiddenFloorIds.has(node.localId);
+      if (alwaysHidden || hiddenByType || hiddenByFloor) {
+        hiddenIds.push(node.localId);
+      } else {
+        visibleIds.push(node.localId);
+      }
+    });
 
     try {
-      // Coleta todos os localIds dos tipos ocultos
-      const hiddenIds: number[] = [];
-      for (const filter of hiddenFilters) {
-        const nodes = this.getNodesByCategories(filter.typeCodes);
-        nodes.forEach(node => {
-          if (node.localId !== null) {
-            hiddenIds.push(node.localId);
-          }
-        });
-      }
-
-      // Coleta todos os localIds dos tipos visíveis
-      const visibleIds: number[] = [];
-      for (const filter of visibleFilters) {
-        const nodes = this.getNodesByCategories(filter.typeCodes);
-        nodes.forEach(node => {
-          if (node.localId !== null) {
-            visibleIds.push(node.localId);
-          }
-        });
-      }
-
-      // Aplica as mudanças de visibilidade
-      if (visibleIds.length > 0) {
-        await this.currentLoadedModel.setVisible(visibleIds, true);
-      }
-      if (hiddenIds.length > 0) {
-        await this.currentLoadedModel.setVisible(hiddenIds, false);
-      }
-
+      if (visibleIds.length > 0) await this.currentLoadedModel.setVisible(visibleIds, true);
+      if (hiddenIds.length > 0) await this.currentLoadedModel.setVisible(hiddenIds, false);
       this.fragments?.core.update(true);
     } catch (e) {
-      console.warn('Aviso ao aplicar filtros de tipo:', e);
+      console.warn('Aviso ao aplicar filtros:', e);
     }
+  }
+
+  private extractFloors(): void {
+    const allNodes = this.getAllNodes(this.rootNodes);
+    const storeys = allNodes.filter(n => n.categoryCode === 'IFCBUILDINGSTOREY');
+    const filters: FloorFilter[] = storeys.map(s => ({
+      storeyId: s.id,
+      storeyLocalId: s.localId,
+      displayName: s.longName || s.name.split(': ').slice(1).join(': ') || s.id,
+      isVisible: true,
+    }));
+    this.floorFilters.set(filters);
   }
 
   private getNodesByCategories(categoryCodes: string[]): IfcNode[] {
@@ -1208,7 +1303,7 @@ export class IfcViewer implements OnInit, OnDestroy {
       }
       this.updateFlatList();
 
-      // Extrai tipos únicos para o painel de filtro
+      // Extrai tipos únicos para o painel de filtro (antes do enriquecimento de nomes)
       this.extractUniqueTypes();
 
       // Load Name attribute for nodes that have valid localIds
@@ -1226,8 +1321,10 @@ export class IfcViewer implements OnInit, OnDestroy {
 
           validNodes.forEach((node, i) => {
             const data = itemsData[i];
-            if (data && data['Name']) {
-              // The Name attribute might be a string or an object with a 'value' property
+            if (!data) return;
+
+            // Captura Name
+            if (data['Name']) {
               let nameValue = data['Name'];
               if (typeof nameValue === 'object' && nameValue !== null && 'value' in nameValue) {
                 nameValue = (nameValue as any).value;
@@ -1235,12 +1332,25 @@ export class IfcViewer implements OnInit, OnDestroy {
               const val = nameValue ? String(nameValue).trim() : null;
               node.name = val ? `${node.category}: ${val}` : node.category;
             }
+
+            // Captura LongName
+            if (data['LongName']) {
+              let longNameValue = data['LongName'];
+              if (typeof longNameValue === 'object' && longNameValue !== null && 'value' in longNameValue) {
+                longNameValue = (longNameValue as any).value;
+              }
+              const lv = longNameValue ? String(longNameValue).trim() : null;
+              if (lv) node.longName = lv;
+            }
           });
         } catch (e) {
           console.warn('Aviso ao carregar nomes dos items:', e);
           // Continue without names if there's an error
         }
       }
+
+      // Extrai pavimentos após enriquecimento para ter acesso ao LongName
+      this.extractFloors();
 
       this.updateFlatList();
 

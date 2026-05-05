@@ -312,6 +312,80 @@
       </div>
     }
 
+    @if (floorPanelVisible()) {
+      <div
+        class="tree-panel filter-panel"
+        [class.tree-panel--collapsed]="floorPanelMinimized()"
+        [style.right.px]="floorPanelX()"
+        [style.top.px]="floorPanelY()"
+        [style.width.px]="floorPanelW()"
+        [style.height.px]="floorPanelMinimized() ? null : floorPanelH()">
+
+        <!-- Cabeçalho arrastável -->
+        <div class="tree-header" (mousedown)="onDragStart('floor', $event)" (touchstart)="onDragStartTouch('floor', $event)">
+          <span class="an an-layer-group"></span>
+          <span class="tree-header-title">Filtro de Pavimentos</span>
+          <button class="tree-collapse-btn" (mousedown)="$event.stopPropagation()" (touchstart)="$event.stopPropagation()" (click)="toggleFloorPanelMinimized()" [title]="floorPanelMinimized() ? 'Expandir' : 'Minimizar'">
+            <span class="tree-collapse-icons">
+              @if (floorPanelMinimized()) {
+                <span class="an an-chevron-down tree-collapse-main"></span>
+                <span class="an an-window-maximize tree-collapse-secondary"></span>
+              } @else {
+                <span class="an an-chevron-up tree-collapse-main"></span>
+                <span class="an an-window-minimize tree-collapse-secondary"></span>
+              }
+            </span>
+          </button>
+        </div>
+
+        @if (!floorPanelMinimized()) {
+          <!-- Botões de seleção rápida -->
+          <div class="filter-quick-actions">
+            <button class="filter-action-btn" (click)="toggleAllFloorFilters(true)" title="Mostrar todos">
+              <span class="an an-check"></span>
+              <span>Mostrar Todos</span>
+            </button>
+            <button class="filter-action-btn" (click)="toggleAllFloorFilters(false)" title="Ocultar todos">
+              <span class="an an-times"></span>
+              <span>Ocultar Todos</span>
+            </button>
+          </div>
+
+          <!-- Lista de pavimentos com checkboxes -->
+          <div class="filter-list">
+            @if (floorFilters().length === 0) {
+              <div class="filter-empty">
+                <span class="an an-info-circle"></span>
+                Nenhum pavimento disponível
+              </div>
+            }
+            @for (floor of floorFilters(); track floor.storeyId) {
+              <div class="filter-item">
+                <label class="filter-checkbox-label">
+                  <input
+                    type="checkbox"
+                    class="filter-checkbox"
+                    [checked]="floor.isVisible"
+                    (change)="toggleFloorFilter(floor)" />
+                  <span class="filter-checkbox-checkmark"></span>
+                  <span class="filter-type-name" [title]="floor.displayName">{{ floor.displayName }}</span>
+                </label>
+              </div>
+            }
+          </div>
+
+          <!-- Alças de redimensionamento -->
+          <div class="resize-handle resize-handle--corner" (mousedown)="onResizeStart('floor', 'corner', $event)" (touchstart)="onResizeStartTouch('floor', 'corner', $event)">
+            <span class="an an-arrows-alt"></span>
+          </div>
+          <div class="resize-handle resize-handle--left" (mousedown)="onResizeStart('floor', 'left', $event)" (touchstart)="onResizeStartTouch('floor', 'left', $event)"></div>
+          <div class="resize-handle resize-handle--right" (mousedown)="onResizeStart('floor', 'right', $event)" (touchstart)="onResizeStartTouch('floor', 'right', $event)"></div>
+          <div class="resize-handle resize-handle--top" (mousedown)="onResizeStart('floor', 'top', $event)" (touchstart)="onResizeStartTouch('floor', 'top', $event)"></div>
+          <div class="resize-handle resize-handle--bottom" (mousedown)="onResizeStart('floor', 'bottom', $event)" (touchstart)="onResizeStartTouch('floor', 'bottom', $event)"></div>
+        }
+      </div>
+    }
+
   </div>
 
 </po-page-default>
