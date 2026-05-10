@@ -57,6 +57,45 @@
   background: rgba(0, 0, 0, 0.2);
 }
 
+/* ── Botão flutuante toggle de projeção ──────────────────────────────── */
+
+.projection-toggle-btn {
+  position: absolute;
+  bottom: 62px;
+  right: 16px;
+  z-index: 30;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  transition: background 0.2s, transform 0.15s;
+}
+
+.projection-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+  transform: scale(1.1);
+}
+
+.viewer-wrapper--light .projection-toggle-btn {
+  background: rgba(0, 0, 0, 0.12);
+  color: #1a2e4a;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.viewer-wrapper--light .projection-toggle-btn:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
 /* ── Canvas ocupa toda a área ─────────────────────────────────────────── */
 
 .canvas-area {

@@ -87,6 +87,7 @@ export class IfcViewer implements OnInit, OnDestroy {
   protected isTreeLoading = signal(false);
   protected treePanelVisible = signal(true);
   protected darkBackground = signal(true);
+  protected isPerspective = signal(true);
 
   // Painel de propriedades (propPanelX = distância da borda direita)
   protected propPanelVisible = signal(false);
@@ -515,6 +516,12 @@ export class IfcViewer implements OnInit, OnDestroy {
     if (this.world) {
       this.world.scene.three.background = new THREE.Color(isDark ? '#1a2634' : '#dce8f7');
     }
+  }
+
+  protected async toggleProjection(): Promise<void> {
+    if (!this.world) return;
+    await this.world.camera.projection.toggle();
+    this.isPerspective.set(this.world.camera.projection.current === 'Perspective');
   }
 
   protected togglePropPanelVisible(): void {

@@ -19,6 +19,11 @@
       <span [class]="darkBackground() ? 'an an-sun' : 'an an-moon'"></span>
     </button>
 
+    <!-- Botão flutuante: alternar projeção perspectiva / ortogonal -->
+    <button class="projection-toggle-btn" (click)="toggleProjection()" [title]="isPerspective() ? 'Mudar para visão ortogonal' : 'Mudar para visão perspectiva'">
+      <span [class]="isPerspective() ? 'an an-cube' : 'an an-border-all'"></span>
+    </button>
+
     <!-- Canvas 3D + overlays ocupa toda a área -->
     <div class="canvas-area">
       <div #viewerContainer class="viewer-canvas"></div>
