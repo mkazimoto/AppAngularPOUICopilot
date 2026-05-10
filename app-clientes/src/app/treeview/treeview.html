@@ -44,71 +44,59 @@
       <div class="th th-acoes" [style.order]="colOrder('acoes')">Ações</div>
     </div>
 
-    <!-- ── Virtual scroll body ───────────────────────────── -->
-    <cdk-virtual-scroll-viewport [itemSize]="ROW_HEIGHT" class="treeview-viewport" [style.height.px]="viewportHeight">
+    <!-- ── Templates de coluna ──────────────────────────────── -->
 
-      <div
-        *cdkVirtualFor="let node of visibleNodes; trackBy: trackById"
-        class="treeview-row"
-        [style.grid-template-columns]="colTemplate"
-        [class.treeview-row--editing]="node.id === editingId || node.id === SENTINEL"
-        [class.treeview-row--selected]="node.id === selectedId && node.id !== SENTINEL"
-        [style.height.px]="ROW_HEIGHT"
-        (click)="selectNode(node)"
-      >
-        <!-- ── Nome ─────────────────────────────────────── -->
-        <div class="td td-nome" [style.order]="colOrder('nome')">
-          <div class="tree-cell" [style.paddingLeft]="indentPx(node.level)">
+    <ng-template #colNome let-node>
+      <div class="td td-nome" [style.order]="colOrder('nome')">
+        <div class="tree-cell" [style.paddingLeft]="indentPx(node.level)">
+          @if (node.hasChildren && node.id !== editingId && node.id !== SENTINEL) {
+            <button
+              class="expand-btn"
+              (click)="toggle(node)"
+              [attr.aria-expanded]="node.expanded"
+            >
+              <i class="an"
+                 [class.an-caret-right]="!node.expanded"
+                 [class.an-caret-down]="node.expanded"></i>
+            </button>
+          } @else {
+            <span class="expand-spacer"></span>
+          }
 
-            @if (node.hasChildren && node.id !== editingId && node.id !== SENTINEL) {
-              <button
-                class="expand-btn"
-                (click)="toggle(node)"
-                [attr.aria-expanded]="node.expanded"
-              >
-                <i class="an"
-                   [class.an-caret-right]="!node.expanded"
-                   [class.an-caret-down]="node.expanded"></i>
-              </button>
-            } @else {
-              <span class="expand-spacer"></span>
-            }
+          @if (node.id !== SENTINEL) {
+            <i class="an node-icon"
+               [class.an-folder]="node.hasChildren && !node.expanded"
+               [class.an-folder-open]="node.hasChildren && node.expanded"
+               [class.an-file-text]="!node.hasChildren"></i>
+          } @else {
+            <i class="an an-plus-circle node-icon node-icon--new"></i>
+          }
 
-            @if (node.id !== SENTINEL) {
-              <i class="an node-icon"
-                 [class.an-folder]="node.hasChildren && !node.expanded"
-                 [class.an-folder-open]="node.hasChildren && node.expanded"
-                 [class.an-file-text]="!node.hasChildren"></i>
-            } @else {
-              <i class="an an-plus-circle node-icon node-icon--new"></i>
-            }
-
-            @if (node.id !== SENTINEL && node.id !== editingId) {
-              <span class="node-label">{{ node.label }}</span>
-            }
-
-            @if (node.id === editingId) {
-              <po-input
-                name="editLabel"
-                p-placeholder="Nome"
-                [(ngModel)]="editForm.label"
-                (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()">
-              </po-input>
-            }
-
-            @if (node.id === SENTINEL) {
-              <po-input
-                name="addLabel"
-                p-placeholder="Nome"
-                [(ngModel)]="addForm.label"
-                (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()">
-              </po-input>
-            }
-          </div>
+          @if (node.id !== SENTINEL && node.id !== editingId) {
+            <span class="node-label">{{ node.label }}</span>
+          }
+          @if (node.id === editingId) {
+            <po-input
+              name="editLabel"
+              p-placeholder="Nome"
+              [(ngModel)]="editForm.label"
+              (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()">
+            </po-input>
+          }
+          @if (node.id === SENTINEL) {
+            <po-input
+              name="addLabel"
+              p-placeholder="Nome"
+              [(ngModel)]="addForm.label"
+              (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()">
+            </po-input>
+          }
         </div>
+      </div>
+    </ng-template>
 
-        <!-- Tipo de Recurso -->
-        @if (isVisible('tipoRecurso')) {
+    <ng-template #colTipoRecurso let-node>
+      @if (isVisible('tipoRecurso')) {
         <div class="td td-tipo-recurso" [style.order]="colOrder('tipoRecurso')">
           @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
             <po-tag [p-value]="node.tipoRecurso || 'Valor cotado'" p-text-color="White" [p-color]="tipoRecursoColor(node.tipoRecurso)"></po-tag>
@@ -130,10 +118,11 @@
             </po-select>
           }
         </div>
-        }
+      }
+    </ng-template>
 
-        <!-- Recurso -->
-        @if (isVisible('recurso')) {
+    <ng-template #colRecurso let-node>
+      @if (isVisible('recurso')) {
         <div class="td td-recurso" [style.order]="colOrder('recurso')">
           @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
             @if (node.recursoId) {
@@ -203,9 +192,11 @@
             </po-lookup>
           }
         </div>
-        }
+      }
+    </ng-template>
 
-        @if (isVisible('quantidade')) {
+    <ng-template #colQuantidade let-node>
+      @if (isVisible('quantidade')) {
         <div class="td td-quantidade" [style.order]="colOrder('quantidade')">
           @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
             <span>{{ node.quantity }}</span>
@@ -229,10 +220,11 @@
             </po-decimal>
           }
         </div>
-        }
+      }
+    </ng-template>
 
-        <!--  Unidade  -->
-        @if (isVisible('unidade')) {
+    <ng-template #colUnidade let-node>
+      @if (isVisible('unidade')) {
         <div class="td td-unidade" [style.order]="colOrder('unidade')">
           @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
             <span>{{ node.unit }}</span>
@@ -264,10 +256,11 @@
             </po-lookup>
           }
         </div>
-        }
+      }
+    </ng-template>
 
-        <!--  Preço  -->
-        @if (isVisible('preco')) {
+    <ng-template #colPreco let-node>
+      @if (isVisible('preco')) {
         <div class="td td-preco" [style.order]="colOrder('preco')">
           @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
             <span>{{ node.price | currency:'BRL':'symbol':'1.2-2' }}</span>
@@ -291,10 +284,11 @@
             </po-decimal>
           }
         </div>
-        }
+      }
+    </ng-template>
 
-        <!--  Valor  -->
-        @if (isVisible('valor')) {
+    <ng-template #colValor let-node>
+      @if (isVisible('valor')) {
         <div class="td td-valor" [style.order]="colOrder('valor')">
           @if (node.id !== editingId && node.id !== SENTINEL) {
             <span>{{ node.value | currency:'BRL':'symbol':'1.2-2' }}</span>
@@ -308,28 +302,54 @@
           @if (node.id === SENTINEL) {
             <span>{{ addPreviewValue | currency:'BRL':'symbol':'1.2-2' }}</span>
           }
-        </div>        }        <!-- ── Ações ─────────────────────────────────────── -->
-        <div class="td td-acoes" [style.order]="colOrder('acoes')">
-          @if (node.id !== SENTINEL && node.id !== editingId) {
-            <div class="actions-row">
-              <po-button p-icon="an an-pencil" p-kind="tertiary" p-label="" p-size="small" (p-click)="startEdit(node)" p-tooltip="Editar" p-append-in-body="true"></po-button>
-              <po-button p-icon="an an-plus"   p-kind="tertiary" p-label="" p-size="small" (p-click)="startAdd(node.id)" p-tooltip="Adicionar filha" p-append-in-body="true"></po-button>
-              <po-button p-icon="an an-trash"  p-kind="tertiary" [p-danger]="true" p-label="" p-size="small" (p-click)="deleteNode(node)" p-tooltip="Excluir" p-append-in-body="true"></po-button>
-            </div>
-          }
-          @if (node.id === editingId) {
-            <div class="actions-row">
-              <po-button p-icon="an an-check" p-kind="primary"  p-label="" p-size="small" (p-click)="saveEdit()" p-tooltip="Salvar" p-append-in-body="true"></po-button>
-              <po-button p-icon="an an-x"     p-kind="tertiary" p-label="" p-size="small" (p-click)="cancelEdit()" p-tooltip="Cancelar" p-append-in-body="true"></po-button>
-            </div>
-          }
-          @if (node.id === SENTINEL) {
-            <div class="actions-row">
-              <po-button p-icon="an an-check" p-kind="primary"  p-label="" p-size="small" (p-click)="saveAdd()" p-tooltip="Salvar" p-append-in-body="true"></po-button>
-              <po-button p-icon="an an-x"     p-kind="tertiary" p-label="" p-size="small" (p-click)="cancelAdd()" p-tooltip="Cancelar" p-append-in-body="true"></po-button>
-            </div>
-          }
         </div>
+      }
+    </ng-template>
+
+    <ng-template #colAcoes let-node>
+      <div class="td td-acoes" [style.order]="colOrder('acoes')">
+        @if (node.id !== SENTINEL && node.id !== editingId) {
+          <div class="actions-row">
+            <po-button p-icon="an an-pencil" p-kind="tertiary" p-label="" p-size="small" (p-click)="startEdit(node)" p-tooltip="Editar" p-append-in-body="true"></po-button>
+            <po-button p-icon="an an-plus"   p-kind="tertiary" p-label="" p-size="small" (p-click)="startAdd(node.id)" p-tooltip="Adicionar filha" p-append-in-body="true"></po-button>
+            <po-button p-icon="an an-trash"  p-kind="tertiary" [p-danger]="true" p-label="" p-size="small" (p-click)="deleteNode(node)" p-tooltip="Excluir" p-append-in-body="true"></po-button>
+          </div>
+        }
+        @if (node.id === editingId) {
+          <div class="actions-row">
+            <po-button p-icon="an an-check" p-kind="primary"  p-label="" p-size="small" (p-click)="saveEdit()" p-tooltip="Salvar" p-append-in-body="true"></po-button>
+            <po-button p-icon="an an-x"     p-kind="tertiary" p-label="" p-size="small" (p-click)="cancelEdit()" p-tooltip="Cancelar" p-append-in-body="true"></po-button>
+          </div>
+        }
+        @if (node.id === SENTINEL) {
+          <div class="actions-row">
+            <po-button p-icon="an an-check" p-kind="primary"  p-label="" p-size="small" (p-click)="saveAdd()" p-tooltip="Salvar" p-append-in-body="true"></po-button>
+            <po-button p-icon="an an-x"     p-kind="tertiary" p-label="" p-size="small" (p-click)="cancelAdd()" p-tooltip="Cancelar" p-append-in-body="true"></po-button>
+          </div>
+        }
+      </div>
+    </ng-template>
+
+    <!-- ── Virtual scroll body ───────────────────────────── -->
+    <cdk-virtual-scroll-viewport [itemSize]="ROW_HEIGHT" class="treeview-viewport" [style.height.px]="viewportHeight">
+
+      <div
+        *cdkVirtualFor="let node of visibleNodes; trackBy: trackById"
+        class="treeview-row"
+        [style.grid-template-columns]="colTemplate"
+        [class.treeview-row--editing]="node.id === editingId || node.id === SENTINEL"
+        [class.treeview-row--selected]="node.id === selectedId && node.id !== SENTINEL"
+        [style.height.px]="ROW_HEIGHT"
+        (click)="selectNode(node)"
+      >
+        <ng-container *ngTemplateOutlet="colNome;        context: { $implicit: node }"></ng-container>
+        <ng-container *ngTemplateOutlet="colTipoRecurso; context: { $implicit: node }"></ng-container>
+        <ng-container *ngTemplateOutlet="colRecurso;     context: { $implicit: node }"></ng-container>
+        <ng-container *ngTemplateOutlet="colQuantidade;  context: { $implicit: node }"></ng-container>
+        <ng-container *ngTemplateOutlet="colUnidade;     context: { $implicit: node }"></ng-container>
+        <ng-container *ngTemplateOutlet="colPreco;       context: { $implicit: node }"></ng-container>
+        <ng-container *ngTemplateOutlet="colValor;       context: { $implicit: node }"></ng-container>
+        <ng-container *ngTemplateOutlet="colAcoes;       context: { $implicit: node }"></ng-container>
       </div>
 
       <!-- Empty state -->
