@@ -322,6 +322,7 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
 
   restoreColumns(): void {
     this.columns = this.DEFAULT_COLUMNS.map(c => ({ ...c }));
+    this.bindColumnTemplates();
     this.saveColumns();
   }
 
