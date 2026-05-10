@@ -222,6 +222,27 @@ export class IfcViewer implements OnInit, OnDestroy {
     }
   };
 
+  private readonly onViewerDblClick = async (e: MouseEvent) => {
+    if (!this.currentLoadedModel || !this.world || !this.viewerCanvas) return;
+    const mouse = new THREE.Vector2(e.clientX, e.clientY);
+    try {
+      const result = await this.currentLoadedModel.raycast({
+        camera: this.world.camera.three,
+        mouse,
+        dom: this.viewerCanvas,
+      });
+      if (result === null) return;
+      const node = this.localIdToNode.get(result.localId);
+      if (!node) return;
+
+      // Duplo clique: faz zoom no objeto selecionado
+      this.selectedNodeId = node.id;
+      await this.highlightNodeInModel(node, true);
+    } catch {
+      // ignora erros de raycast
+    }
+  };
+
   private readonly onViewerMouseMove = (e: MouseEvent) => {
     if (this.hoverRafId !== null) return;
     this.hoverRafId = requestAnimationFrame(() => {
@@ -755,7 +776,8 @@ export class IfcViewer implements OnInit, OnDestroy {
     if (this.viewerCanvas) {
       this.viewerCanvas.removeEventListener('mousemove', this.onViewerMouseMove);
       this.viewerCanvas.removeEventListener('mouseleave', this.onViewerMouseLeave);
-      this.viewerCanvas.removeEventListener('dblclick', this.onViewerClick);
+      this.viewerCanvas.removeEventListener('click', this.onViewerClick);
+      this.viewerCanvas.removeEventListener('dblclick', this.onViewerDblClick);
       this.viewerCanvas = null;
     }
     this.hoveredLocalId = null;
@@ -1406,7 +1428,8 @@ export class IfcViewer implements OnInit, OnDestroy {
     this.viewerCanvas = this.world.renderer.three.domElement;
     this.viewerCanvas.addEventListener('mousemove', this.onViewerMouseMove);
     this.viewerCanvas.addEventListener('mouseleave', this.onViewerMouseLeave);
-    this.viewerCanvas.addEventListener('dblclick', this.onViewerClick);
+    this.viewerCanvas.addEventListener('click', this.onViewerClick);
+    this.viewerCanvas.addEventListener('dblclick', this.onViewerDblClick);
 
     // Configura o IfcLoader
     this.ifcLoader = this.components.get(OBC.IfcLoader);
