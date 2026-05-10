@@ -332,14 +332,11 @@
         [style.height.px]="ROW_HEIGHT"
         (click)="selectNode(node)"
       >
-        <ng-container *ngTemplateOutlet="colNome;        context: { $implicit: node }"></ng-container>
-        <ng-container *ngTemplateOutlet="colTipoRecurso; context: { $implicit: node }"></ng-container>
-        <ng-container *ngTemplateOutlet="colRecurso;     context: { $implicit: node }"></ng-container>
-        <ng-container *ngTemplateOutlet="colQuantidade;  context: { $implicit: node }"></ng-container>
-        <ng-container *ngTemplateOutlet="colUnidade;     context: { $implicit: node }"></ng-container>
-        <ng-container *ngTemplateOutlet="colPreco;       context: { $implicit: node }"></ng-container>
-        <ng-container *ngTemplateOutlet="colValor;       context: { $implicit: node }"></ng-container>
-        <ng-container *ngTemplateOutlet="colAcoes;       context: { $implicit: node }"></ng-container>
+        @for (col of columns; track col.property) {
+          @if (col.visible !== false && col.template) {
+            <ng-container *ngTemplateOutlet="col.template; context: { $implicit: node }"></ng-container>
+          }
+        }
       </div>
 
       <!-- Empty state -->

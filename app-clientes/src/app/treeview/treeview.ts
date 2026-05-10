@@ -1,6 +1,6 @@
 ﻿import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, HostListener, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, NgZone, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PoButtonModule, PoFieldModule, PoLookupColumn, PoLookupFilter, PoLookupFilteredItemsParams, PoLookupResponseApi, PoNotificationService, PoPageAction, PoPageFilter, PoPageModule, PoPageSlideComponent, PoPageSlideModule, PoSwitchLabelPosition, PoTableColumn, PoTagModule, PoTooltipModule } from '@po-ui/ng-components';
 import { Observable, of } from 'rxjs';
@@ -15,6 +15,8 @@ export interface TreeviewColumn extends PoTableColumn {
   widthPx: number;
   /** Impede que a coluna seja ocultada ou reordenada. */
   fixed?: boolean;
+  /** Template Angular associado a esta coluna. Preenchido em ngAfterViewInit. */
+  template?: TemplateRef<any>;
 }
 
 export interface TreeNode {
@@ -242,6 +244,16 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('treeviewHeader') treeviewHeaderRef!: ElementRef<HTMLElement>;
   private resizeObserver!: ResizeObserver;
 
+  // ── Column templates ───────────────────────────────────────
+  @ViewChild('colNome')        private colNomeTpl!:        TemplateRef<any>;
+  @ViewChild('colTipoRecurso') private colTipoRecursoTpl!: TemplateRef<any>;
+  @ViewChild('colRecurso')     private colRecursoTpl!:     TemplateRef<any>;
+  @ViewChild('colQuantidade')  private colQuantidadeTpl!:  TemplateRef<any>;
+  @ViewChild('colUnidade')     private colUnidadeTpl!:     TemplateRef<any>;
+  @ViewChild('colPreco')       private colPrecoTpl!:       TemplateRef<any>;
+  @ViewChild('colValor')       private colValorTpl!:       TemplateRef<any>;
+  @ViewChild('colAcoes')       private colAcoesTpl!:       TemplateRef<any>;
+
   // ── Column manager ─────────────────────────────────────────
   @ViewChild('columnManagerSlide') columnManagerSlide!: PoPageSlideComponent;
   @ViewChild(CdkVirtualScrollViewport) viewport!: CdkVirtualScrollViewport;
@@ -451,6 +463,22 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
       this.ngZone.run(() => this.calculateViewportHeight());
     });
     this.resizeObserver.observe(document.documentElement);
+
+    this.bindColumnTemplates();
+  }
+
+  private bindColumnTemplates(): void {
+    const tplMap: Record<string, TemplateRef<any>> = {
+      nome:        this.colNomeTpl,
+      tipoRecurso: this.colTipoRecursoTpl,
+      recurso:     this.colRecursoTpl,
+      quantidade:  this.colQuantidadeTpl,
+      unidade:     this.colUnidadeTpl,
+      preco:       this.colPrecoTpl,
+      valor:       this.colValorTpl,
+      acoes:       this.colAcoesTpl,
+    };
+    this.columns = this.columns.map(col => ({ ...col, template: tplMap[col.property] }));
   }
 
   ngOnDestroy(): void {
