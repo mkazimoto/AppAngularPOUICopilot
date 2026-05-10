@@ -16,21 +16,21 @@ export class App {
   readonly toolbarTitle = `App PO-UI gerado pelo Copilot com o Modelo Claude Sonnet 4.6 - Versão do PO-UI ${this.poUiVersion}`;
 
   readonly menus: Array<PoMenuItem> = [
-    { label: 'Dashboard', link: '/dashboard', icon: 'an an-chart-bar' },
-    { label: 'Clientes', link: '/clientes', icon: 'an an-users' },
-    { label: 'Produtos', link: '/produtos', icon: 'an an-shopping-bag' },
-    { label: 'PetSocial', link: '/petsocial', icon: 'an an-paw-print' },
-    { label: 'Passagens Aéreas', link: '/passagens', icon: 'an an-airplane' },
-    { label: 'Aluguel de Carros', link: '/carros', icon: 'an an-car' },
-    { label: 'Cursos Online', link: '/cursos', icon: 'an an-graduation-cap' },
-    { label: 'Imóveis', link: '/imoveis', icon: 'an an-building' },
-    { label: 'Kanban', link: '/kanban', icon: 'an an-kanban' },
-    { label: 'Tarefas / Gantt', link: '/tarefas', icon: 'an an-calendar-check' },
-    { label: 'Agendamento', link: '/agendamento', icon: 'an an-calendar' },
-    { label: 'Workflow', link: '/workflow', icon: 'an an-git-branch' },
-    { label: 'Organograma', link: '/organograma', icon: 'an an-users' },
-    { label: 'Tree View Editável', link: '/treeview', icon: 'an an-tree-structure' },
-    { label: 'Visualizador IFC', link: '/ifc-viewer', icon: 'an an-cube' },
+    { label: 'Dashboard', shortLabel: 'Dashboard', link: '/dashboard', icon: 'an an-chart-bar' },
+    { label: 'Clientes', shortLabel: 'Clientes', link: '/clientes', icon: 'an an-users' },
+    { label: 'Produtos', shortLabel: 'Produtos', link: '/produtos', icon: 'an an-shopping-bag' },
+    { label: 'PetSocial', shortLabel: 'PetSocial', link: '/petsocial', icon: 'an an-paw-print' },
+    { label: 'Passagens Aéreas', shortLabel: 'Passagens', link: '/passagens', icon: 'an an-airplane' },
+    { label: 'Aluguel de Carros', shortLabel: 'Carros', link: '/carros', icon: 'an an-car' },
+    { label: 'Cursos Online', shortLabel: 'Cursos', link: '/cursos', icon: 'an an-graduation-cap' },
+    { label: 'Imóveis', shortLabel: 'Imóveis', link: '/imoveis', icon: 'an an-building' },
+    { label: 'Kanban', shortLabel: 'Kanban', link: '/kanban', icon: 'an an-kanban' },
+    { label: 'Tarefas / Gantt', shortLabel: 'Tarefas', link: '/tarefas', icon: 'an an-calendar-check' },
+    { label: 'Agendamento', shortLabel: 'Agenda', link: '/agendamento', icon: 'an an-calendar' },
+    { label: 'Workflow', shortLabel: 'Workflow', link: '/workflow', icon: 'an an-git-branch' },
+    { label: 'Organograma', shortLabel: 'Org.', link: '/organograma', icon: 'an an-users' },
+    { label: 'Tree View Editável', shortLabel: 'Tree View', link: '/treeview', icon: 'an an-tree-structure' },
+    { label: 'Visualizador IFC', shortLabel: 'IFC', link: '/ifc-viewer', icon: 'an an-cube' },
   ];
 
 
