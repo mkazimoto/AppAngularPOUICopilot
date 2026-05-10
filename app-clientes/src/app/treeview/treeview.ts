@@ -55,11 +55,15 @@ const INSUMOS = [
   { id: 'INS010', nome: 'Fio elétrico 2,5mm²', unidade: 'M', preco: 3.80 },
 ];
 
+function normalize(s: string): string {
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
 class InsumoFilterService implements PoLookupFilter {
   getFilteredItems(params: PoLookupFilteredItemsParams): Observable<PoLookupResponseApi> {
-    const f = (params.filter ?? '').toUpperCase();
+    const f = normalize(params.filter ?? '');
     const items = f
-      ? INSUMOS.filter(i => i.nome.toUpperCase().includes(f) || i.id.toUpperCase().includes(f))
+      ? INSUMOS.filter(i => normalize(i.nome).includes(f) || normalize(i.id).includes(f))
       : INSUMOS;
     return of({ items, hasNext: false });
   }
@@ -83,9 +87,9 @@ const COMPOSICOES = [
 
 class ComposicaoFilterService implements PoLookupFilter {
   getFilteredItems(params: PoLookupFilteredItemsParams): Observable<PoLookupResponseApi> {
-    const f = (params.filter ?? '').toUpperCase();
+    const f = normalize(params.filter ?? '');
     const items = f
-      ? COMPOSICOES.filter(c => c.nome.toUpperCase().includes(f) || c.id.toUpperCase().includes(f))
+      ? COMPOSICOES.filter(c => normalize(c.nome).includes(f) || normalize(c.id).includes(f))
       : COMPOSICOES;
     return of({ items, hasNext: false });
   }
@@ -107,9 +111,9 @@ const UNIT_ITEMS = [
 
 class UnitFilterService implements PoLookupFilter {
   getFilteredItems(params: PoLookupFilteredItemsParams): Observable<PoLookupResponseApi> {
-    const f = (params.filter ?? '').toUpperCase();
+    const f = normalize(params.filter ?? '');
     const items = f
-      ? UNIT_ITEMS.filter(u => u.value.toUpperCase().includes(f) || u.label.toUpperCase().includes(f))
+      ? UNIT_ITEMS.filter(u => normalize(u.value).includes(f) || normalize(u.label).includes(f))
       : UNIT_ITEMS;
     return of({ items, hasNext: false });
   }
@@ -503,15 +507,15 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
 
   refreshVisibleNodes(): void {
     if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
+      const term = normalize(this.searchTerm);
       const hasChildrenSet = new Set<string>();
       for (const node of this.nodes) {
         if (node.parentId !== null) hasChildrenSet.add(node.parentId);
       }
       this.visibleNodes = this.nodes
         .filter(n =>
-          n.label.toLowerCase().includes(term) ||
-          (n.recurso ?? '').toLowerCase().includes(term)
+          normalize(n.label).includes(term) ||
+          normalize(n.recurso ?? '').includes(term)
         )
         .map(n => ({ ...n, level: 0, hasChildren: hasChildrenSet.has(n.id) }));
       return;
