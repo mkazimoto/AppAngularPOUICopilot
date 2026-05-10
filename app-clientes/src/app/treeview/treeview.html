@@ -22,26 +22,16 @@
 
     <!-- ── Sticky header ─────────────────────────────────── -->
     <div class="treeview-header" #treeviewHeader [style.grid-template-columns]="colTemplate">
-      <div class="th th-nome" [style.order]="colOrder('nome')">Nome<span class="col-resize-handle" (mousedown)="resizeStart($event, 'nome')"></span></div>
-      @if (isVisible('tipoRecurso')) {
-        <div class="th th-tipo-recurso" [style.order]="colOrder('tipoRecurso')">Tipo de Recurso<span class="col-resize-handle" (mousedown)="resizeStart($event, 'tipoRecurso')"></span></div>
+      @for (col of columns; track col.property) {
+        @if (col.visible !== false) {
+          <div [class]="'th th-' + col.property" [style.order]="colOrder(col.property)">
+            {{ col.label }}
+            @if (col.property !== 'acoes') {
+              <span class="col-resize-handle" (mousedown)="resizeStart($event, col.property)"></span>
+            }
+          </div>
+        }
       }
-      @if (isVisible('recurso')) {
-        <div class="th th-recurso" [style.order]="colOrder('recurso')">Recurso<span class="col-resize-handle" (mousedown)="resizeStart($event, 'recurso')"></span></div>
-      }
-      @if (isVisible('quantidade')) {
-        <div class="th th-quantidade" [style.order]="colOrder('quantidade')">Quantidade<span class="col-resize-handle" (mousedown)="resizeStart($event, 'quantidade')"></span></div>
-      }
-      @if (isVisible('unidade')) {
-        <div class="th th-unidade" [style.order]="colOrder('unidade')">Unidade<span class="col-resize-handle" (mousedown)="resizeStart($event, 'unidade')"></span></div>
-      }
-      @if (isVisible('preco')) {
-        <div class="th th-preco" [style.order]="colOrder('preco')">Preço Unitário<span class="col-resize-handle" (mousedown)="resizeStart($event, 'preco')"></span></div>
-      }
-      @if (isVisible('valor')) {
-        <div class="th th-valor" [style.order]="colOrder('valor')">Valor<span class="col-resize-handle" (mousedown)="resizeStart($event, 'valor')"></span></div>
-      }
-      <div class="th th-acoes" [style.order]="colOrder('acoes')">Ações</div>
     </div>
 
     <!-- ── Templates de coluna ──────────────────────────────── -->
