@@ -353,12 +353,12 @@
     [p-click-out]="true">
 
     <div class="column-manager-list">
-      @for (col of columns; track col.key) {
+      @for (col of columns; track col.property) {
         @if (!col.fixed) {
           <div class="column-manager-item">
             <po-switch
-              [name]="'col-' + col.key"
-              [p-label]="col.label"
+              [name]="'col-' + col.property"
+              [p-label]="col.label ?? ''"
               [p-label-position]="labelPosition"              
               [p-label-on]="' '"
               [p-label-off]="' '"
@@ -372,8 +372,8 @@
                 p-size="small"
                 p-label=""
                 p-tooltip="Mover para cima"
-                [p-disabled]="isFirstMovable(col.key)"
-                (p-click)="moveColumn(col.key, 'up')">
+                [p-disabled]="isFirstMovable(col.property)"
+                (p-click)="moveColumn(col.property, 'up')">
               </po-button>
               <po-button
                 p-icon="an an-caret-down"
@@ -381,8 +381,8 @@
                 p-size="small"
                 p-label=""
                 p-tooltip="Mover para baixo"
-                [p-disabled]="isLastMovable(col.key)"
-                (p-click)="moveColumn(col.key, 'down')">
+                [p-disabled]="isLastMovable(col.property)"
+                (p-click)="moveColumn(col.property, 'down')">
               </po-button>
             </div>
           </div>

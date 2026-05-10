@@ -2,16 +2,18 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, HostListener, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PoButtonModule, PoFieldModule, PoLookupColumn, PoLookupFilter, PoLookupFilteredItemsParams, PoLookupResponseApi, PoNotificationService, PoPageAction, PoPageFilter, PoPageModule, PoPageSlideComponent, PoPageSlideModule, PoSwitchLabelPosition, PoTagModule, PoTooltipModule } from '@po-ui/ng-components';
+import { PoButtonModule, PoFieldModule, PoLookupColumn, PoLookupFilter, PoLookupFilteredItemsParams, PoLookupResponseApi, PoNotificationService, PoPageAction, PoPageFilter, PoPageModule, PoPageSlideComponent, PoPageSlideModule, PoSwitchLabelPosition, PoTableColumn, PoTagModule, PoTooltipModule } from '@po-ui/ng-components';
 import { Observable, of } from 'rxjs';
 
 export type TipoRecurso = 'Insumo' | 'Composição' | 'Valor cotado';
 
-export interface ColumnConfig {
-  key: string;
-  label: string;
-  width: number;
-  visible: boolean;
+/** Extensão de PoTableColumn com propriedades específicas do treeview. */
+export interface TreeviewColumn extends PoTableColumn {
+  /** Identificador da coluna (obrigatório; equivale a PoTableColumn.property). */
+  property: string;
+  /** Largura em pixels usada pelo grid e pelo resize. */
+  widthPx: number;
+  /** Impede que a coluna seja ocultada ou reordenada. */
   fixed?: boolean;
 }
 
@@ -246,33 +248,33 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
 
   private readonly COLUMNS_STORAGE_KEY = 'treeview_columns';
 
-  private readonly DEFAULT_COLUMNS: ColumnConfig[] = [
-    { key: 'nome',        label: 'Nome',           width: 450, visible: true, fixed: true },
-    { key: 'tipoRecurso', label: 'Tipo de Recurso', width: 130, visible: true },
-    { key: 'recurso',     label: 'Recurso',         width: 200, visible: true },
-    { key: 'quantidade',  label: 'Quantidade',      width: 110, visible: true },
-    { key: 'unidade',     label: 'Unidade',         width: 130, visible: true },
-    { key: 'preco',       label: 'Preço Unitário',  width: 150, visible: true },
-    { key: 'valor',       label: 'Valor',           width: 120, visible: true },
-    { key: 'acoes',       label: 'Ações',           width: 100, visible: true, fixed: true },
+  private readonly DEFAULT_COLUMNS: TreeviewColumn[] = [
+    { property: 'nome',        label: 'Nome',           widthPx: 450, visible: true, fixed: true },
+    { property: 'tipoRecurso', label: 'Tipo de Recurso', widthPx: 130, visible: true },
+    { property: 'recurso',     label: 'Recurso',         widthPx: 200, visible: true },
+    { property: 'quantidade',  label: 'Quantidade',      widthPx: 110, visible: true },
+    { property: 'unidade',     label: 'Unidade',         widthPx: 130, visible: true },
+    { property: 'preco',       label: 'Preço Unitário',  widthPx: 150, visible: true },
+    { property: 'valor',       label: 'Valor',           widthPx: 120, visible: true },
+    { property: 'acoes',       label: 'Ações',           widthPx: 100, visible: true, fixed: true },
   ];
 
-  columns: ColumnConfig[] = [];
+  columns: TreeviewColumn[] = [];
 
-  private loadColumns(): ColumnConfig[] {
+  private loadColumns(): TreeviewColumn[] {
     try {
       const saved = localStorage.getItem(this.COLUMNS_STORAGE_KEY);
       if (!saved) return this.DEFAULT_COLUMNS.map(c => ({ ...c }));
-      const parsed: Array<{ key: string; visible: boolean; width: number }> = JSON.parse(saved);
-      const ordered = parsed
+      const parsed: Array<{ property: string; visible: boolean; widthPx: number }> = JSON.parse(saved);
+      const ordered: TreeviewColumn[] = parsed
         .map(s => {
-          const def = this.DEFAULT_COLUMNS.find(d => d.key === s.key);
-          return def ? { ...def, visible: s.visible, width: s.width } : null;
+          const def = this.DEFAULT_COLUMNS.find(d => d.property === s.property);
+          return def ? ({ ...def, visible: s.visible, widthPx: s.widthPx } as TreeviewColumn) : null;
         })
-        .filter((c): c is ColumnConfig => c !== null);
+        .filter((c): c is TreeviewColumn => c !== null);
       // append any new default columns not yet in storage
       this.DEFAULT_COLUMNS.forEach(def => {
-        if (!ordered.find(o => o.key === def.key)) ordered.push({ ...def });
+        if (!ordered.find((o: TreeviewColumn) => o.property === def.property)) ordered.push({ ...def });
       });
       return ordered;
     } catch {
@@ -281,7 +283,7 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
   }
 
   saveColumns(): void {
-    const payload = this.columns.map(c => ({ key: c.key, visible: c.visible, width: c.width }));
+    const payload = this.columns.map(c => ({ property: c.property, visible: c.visible, widthPx: c.widthPx }));
     localStorage.setItem(this.COLUMNS_STORAGE_KEY, JSON.stringify(payload));
   }
 
@@ -291,15 +293,15 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
   private _resizeStartWidth = 0;
 
   get colTemplate(): string {
-    return this.columns.filter(c => c.visible).map(c => c.width + 'px').join(' ');
+    return this.columns.filter(c => c.visible !== false).map(c => c.widthPx + 'px').join(' ');
   }
 
-  isVisible(key: string): boolean {
-    return this.columns.find(c => c.key === key)?.visible ?? true;
+  isVisible(property: string): boolean {
+    return this.columns.find(c => c.property === property)?.visible !== false;
   }
 
-  colOrder(key: string): number {
-    return this.columns.filter(c => c.visible).findIndex(c => c.key === key);
+  colOrder(property: string): number {
+    return this.columns.filter(c => c.visible !== false).findIndex(c => c.property === property);
   }
 
   openColumnManager(): void {
@@ -311,9 +313,9 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
     this.saveColumns();
   }
 
-  moveColumn(key: string, direction: 'up' | 'down'): void {
+  moveColumn(property: string, direction: 'up' | 'down'): void {
     const movable = this.columns.filter(c => !c.fixed);
-    const idx = movable.findIndex(c => c.key === key);
+    const idx = movable.findIndex(c => c.property === property);
     const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
     if (targetIdx < 0 || targetIdx >= movable.length) return;
     const colIdx = this.columns.indexOf(movable[idx]);
@@ -324,22 +326,22 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
     this.saveColumns();
   }
 
-  isFirstMovable(key: string): boolean {
+  isFirstMovable(property: string): boolean {
     const movable = this.columns.filter(c => !c.fixed);
-    return movable.length > 0 && movable[0].key === key;
+    return movable.length > 0 && movable[0].property === property;
   }
 
-  isLastMovable(key: string): boolean {
+  isLastMovable(property: string): boolean {
     const movable = this.columns.filter(c => !c.fixed);
-    return movable.length > 0 && movable[movable.length - 1].key === key;
+    return movable.length > 0 && movable[movable.length - 1].property === property;
   }
 
-  resizeStart(event: MouseEvent, colKey: string): void {
-    const idx = this.columns.findIndex(c => c.key === colKey);
+  resizeStart(event: MouseEvent, property: string): void {
+    const idx = this.columns.findIndex(c => c.property === property);
     if (idx < 0) return;
     this._resizingCol      = idx;
     this._resizeStartX     = event.clientX;
-    this._resizeStartWidth = this.columns[idx].width;
+    this._resizeStartWidth = this.columns[idx].widthPx;
     event.preventDefault();
   }
 
@@ -356,7 +358,7 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
   onMouseMove(event: MouseEvent): void {
     if (this._resizingCol < 0) return;
     const delta = event.clientX - this._resizeStartX;
-    this.columns[this._resizingCol].width = Math.max(60, this._resizeStartWidth + delta);
+    this.columns[this._resizingCol].widthPx = Math.max(60, this._resizeStartWidth + delta);
   }
 
   @HostListener('document:mouseup')
