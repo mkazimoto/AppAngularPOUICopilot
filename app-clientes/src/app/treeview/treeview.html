@@ -36,6 +36,7 @@
 
     <!-- ── Templates de coluna ──────────────────────────────── -->
 
+    <!-- Coluna Nome -->
     <ng-template #colNome let-node>
       <div class="td td-nome" [style.order]="colOrder('nome')">
         <div class="tree-cell" [style.paddingLeft]="indentPx(node.level)">
@@ -85,6 +86,7 @@
       </div>
     </ng-template>
 
+    <!-- Coluna Tipo de Recurso -->
     <ng-template #colTipoRecurso let-node>
       @if (isVisible('tipoRecurso')) {
         <div class="td td-tipo-recurso" [style.order]="colOrder('tipoRecurso')">
@@ -111,6 +113,7 @@
       }
     </ng-template>
 
+    <!-- Coluna Recurso -->
     <ng-template #colRecurso let-node>
       @if (isVisible('recurso')) {
         <div class="td td-recurso" [style.order]="colOrder('recurso')">
@@ -185,6 +188,7 @@
       }
     </ng-template>
 
+    <!-- Coluna Quantidade -->
     <ng-template #colQuantidade let-node>
       @if (isVisible('quantidade')) {
         <div class="td td-quantidade" [style.order]="colOrder('quantidade')">
@@ -213,6 +217,7 @@
       }
     </ng-template>
 
+    <!-- Coluna Unidade -->
     <ng-template #colUnidade let-node>
       @if (isVisible('unidade')) {
         <div class="td td-unidade" [style.order]="colOrder('unidade')">
@@ -249,6 +254,7 @@
       }
     </ng-template>
 
+    <!-- Coluna Preço -->
     <ng-template #colPreco let-node>
       @if (isVisible('preco')) {
         <div class="td td-preco" [style.order]="colOrder('preco')">
@@ -277,6 +283,7 @@
       }
     </ng-template>
 
+    <!-- Coluna Valor -->
     <ng-template #colValor let-node>
       @if (isVisible('valor')) {
         <div class="td td-valor" [style.order]="colOrder('valor')">
@@ -296,6 +303,7 @@
       }
     </ng-template>
 
+    <!-- Coluna Ações -->
     <ng-template #colAcoes let-node>
       <div class="td td-acoes" [style.order]="colOrder('acoes')">
         @if (node.id !== SENTINEL && node.id !== editingId) {
