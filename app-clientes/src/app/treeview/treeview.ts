@@ -2,7 +2,7 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, HostListener, NgZone, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PoButtonModule, PoFieldModule, PoLookupColumn, PoLookupFilter, PoLookupFilteredItemsParams, PoLookupResponseApi, PoNotificationService, PoPageAction, PoPageFilter, PoPageModule, PoPageSlideComponent, PoPageSlideModule, PoSwitchLabelPosition, PoTableColumn, PoTagModule, PoTooltipModule } from '@po-ui/ng-components';
+import { PoButtonModule, PoFieldModule, PoLookupColumn, PoLookupFilter, PoLookupFilteredItemsParams, PoLookupResponseApi, PoNotificationService, PoPageAction, PoPageFilter, PoPageListComponent, PoPageModule, PoPageSlideComponent, PoPageSlideModule, PoSwitchLabelPosition, PoTableColumn, PoTagModule, PoTooltipModule } from '@po-ui/ng-components';
 import { Observable, of } from 'rxjs';
 
 export type TipoRecurso = 'Insumo' | 'Composição' | 'Valor cotado';
@@ -246,6 +246,7 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
   viewportHeight = 600;
   @ViewChild('treeviewGrid') treeviewGridRef!: ElementRef<HTMLElement>;
   @ViewChild('treeviewHeader') treeviewHeaderRef!: ElementRef<HTMLElement>;
+  @ViewChild('pageList') private pageList!: PoPageListComponent;
   private resizeObserver!: ResizeObserver;
 
   // ── Column templates ───────────────────────────────────────
@@ -797,6 +798,6 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  private expandAll(): void { this.nodes = this.nodes.map(n => ({ ...n, expanded: true })); this.refreshVisibleNodes(); }
-  private collapseAll(): void { this.nodes = this.nodes.map(n => ({ ...n, expanded: false })); this.refreshVisibleNodes(); }
+  private expandAll(): void { this.pageList?.clearInputSearch(); this.onSearch(''); this.nodes = this.nodes.map(n => ({ ...n, expanded: true })); this.refreshVisibleNodes(); }
+  private collapseAll(): void { this.pageList?.clearInputSearch(); this.onSearch(''); this.nodes = this.nodes.map(n => ({ ...n, expanded: false })); this.refreshVisibleNodes(); }
 }
