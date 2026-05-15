@@ -28,6 +28,8 @@ import {
 } from '@po-ui/ng-components';
 import { FlatNode, TreeviewColumn } from '../treeview-page';
 
+export const SENTINEL_ID = '__new__';
+
 @Component({
   selector: 'app-treeview-grid',
   standalone: true,
@@ -51,7 +53,7 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
   @Input() visibleNodes: FlatNode[] = [];
   @Input() editingId: string | null = null;
   @Input() selectedId: string | null = null;
-  @Input() sentinel = '__new__';
+  @Input() sentinel = SENTINEL_ID;
   @Input() rowHeight = 50;
 
   @Output() nodeSelect = new EventEmitter<FlatNode>();

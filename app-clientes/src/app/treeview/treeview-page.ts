@@ -3,7 +3,7 @@ import { AfterViewInit, ChangeDetectorRef, Component, HostListener, OnInit, Temp
 import { FormsModule } from '@angular/forms';
 import { PoButtonModule, PoFieldModule, PoLookupColumn, PoLookupFilter, PoLookupFilteredItemsParams, PoLookupResponseApi, PoNotificationService, PoPageAction, PoPageFilter, PoPageListComponent, PoPageModule, PoTableColumn, PoTagModule, PoTooltipModule } from '@po-ui/ng-components';
 import { Observable, of } from 'rxjs';
-import { TreeviewGridComponent } from './treeview-component/treeview-grid.component';
+import { SENTINEL_ID, TreeviewGridComponent } from './treeview-component/treeview-grid.component';
 
 export type TipoRecurso = 'Insumo' | 'Composição' | 'Valor cotado';
 
@@ -39,8 +39,6 @@ export interface FlatNode extends TreeNode {
   level: number;
   hasChildren: boolean;
 }
-
-const SENTINEL_ID = '__new__';
 
 const INSUMOS = [
   { id: 'INS001', nome: 'Cimento CP-II 32', unidade: 'KG', preco: 0.85   },
