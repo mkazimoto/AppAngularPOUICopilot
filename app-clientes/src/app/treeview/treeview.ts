@@ -1,9 +1,9 @@
-﻿import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
-import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, HostListener, NgZone, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+﻿import { CommonModule } from '@angular/common';
+import { AfterViewInit, ChangeDetectorRef, Component, HostListener, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PoButtonModule, PoFieldModule, PoLookupColumn, PoLookupFilter, PoLookupFilteredItemsParams, PoLookupResponseApi, PoNotificationService, PoPageAction, PoPageFilter, PoPageListComponent, PoPageModule, PoPageSlideComponent, PoPageSlideModule, PoSwitchLabelPosition, PoTableColumn, PoTagModule, PoTooltipModule } from '@po-ui/ng-components';
+import { PoButtonModule, PoFieldModule, PoLookupColumn, PoLookupFilter, PoLookupFilteredItemsParams, PoLookupResponseApi, PoNotificationService, PoPageAction, PoPageFilter, PoPageListComponent, PoPageModule, PoTableColumn, PoTagModule, PoTooltipModule } from '@po-ui/ng-components';
 import { Observable, of } from 'rxjs';
+import { TreeviewGridComponent } from './treeview-component/treeview-grid.component';
 
 export type TipoRecurso = 'Insumo' | 'Composição' | 'Valor cotado';
 
@@ -231,25 +231,18 @@ function buildEapNodes(): TreeNode[] {
 @Component({
   selector: 'app-treeview',
   standalone: true,
-  imports: [CommonModule, FormsModule, ScrollingModule, PoButtonModule, PoFieldModule, PoPageModule, PoPageSlideModule, PoTagModule, PoTooltipModule],
+  imports: [CommonModule, FormsModule, PoButtonModule, PoFieldModule, PoPageModule, PoTagModule, PoTooltipModule, TreeviewGridComponent],
   templateUrl: './treeview.html',
   styleUrl: './treeview.css',
 })
-export class Treeview implements OnInit, AfterViewInit, OnDestroy {
+export class Treeview implements OnInit, AfterViewInit {
   readonly SENTINEL = SENTINEL_ID;
   readonly ROW_HEIGHT = 50;
 
-  labelPosition: PoSwitchLabelPosition = PoSwitchLabelPosition.Right;
+  @ViewChild('pageList')       private pageList!:      PoPageListComponent;
+  @ViewChild(TreeviewGridComponent) treeviewGrid!:     TreeviewGridComponent;
 
-
-  // ── Adaptive viewport height ─────────────────────────────
-  viewportHeight = 600;
-  @ViewChild('treeviewGrid') treeviewGridRef!: ElementRef<HTMLElement>;
-  @ViewChild('treeviewHeader') treeviewHeaderRef!: ElementRef<HTMLElement>;
-  @ViewChild('pageList') private pageList!: PoPageListComponent;
-  private resizeObserver!: ResizeObserver;
-
-  // ── Column templates ───────────────────────────────────────
+  // ── Column templates (declarados neste template, passados ao filho) ──
   @ViewChild('colNome')        private colNomeTpl!:        TemplateRef<any>;
   @ViewChild('colTipoRecurso') private colTipoRecursoTpl!: TemplateRef<any>;
   @ViewChild('colRecurso')     private colRecursoTpl!:     TemplateRef<any>;
@@ -259,14 +252,12 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('colValor')       private colValorTpl!:       TemplateRef<any>;
   @ViewChild('colAcoes')       private colAcoesTpl!:       TemplateRef<any>;
 
-  // ── Column manager ─────────────────────────────────────────
-  @ViewChild('columnManagerSlide') columnManagerSlide!: PoPageSlideComponent;
-  @ViewChild(CdkVirtualScrollViewport) viewport!: CdkVirtualScrollViewport;
+  colTemplates: Record<string, TemplateRef<any>> = {};
 
-  private readonly COLUMNS_STORAGE_KEY = 'treeview_columns';
+  readonly columnsStorageKey = 'treeview_columns';
 
-  private readonly DEFAULT_COLUMNS: TreeviewColumn[] = [
-    { property: 'nome',        label: 'Nome',           widthPx: 450, visible: true, fixed: true },
+  readonly defaultColumns: TreeviewColumn[] = [
+    { property: 'nome',        label: 'Nome',            widthPx: 450, visible: true, fixed: true },
     { property: 'tipoRecurso', label: 'Tipo de Recurso', widthPx: 130, visible: true },
     { property: 'recurso',     label: 'Recurso',         widthPx: 200, visible: true },
     { property: 'quantidade',  label: 'Quantidade',      widthPx: 110, visible: true },
@@ -276,114 +267,12 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
     { property: 'acoes',       label: 'Ações',           widthPx: 100, visible: true, fixed: true },
   ];
 
-  columns: TreeviewColumn[] = [];
-
-  private loadColumns(): TreeviewColumn[] {
-    try {
-      const saved = localStorage.getItem(this.COLUMNS_STORAGE_KEY);
-      if (!saved) return this.DEFAULT_COLUMNS.map(c => ({ ...c }));
-      const parsed: Array<{ property: string; visible: boolean; widthPx: number }> = JSON.parse(saved);
-      const ordered: TreeviewColumn[] = parsed
-        .map(s => {
-          const def = this.DEFAULT_COLUMNS.find(d => d.property === s.property);
-          return def ? ({ ...def, visible: s.visible, widthPx: s.widthPx } as TreeviewColumn) : null;
-        })
-        .filter((c): c is TreeviewColumn => c !== null);
-      // append any new default columns not yet in storage
-      this.DEFAULT_COLUMNS.forEach(def => {
-        if (!ordered.find((o: TreeviewColumn) => o.property === def.property)) ordered.push({ ...def });
-      });
-      return ordered;
-    } catch {
-      return this.DEFAULT_COLUMNS.map(c => ({ ...c }));
-    }
-  }
-
-  saveColumns(): void {
-    const payload = this.columns.map(c => ({ property: c.property, visible: c.visible, widthPx: c.widthPx }));
-    localStorage.setItem(this.COLUMNS_STORAGE_KEY, JSON.stringify(payload));
-  }
-
-  // ── Resizable columns ──────────────────────────────────────
-  private _resizingCol = -1;
-  private _resizeStartX = 0;
-  private _resizeStartWidth = 0;
-
-  get colTemplate(): string {
-    return this.columns.filter(c => c.visible !== false).map(c => c.widthPx + 'px').join(' ');
-  }
-
-  isVisible(property: string): boolean {
-    return this.columns.find(c => c.property === property)?.visible !== false;
-  }
-
-  colOrder(property: string): number {
-    return this.columns.filter(c => c.visible !== false).findIndex(c => c.property === property);
-  }
-
-  openColumnManager(): void {
-    this.columnManagerSlide.open();
-  }
-
-  restoreColumns(): void {
-    this.columns = this.DEFAULT_COLUMNS.map(c => ({ ...c }));
-    this.bindColumnTemplates();
-    this.saveColumns();
-  }
-
-  moveColumn(property: string, direction: 'up' | 'down'): void {
-    const movable = this.columns.filter(c => !c.fixed);
-    const idx = movable.findIndex(c => c.property === property);
-    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
-    if (targetIdx < 0 || targetIdx >= movable.length) return;
-    const colIdx = this.columns.indexOf(movable[idx]);
-    const swapIdx = this.columns.indexOf(movable[targetIdx]);
-    const cols = [...this.columns];
-    [cols[colIdx], cols[swapIdx]] = [cols[swapIdx], cols[colIdx]];
-    this.columns = cols;
-    this.saveColumns();
-  }
-
-  isFirstMovable(property: string): boolean {
-    const movable = this.columns.filter(c => !c.fixed);
-    return movable.length > 0 && movable[0].property === property;
-  }
-
-  isLastMovable(property: string): boolean {
-    const movable = this.columns.filter(c => !c.fixed);
-    return movable.length > 0 && movable[movable.length - 1].property === property;
-  }
-
-  resizeStart(event: MouseEvent, property: string): void {
-    const idx = this.columns.findIndex(c => c.property === property);
-    if (idx < 0) return;
-    this._resizingCol      = idx;
-    this._resizeStartX     = event.clientX;
-    this._resizeStartWidth = this.columns[idx].widthPx;
-    event.preventDefault();
-  }
-
   @HostListener('input', ['$event'])
   onFilterInput(event: Event): void {
     const target = event.target as HTMLElement;
     // Reage apenas ao input do filtro da página (fora do grid e do gerenciador de colunas)
     if (!target.closest('.treeview-grid') && !target.closest('.column-manager-list')) {
       this.onSearch((target as HTMLInputElement).value);
-    }
-  }
-
-  @HostListener('document:mousemove', ['$event'])
-  onMouseMove(event: MouseEvent): void {
-    if (this._resizingCol < 0) return;
-    const delta = event.clientX - this._resizeStartX;
-    this.columns[this._resizingCol].widthPx = Math.max(60, this._resizeStartWidth + delta);
-  }
-
-  @HostListener('document:mouseup')
-  onMouseUp(): void {
-    if (this._resizingCol >= 0) {
-      this._resizingCol = -1;
-      this.saveColumns();
     }
   }
   // ───────────────────────────────────────────────────────────
@@ -455,26 +344,15 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
     { label: 'Recolher Todos', action: () => this.collapseAll(), icon: 'an an-arrows-in'   },
   ];
 
-  constructor(private notification: PoNotificationService, private ngZone: NgZone) {}
+  constructor(private notification: PoNotificationService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
-    this.columns = this.loadColumns();
     this.recalculateAll();
     this.refreshVisibleNodes();
   }
 
   ngAfterViewInit(): void {
-    this.calculateViewportHeight();
-    this.resizeObserver = new ResizeObserver(() => {
-      this.ngZone.run(() => this.calculateViewportHeight());
-    });
-    this.resizeObserver.observe(document.documentElement);
-
-    this.bindColumnTemplates();
-  }
-
-  private bindColumnTemplates(): void {
-    const tplMap: Record<string, TemplateRef<any>> = {
+    this.colTemplates = {
       nome:        this.colNomeTpl,
       tipoRecurso: this.colTipoRecursoTpl,
       recurso:     this.colRecursoTpl,
@@ -484,21 +362,7 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
       valor:       this.colValorTpl,
       acoes:       this.colAcoesTpl,
     };
-    this.columns = this.columns.map(col => ({ ...col, template: tplMap[col.property] }));
-  }
-
-  ngOnDestroy(): void {
-    this.resizeObserver?.disconnect();
-  }
-
-  private calculateViewportHeight(): void {
-    const grid = this.treeviewGridRef?.nativeElement;
-    const header = this.treeviewHeaderRef?.nativeElement;
-    if (!grid || !header) return;
-    const gridTop = grid.getBoundingClientRect().top;
-    const headerH = header.getBoundingClientRect().height;
-    const bottomPadding = 24;
-    this.viewportHeight = Math.max(300, window.innerHeight - gridTop - headerH - bottomPadding);
+    this.cdr.detectChanges();
   }
 
   onSearch(term: string | null): void {
@@ -565,19 +429,7 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
       if (parent) parent.expanded = true;
     }
     this.refreshVisibleNodes();
-    this.scrollToSentinel();
-  }
-
-  private scrollToSentinel(): void {
-    this.ngZone.onStable.pipe().subscribe(() => {
-      const idx = this.visibleNodes.findIndex(n => n.id === SENTINEL_ID);
-      if (idx < 0 || !this.viewport) return;
-      const totalHeight = this.viewport.measureScrollOffset('bottom') + this.viewport.measureScrollOffset('top') + this.viewport.elementRef.nativeElement.clientHeight;
-      const rowTop = idx * this.ROW_HEIGHT;
-      const viewportHeight = this.viewport.elementRef.nativeElement.clientHeight;
-      const centeredOffset = rowTop - (viewportHeight - this.ROW_HEIGHT) / 2;
-      this.viewport.scrollToOffset(Math.max(0, centeredOffset), 'smooth');
-    }).unsubscribe();
+    this.treeviewGrid?.scrollToSentinel();
   }
 
   cancelAdd(): void { this.pendingAdd = null; this.refreshVisibleNodes(); }
@@ -741,7 +593,6 @@ export class Treeview implements OnInit, AfterViewInit, OnDestroy {
   get addPreviewValue(): number  { return (this.addForm.quantity  || 0) * (this.addForm.price  || 0); }
   get editUnitReadonly(): boolean { return !!this.editForm.recursoId; }
   get addUnitReadonly(): boolean  { return !!this.addForm.recursoId; }
-  get totalProjeto(): number     { return this.nodes.filter(n => n.parentId === null).reduce((s, n) => s + (n.value || 0), 0); }
 
   private getAllDescendantIds(parentId: string): string[] {
     const childrenMap = new Map<string, string[]>();

@@ -1,0 +1,113 @@
+<div class="treeview-grid" #treeviewGrid>
+
+  <!-- ── Botão gerenciador de colunas ─────────────────────── -->
+  <po-button
+    class="column-manager-btn"
+    p-icon="an an-gear"
+    p-kind="tertiary"
+    p-size="small"
+    p-label=""
+    p-tooltip="Gerenciar de colunas"
+    (p-click)="openColumnManager()">
+  </po-button>
+
+  <!-- ── Sticky header ─────────────────────────────────────── -->
+  <div class="treeview-header" #treeviewHeader [style.grid-template-columns]="colTemplate">
+    @for (col of columns; track col.property) {
+      @if (col.visible !== false) {
+        <div [class]="'th th-' + col.property">
+          {{ col.label }}
+          @if (col.property !== 'acoes') {
+            <span class="col-resize-handle" (mousedown)="resizeStart($event, col.property)"></span>
+          }
+        </div>
+      }
+    }
+  </div>
+
+  <!-- ── Virtual scroll body ───────────────────────────────── -->
+  <cdk-virtual-scroll-viewport [itemSize]="rowHeight" class="treeview-viewport" [style.height.px]="viewportHeight">
+
+    <div
+      *cdkVirtualFor="let node of visibleNodes; trackBy: trackById"
+      class="treeview-row"
+      [style.grid-template-columns]="colTemplate"
+      [class.treeview-row--editing]="node.id === editingId || node.id === sentinel"
+      [class.treeview-row--selected]="node.id === selectedId && node.id !== sentinel"
+      [style.height.px]="rowHeight"
+      (click)="nodeSelect.emit(node)"
+    >
+      @for (col of columns; track col.property) {
+        @if (col.visible !== false && col.template) {
+          <ng-container *ngTemplateOutlet="col.template; context: { $implicit: node }"></ng-container>
+        }
+      }
+    </div>
+
+    <!-- Empty state -->
+    @if (visibleNodes.length === 0) {
+      <div class="empty-row">
+        <i class="an an-tree-structure empty-icon"></i>
+        <p>Nenhum item. Clique em <strong>Adicionar Tarefa</strong> para começar.</p>
+      </div>
+    }
+
+  </cdk-virtual-scroll-viewport>
+
+  <!-- ── Gerenciador de colunas ──────────────────────────── -->
+  <po-page-slide
+    #columnManagerSlide
+    p-title="Gerenciar Colunas"
+    p-size="auto"
+    [p-click-out]="true">
+
+    <div class="column-manager-list">
+      @for (col of columns; track col.property) {
+        @if (!col.fixed) {
+          <div class="column-manager-item">
+            <po-switch
+              [name]="'col-' + col.property"
+              [p-label]="col.label ?? ''"
+              [p-label-position]="labelPosition"
+              [p-label-on]="' '"
+              [p-label-off]="' '"
+              [(ngModel)]="col.visible"
+              (ngModelChange)="saveColumns()">
+            </po-switch>
+            <div class="column-manager-move">
+              <po-button
+                p-icon="an an-caret-up"
+                p-kind="secondary"
+                p-size="small"
+                p-label=""
+                p-tooltip="Mover para cima"
+                [p-disabled]="isFirstMovable(col.property)"
+                (p-click)="moveColumn(col.property, 'up')">
+              </po-button>
+              <po-button
+                p-icon="an an-caret-down"
+                p-kind="secondary"
+                p-size="small"
+                p-label=""
+                p-tooltip="Mover para baixo"
+                [p-disabled]="isLastMovable(col.property)"
+                (p-click)="moveColumn(col.property, 'down')">
+              </po-button>
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+    <po-page-slide-footer>
+      <po-button
+        p-kind="secondary"
+        p-label="Restaurar padrão"
+        p-icon="an an-arrow-counterclockwise"
+        (p-click)="restoreColumns()">
+      </po-button>
+    </po-page-slide-footer>
+
+  </po-page-slide>
+
+</div>

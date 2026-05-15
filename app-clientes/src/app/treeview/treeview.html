@@ -1,44 +1,11 @@
 <po-page-list #pageList p-title="TreeView Editável com 10.000 registros" [p-actions]="pageActions" [p-filter]="pageFilter">
 
-  <div class="project-total">
-    <div class="project-total__summary">
-      <span class="project-total__label">Valor total do projeto</span>
-      <span class="project-total__value">{{ totalProjeto | currency:'BRL':'symbol':'1.2-2' }}</span>
-    </div>
-  </div>
 
-  <div class="treeview-grid" #treeviewGrid>
-
-    <!-- ── Botão gerenciador de colunas ─────────────────── -->
-    <po-button
-      class="column-manager-btn"
-      p-icon="an an-gear"
-      p-kind="tertiary"
-      p-size="small"
-      p-label=""
-      p-tooltip="Gerenciar de colunas"
-      (p-click)="openColumnManager()">
-    </po-button>
-
-    <!-- ── Sticky header ─────────────────────────────────── -->
-    <div class="treeview-header" #treeviewHeader [style.grid-template-columns]="colTemplate">
-      @for (col of columns; track col.property) {
-        @if (col.visible !== false) {
-          <div [class]="'th th-' + col.property" [style.order]="colOrder(col.property)">
-            {{ col.label }}
-            @if (col.property !== 'acoes') {
-              <span class="col-resize-handle" (mousedown)="resizeStart($event, col.property)"></span>
-            }
-          </div>
-        }
-      }
-    </div>
-
-    <!-- ── Templates de coluna ──────────────────────────────── -->
+  <!-- ── Templates de coluna (declarados aqui, passados ao componente filho via colTemplates) ── -->
 
     <!-- Coluna Nome -->
     <ng-template #colNome let-node>
-      <div class="td td-nome" [style.order]="colOrder('nome')">
+      <div class="td td-nome">
         <div class="tree-cell" [style.paddingLeft]="indentPx(node.level)">
           @if (node.hasChildren && node.id !== editingId && node.id !== SENTINEL) {
             <button
@@ -88,224 +55,212 @@
 
     <!-- Coluna Tipo de Recurso -->
     <ng-template #colTipoRecurso let-node>
-      @if (isVisible('tipoRecurso')) {
-        <div class="td td-tipo-recurso" [style.order]="colOrder('tipoRecurso')">
-          @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
-            <po-tag [p-value]="node.tipoRecurso || 'Valor cotado'" p-text-color="White" [p-color]="tipoRecursoColor(node.tipoRecurso)"></po-tag>
-          }
-          @if (node.id === editingId && editingIsLeaf) {
-            <po-select
-              name="editTipoRecurso"
-              [p-options]="tipoRecursoOptions"
-              [ngModel]="editForm.tipoRecurso"
-              (ngModelChange)="onEditTipoRecursoChange($event)">
-            </po-select>
-          }
-          @if (node.id === SENTINEL) {
-            <po-select
-              name="addTipoRecurso"
-              [p-options]="tipoRecursoOptions"
-              [ngModel]="addForm.tipoRecurso"
-              (ngModelChange)="onAddTipoRecursoChange($event)">
-            </po-select>
-          }
-        </div>
-      }
+      <div class="td td-tipo-recurso">
+        @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
+          <po-tag [p-value]="node.tipoRecurso || 'Valor cotado'" p-text-color="White" [p-color]="tipoRecursoColor(node.tipoRecurso)"></po-tag>
+        }
+        @if (node.id === editingId && editingIsLeaf) {
+          <po-select
+            name="editTipoRecurso"
+            [p-options]="tipoRecursoOptions"
+            [ngModel]="editForm.tipoRecurso"
+            (ngModelChange)="onEditTipoRecursoChange($event)">
+          </po-select>
+        }
+        @if (node.id === SENTINEL) {
+          <po-select
+            name="addTipoRecurso"
+            [p-options]="tipoRecursoOptions"
+            [ngModel]="addForm.tipoRecurso"
+            (ngModelChange)="onAddTipoRecursoChange($event)">
+          </po-select>
+        }
+      </div>
     </ng-template>
 
     <!-- Coluna Recurso -->
     <ng-template #colRecurso let-node>
-      @if (isVisible('recurso')) {
-        <div class="td td-recurso" [style.order]="colOrder('recurso')">
-          @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
-            @if (node.recursoId) {
-              <a class="recurso-link" [href]="'app://editar-recurso/' + node.recursoId">{{ node.recurso }}</a>
-            } @else {
-              <span>{{ node.recurso }}</span>
-            }
+      <div class="td td-recurso">
+        @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
+          @if (node.recursoId) {
+            <a class="recurso-link" [href]="'app://editar-recurso/' + node.recursoId">{{ node.recurso }}</a>
+          } @else {
+            <span>{{ node.recurso }}</span>
           }
-          <!-- Edit: Insumo -->
-          @if (node.id === editingId && editingIsLeaf && editForm.tipoRecurso === 'Insumo') {
-            <po-lookup
-              name="editRecurso"
-              p-placeholder="Selecionar insumo"
-              p-field-value="id"
-              p-field-label="nome"
-              p-clean
-              [p-filter-service]="insumoService"
-              [p-columns]="insumoColumns"
-              [(ngModel)]="editForm.recursoId"
-              (p-selected)="onEditRecursoSelected($event)"
-              (p-change)="onEditRecursoChange($event)">
-            </po-lookup>
-          }
-          <!-- Edit: Composição -->
-          @if (node.id === editingId && editingIsLeaf && editForm.tipoRecurso === 'Composição') {
-            <po-lookup
-              name="editComposicao"
-              p-placeholder="Selecionar composição"
-              p-field-value="id"
-              p-field-label="nome"
-              p-clean
-              [p-filter-service]="composicaoService"
-              [p-columns]="composicaoColumns"
-              [(ngModel)]="editForm.recursoId"
-              (p-selected)="onEditComposicaoSelected($event)"
-              (p-change)="onEditComposicaoChange($event)">
-            </po-lookup>
-          }
-          <!-- Add: Insumo -->
-          @if (node.id === SENTINEL && addForm.tipoRecurso === 'Insumo') {
-            <po-lookup
-              name="addRecurso"
-              p-placeholder="Selecionar insumo"
-              p-field-value="id"
-              p-field-label="nome"
-              p-clean
-              [p-filter-service]="insumoService"
-              [p-columns]="insumoColumns"
-              [(ngModel)]="addForm.recursoId"
-              (p-selected)="onAddRecursoSelected($event)"
-              (p-change)="onAddRecursoChange($event)">
-            </po-lookup>
-          }
-          <!-- Add: Composição -->
-          @if (node.id === SENTINEL && addForm.tipoRecurso === 'Composição') {
-            <po-lookup
-              name="addComposicao"
-              p-placeholder="Selecionar composição"
-              p-field-value="id"
-              p-field-label="nome"
-              p-clean
-              [p-filter-service]="composicaoService"
-              [p-columns]="composicaoColumns"
-              [(ngModel)]="addForm.recursoId"
-              (p-selected)="onAddComposicaoSelected($event)"
-              (p-change)="onAddComposicaoChange($event)">
-            </po-lookup>
-          }
-        </div>
-      }
+        }
+        <!-- Edit: Insumo -->
+        @if (node.id === editingId && editingIsLeaf && editForm.tipoRecurso === 'Insumo') {
+          <po-lookup
+            name="editRecurso"
+            p-placeholder="Selecionar insumo"
+            p-field-value="id"
+            p-field-label="nome"
+            p-clean
+            [p-filter-service]="insumoService"
+            [p-columns]="insumoColumns"
+            [(ngModel)]="editForm.recursoId"
+            (p-selected)="onEditRecursoSelected($event)"
+            (p-change)="onEditRecursoChange($event)">
+          </po-lookup>
+        }
+        <!-- Edit: Composição -->
+        @if (node.id === editingId && editingIsLeaf && editForm.tipoRecurso === 'Composição') {
+          <po-lookup
+            name="editComposicao"
+            p-placeholder="Selecionar composição"
+            p-field-value="id"
+            p-field-label="nome"
+            p-clean
+            [p-filter-service]="composicaoService"
+            [p-columns]="composicaoColumns"
+            [(ngModel)]="editForm.recursoId"
+            (p-selected)="onEditComposicaoSelected($event)"
+            (p-change)="onEditComposicaoChange($event)">
+          </po-lookup>
+        }
+        <!-- Add: Insumo -->
+        @if (node.id === SENTINEL && addForm.tipoRecurso === 'Insumo') {
+          <po-lookup
+            name="addRecurso"
+            p-placeholder="Selecionar insumo"
+            p-field-value="id"
+            p-field-label="nome"
+            p-clean
+            [p-filter-service]="insumoService"
+            [p-columns]="insumoColumns"
+            [(ngModel)]="addForm.recursoId"
+            (p-selected)="onAddRecursoSelected($event)"
+            (p-change)="onAddRecursoChange($event)">
+          </po-lookup>
+        }
+        <!-- Add: Composição -->
+        @if (node.id === SENTINEL && addForm.tipoRecurso === 'Composição') {
+          <po-lookup
+            name="addComposicao"
+            p-placeholder="Selecionar composição"
+            p-field-value="id"
+            p-field-label="nome"
+            p-clean
+            [p-filter-service]="composicaoService"
+            [p-columns]="composicaoColumns"
+            [(ngModel)]="addForm.recursoId"
+            (p-selected)="onAddComposicaoSelected($event)"
+            (p-change)="onAddComposicaoChange($event)">
+          </po-lookup>
+        }
+      </div>
     </ng-template>
 
     <!-- Coluna Quantidade -->
     <ng-template #colQuantidade let-node>
-      @if (isVisible('quantidade')) {
-        <div class="td td-quantidade" [style.order]="colOrder('quantidade')">
-          @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
-            <span>{{ node.quantity }}</span>
-          }
-          @if (node.id === editingId && editingIsLeaf) {
-            <po-decimal
-              name="editQuantity"
-              p-placeholder="Qtd"
-              [p-decimals-length]="3"
-              [(ngModel)]="editForm.quantity"
-              (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()">
-            </po-decimal>
-          }
-          @if (node.id === SENTINEL) {
-            <po-decimal
-              name="addQuantity"
-              p-placeholder="Qtd"
-              [p-decimals-length]="3"
-              [(ngModel)]="addForm.quantity"
-              (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()">
-            </po-decimal>
-          }
-        </div>
-      }
+      <div class="td td-quantidade">
+        @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
+          <span>{{ node.quantity }}</span>
+        }
+        @if (node.id === editingId && editingIsLeaf) {
+          <po-decimal
+            name="editQuantity"
+            p-placeholder="Qtd"
+            [p-decimals-length]="3"
+            [(ngModel)]="editForm.quantity"
+            (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()">
+          </po-decimal>
+        }
+        @if (node.id === SENTINEL) {
+          <po-decimal
+            name="addQuantity"
+            p-placeholder="Qtd"
+            [p-decimals-length]="3"
+            [(ngModel)]="addForm.quantity"
+            (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()">
+          </po-decimal>
+        }
+      </div>
     </ng-template>
 
     <!-- Coluna Unidade -->
     <ng-template #colUnidade let-node>
-      @if (isVisible('unidade')) {
-        <div class="td td-unidade" [style.order]="colOrder('unidade')">
-          @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
-            <span>{{ node.unit }}</span>
-          }
-          @if (node.id === editingId && editingIsLeaf) {
-            <po-lookup
-              name="editUnit"
-              p-placeholder="Unidade"
-              p-field-value="value"
-              p-field-label="label"
-              p-clean
-              [p-filter-service]="unitService"
-              [p-columns]="unitColumns"
-              [p-disabled]="editUnitReadonly"
-              [(ngModel)]="editForm.unit">
-            </po-lookup>
-          }
-          @if (node.id === SENTINEL) {
-            <po-lookup
-              name="addUnit"
-              p-placeholder="Unidade"
-              p-field-value="value"
-              p-field-label="label"
-              p-clean
-              [p-filter-service]="unitService"
-              [p-columns]="unitColumns"
-              [p-disabled]="addUnitReadonly"
-              [(ngModel)]="addForm.unit">
-            </po-lookup>
-          }
-        </div>
-      }
+      <div class="td td-unidade">
+        @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
+          <span>{{ node.unit }}</span>
+        }
+        @if (node.id === editingId && editingIsLeaf) {
+          <po-lookup
+            name="editUnit"
+            p-placeholder="Unidade"
+            p-field-value="value"
+            p-field-label="label"
+            p-clean
+            [p-filter-service]="unitService"
+            [p-columns]="unitColumns"
+            [p-disabled]="editUnitReadonly"
+            [(ngModel)]="editForm.unit">
+          </po-lookup>
+        }
+        @if (node.id === SENTINEL) {
+          <po-lookup
+            name="addUnit"
+            p-placeholder="Unidade"
+            p-field-value="value"
+            p-field-label="label"
+            p-clean
+            [p-filter-service]="unitService"
+            [p-columns]="unitColumns"
+            [p-disabled]="addUnitReadonly"
+            [(ngModel)]="addForm.unit">
+          </po-lookup>
+        }
+      </div>
     </ng-template>
 
     <!-- Coluna Preço -->
     <ng-template #colPreco let-node>
-      @if (isVisible('preco')) {
-        <div class="td td-preco" [style.order]="colOrder('preco')">
-          @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
-            <span>{{ node.price | currency:'BRL':'symbol':'1.2-2' }}</span>
-          }
-          @if (node.id === editingId && editingIsLeaf) {
-            <po-decimal
-              name="editPrice"
-              p-placeholder="Preço Unitário"
-              [p-decimals-length]="2"
-              [(ngModel)]="editForm.price"
-              (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()">
-            </po-decimal>
-          }
-          @if (node.id === SENTINEL) {
-            <po-decimal
-              name="addPrice"
-              p-placeholder="Preço"
-              [p-decimals-length]="2"
-              [(ngModel)]="addForm.price"
-              (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()">
-            </po-decimal>
-          }
-        </div>
-      }
+      <div class="td td-preco">
+        @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
+          <span>{{ node.price | currency:'BRL':'symbol':'1.2-2' }}</span>
+        }
+        @if (node.id === editingId && editingIsLeaf) {
+          <po-decimal
+            name="editPrice"
+            p-placeholder="Preço Unitário"
+            [p-decimals-length]="2"
+            [(ngModel)]="editForm.price"
+            (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()">
+          </po-decimal>
+        }
+        @if (node.id === SENTINEL) {
+          <po-decimal
+            name="addPrice"
+            p-placeholder="Preço"
+            [p-decimals-length]="2"
+            [(ngModel)]="addForm.price"
+            (keyup.enter)="saveAdd()" (keyup.escape)="cancelAdd()">
+          </po-decimal>
+        }
+      </div>
     </ng-template>
 
     <!-- Coluna Valor -->
     <ng-template #colValor let-node>
-      @if (isVisible('valor')) {
-        <div class="td td-valor" [style.order]="colOrder('valor')">
-          @if (node.id !== editingId && node.id !== SENTINEL) {
-            <span>{{ node.value | currency:'BRL':'symbol':'1.2-2' }}</span>
-          }
-          @if (node.id === editingId && editingIsLeaf) {
-            <span>{{ editPreviewValue | currency:'BRL':'symbol':'1.2-2' }}</span>
-          }
-          @if (node.id === editingId && !editingIsLeaf) {
-            <span>{{ node.value | currency:'BRL':'symbol':'1.2-2' }}</span>
-          }
-          @if (node.id === SENTINEL) {
-            <span>{{ addPreviewValue | currency:'BRL':'symbol':'1.2-2' }}</span>
-          }
-        </div>
-      }
+      <div class="td td-valor">
+        @if (node.id !== editingId && node.id !== SENTINEL) {
+          <span>{{ node.value | currency:'BRL':'symbol':'1.2-2' }}</span>
+        }
+        @if (node.id === editingId && editingIsLeaf) {
+          <span>{{ editPreviewValue | currency:'BRL':'symbol':'1.2-2' }}</span>
+        }
+        @if (node.id === editingId && !editingIsLeaf) {
+          <span>{{ node.value | currency:'BRL':'symbol':'1.2-2' }}</span>
+        }
+        @if (node.id === SENTINEL) {
+          <span>{{ addPreviewValue | currency:'BRL':'symbol':'1.2-2' }}</span>
+        }
+      </div>
     </ng-template>
 
     <!-- Coluna Ações -->
     <ng-template #colAcoes let-node>
-      <div class="td td-acoes" [style.order]="colOrder('acoes')">
+      <div class="td td-acoes">
         @if (node.id !== SENTINEL && node.id !== editingId) {
           <div class="actions-row">
             <po-button p-icon="an an-pencil" p-kind="tertiary" p-label="" p-size="small" (p-click)="startEdit(node)" p-tooltip="Editar" p-append-in-body="true"></po-button>
@@ -328,92 +283,18 @@
       </div>
     </ng-template>
 
-    <!-- ── Virtual scroll body ───────────────────────────── -->
-    <cdk-virtual-scroll-viewport [itemSize]="ROW_HEIGHT" class="treeview-viewport" [style.height.px]="viewportHeight">
 
-      <div
-        *cdkVirtualFor="let node of visibleNodes; trackBy: trackById"
-        class="treeview-row"
-        [style.grid-template-columns]="colTemplate"
-        [class.treeview-row--editing]="node.id === editingId || node.id === SENTINEL"
-        [class.treeview-row--selected]="node.id === selectedId && node.id !== SENTINEL"
-        [style.height.px]="ROW_HEIGHT"
-        (click)="selectNode(node)"
-      >
-        @for (col of columns; track col.property) {
-          @if (col.visible !== false && col.template) {
-            <ng-container *ngTemplateOutlet="col.template; context: { $implicit: node }"></ng-container>
-          }
-        }
-      </div>
-
-      <!-- Empty state -->
-      @if (visibleNodes.length === 0) {
-        <div class="empty-row">
-          <i class="an an-tree-structure empty-icon"></i>
-          <p>Nenhum item. Clique em <strong>Adicionar Tarefa</strong> para começar.</p>
-        </div>
-      }
-
-    </cdk-virtual-scroll-viewport>
-
-  </div>
-
-
-  <!-- ── Gerenciador de colunas ──────────────────────────── -->
-  <po-page-slide
-    #columnManagerSlide
-    p-title="Gerenciar Colunas"
-    p-size="auto"
-    [p-click-out]="true">
-
-    <div class="column-manager-list">
-      @for (col of columns; track col.property) {
-        @if (!col.fixed) {
-          <div class="column-manager-item">
-            <po-switch
-              [name]="'col-' + col.property"
-              [p-label]="col.label ?? ''"
-              [p-label-position]="labelPosition"              
-              [p-label-on]="' '"
-              [p-label-off]="' '"
-              [(ngModel)]="col.visible"
-              (ngModelChange)="saveColumns()">
-            </po-switch>
-            <div class="column-manager-move">
-              <po-button
-                p-icon="an an-caret-up"
-                p-kind="secondary"
-                p-size="small"
-                p-label=""
-                p-tooltip="Mover para cima"
-                [p-disabled]="isFirstMovable(col.property)"
-                (p-click)="moveColumn(col.property, 'up')">
-              </po-button>
-              <po-button
-                p-icon="an an-caret-down"
-                p-kind="secondary"
-                p-size="small"
-                p-label=""
-                p-tooltip="Mover para baixo"
-                [p-disabled]="isLastMovable(col.property)"
-                (p-click)="moveColumn(col.property, 'down')">
-              </po-button>
-            </div>
-          </div>
-        }
-      }
-    </div>
-
-    <po-page-slide-footer>
-      <po-button
-        p-kind="secondary"
-        p-label="Restaurar padrão"
-        p-icon="an an-arrow-counterclockwise"
-        (p-click)="restoreColumns()">
-      </po-button>
-    </po-page-slide-footer>
-
-  </po-page-slide>
+  <!-- ── Componente de grid reutilizável ──────────────────────── -->
+  <app-treeview-grid
+    [colTemplates]="colTemplates"
+    [defaultColumns]="defaultColumns"
+    [columnsStorageKey]="columnsStorageKey"
+    [visibleNodes]="visibleNodes"
+    [editingId]="editingId"
+    [selectedId]="selectedId"
+    [sentinel]="SENTINEL"
+    [rowHeight]="ROW_HEIGHT"
+    (nodeSelect)="selectNode($event)">
+  </app-treeview-grid>
 
 </po-page-list>

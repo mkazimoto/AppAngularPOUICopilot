@@ -1,0 +1,302 @@
+/* ─── Container ─────────────────────────────────────────────── */
+.treeview-grid {
+  position: relative;
+  border: 1px solid var(--color-neutral-light-20, #e0e0e0);
+  border-radius: 4px;
+  overflow: visible;
+  font-size: 0.875rem;
+  color: var(--color-neutral-dark-95, #1a1a1a);
+}
+
+/* ─── Gear button ─────────────────────────────────────────── */
+.column-manager-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 2;
+}
+
+/* ─── Grid columns (header + rows share same template) ──────── */
+.treeview-header,
+.treeview-row {
+  display: grid;
+  align-items: center;
+}
+
+/* ─── Sticky header ─────────────────────────────────────────── */
+.treeview-header {
+  background-color: var(--color-neutral-light-10, #f5f5f5);
+  border-bottom: 2px solid var(--color-neutral-mid-40, #c0c0c0);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.th {
+  padding: 12px 16px;
+  font-weight: 700;
+  color: var(--color-neutral-dark-90, #333);
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ─── Column resize handle ──────────────────────────────────── */
+.col-resize-handle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 6px;
+  cursor: col-resize;
+  user-select: none;
+  z-index: 2;
+}
+
+.col-resize-handle:hover,
+.col-resize-handle:active {
+  border-right: 2px solid var(--color-action-default, #0079b8);
+}
+
+/* ─── Virtual scroll viewport ───────────────────────────────── */
+.treeview-viewport {
+  width: 100%;
+}
+
+/* ─── Row ────────────────────────────────────────────────────── */
+.treeview-row {
+  border-bottom: 1px solid var(--color-neutral-light-20, #e8e8e8);
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.treeview-row:hover {
+  background-color: var(--color-brand-01-lightest, #eaf4fd);
+  transition: background-color 0.15s ease;
+}
+
+.treeview-row:hover .td {
+  background-color: transparent;
+}
+
+/* ─── Cell ───────────────────────────────────────────────────── */
+.td {
+  padding: 6px 16px;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.td.td-acoes {
+  padding-left: 2px;
+  padding-right: 2px;
+  overflow: visible;
+}
+
+/* ─── Right-aligned value columns ──────────────────────────── */
+.td.td-quantidade,
+.td.td-preco,
+.td.td-valor {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.td.td-quantidade .inline-input,
+.td.td-preco .inline-input,
+.td.td-valor .inline-input {
+  text-align: right;
+}
+
+.th.th-quantidade,
+.th.th-preco,
+.th.th-valor {
+  text-align: right;
+}
+
+/* ─── Editing row highlight ──────────────────────────────────── */
+.treeview-row--editing .td {
+  background-color: var(--color-brand-01-lightest, #eaf4fd) !important;
+}
+
+/* ─── Selected row highlight ─────────────────────────────────── */
+.treeview-row--selected {
+  position: relative;
+  background-color: var(--color-brand-01-lighter, #c2ddf5) !important;
+}
+
+.treeview-row--selected .td {
+  background-color: transparent !important;
+}
+
+/* ─── Recurso lookup cell ──────────────────────────────────── */
+.td-recurso po-lookup {
+  width: 100%;
+}
+.td.td-recurso {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.recurso-link {
+  color: var(--color-action-default, #0079b8);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recurso-link:hover {
+  text-decoration: underline;
+}
+
+/* ─── Tree cell (indent + icon + label) ─────────────────────── */
+.tree-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* ─── Expand/collapse button ────────────────────────────────── */
+.expand-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-action-default, #0079b8);
+  cursor: pointer;
+  transition: background-color 0.15s;
+  padding: 0;
+}
+
+.expand-btn:hover {
+  background-color: var(--color-brand-01-lighter, #c0dff5);
+}
+
+.expand-btn i {
+  font-size: 11px;
+}
+
+/* ─── Spacer for leaf nodes ────────────────────────────────── */
+.expand-spacer {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+/* ─── Node icon ─────────────────────────────────────────────── */
+.node-icon {
+  font-size: 15px;
+  flex-shrink: 0;
+  color: var(--color-action-default, #0079b8);
+}
+
+/* ─── New row icon ───────────────────────────────────────────── */
+.node-icon--new {
+  color: var(--color-feedback-positive-dark, #1d8348);
+}
+
+/* ─── Node label ────────────────────────────────────────────── */
+.node-label {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─── Actions cell ──────────────────────────────────────────── */
+.actions-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0;
+}
+
+/* ─── Inline inputs ─────────────────────────────────────────── */
+.inline-input,
+.inline-select {
+  display: block;
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--color-neutral-mid-40, #c0c0c0);
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  font-family: inherit;
+  color: var(--color-neutral-dark-95, #1a1a1a);
+  background-color: var(--color-neutral-light-00, #fff);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.inline-input:focus,
+.inline-select:focus {
+  border-color: var(--color-action-default, #0079b8);
+  box-shadow: 0 0 0 2px var(--color-brand-01-lighter, #c2ddf5);
+}
+
+.inline-select {
+  cursor: pointer;
+}
+
+/* ─── Empty state ───────────────────────────────────────────── */
+.empty-row {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--color-neutral-mid-60, #999);
+}
+
+.empty-icon {
+  font-size: 40px;
+  display: block;
+  margin: 0 auto 12px;
+  opacity: 0.35;
+}
+
+.empty-row p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* ─── Column manager ────────────────────────────────────────── */
+.column-manager-list {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.column-manager-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--color-neutral-light-20, #e0e0e0);
+}
+
+.column-manager-item:last-child {
+  border-bottom: none;
+}
+
+.column-manager-item po-switch {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.column-manager-move {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  flex-shrink: 0;
+  margin-left: auto;
+}
