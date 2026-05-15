@@ -27,7 +27,11 @@ import {
     PoTableColumn,
     PoTooltipModule,
 } from '@po-ui/ng-components';
-import { FlatNode } from '../treeview-page';
+export interface FlatNode {
+  id: string;
+  level: number;
+  hasChildren: boolean;
+}
 
 export const NEW_ID = '__new__';
 
