@@ -232,8 +232,8 @@ function buildEapNodes(): TreeNode[] {
   selector: 'app-treeview',
   standalone: true,
   imports: [CommonModule, FormsModule, PoButtonModule, PoFieldModule, PoPageModule, PoTagModule, PoTooltipModule, TreeviewGridComponent],
-  templateUrl: './treeview.html',
-  styleUrl: './treeview.css',
+  templateUrl: './treeview-page.html',
+  styleUrl: './treeview-page.css',
 })
 export class Treeview implements OnInit, AfterViewInit {
   readonly SENTINEL = SENTINEL_ID;

@@ -26,7 +26,7 @@ import {
     PoSwitchLabelPosition,
     PoTooltipModule,
 } from '@po-ui/ng-components';
-import { FlatNode, TreeviewColumn } from '../treeview';
+import { FlatNode, TreeviewColumn } from '../treeview-page';
 
 @Component({
   selector: 'app-treeview-grid',
