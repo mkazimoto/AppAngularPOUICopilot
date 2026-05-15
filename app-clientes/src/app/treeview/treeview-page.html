@@ -7,7 +7,7 @@
     <ng-template #colNome let-node>
       <div class="td td-nome">
         <div class="tree-cell" [style.paddingLeft]="indentPx(node.level)">
-          @if (node.hasChildren && node.id !== editingId && node.id !== SENTINEL) {
+          @if (node.hasChildren && node.id !== editingId && node.id !== NEW_ID) {
             <button
               class="expand-btn"
               (click)="toggle(node)"
@@ -21,7 +21,7 @@
             <span class="expand-spacer"></span>
           }
 
-          @if (node.id !== SENTINEL) {
+          @if (node.id !== NEW_ID) {
             <i class="an node-icon"
                [class.an-folder]="node.hasChildren && !node.expanded"
                [class.an-folder-open]="node.hasChildren && node.expanded"
@@ -30,7 +30,7 @@
             <i class="an an-plus-circle node-icon node-icon--new"></i>
           }
 
-          @if (node.id !== SENTINEL && node.id !== editingId) {
+          @if (node.id !== NEW_ID && node.id !== editingId) {
             <span class="node-label">{{ node.label }}</span>
           }
           @if (node.id === editingId) {
@@ -41,7 +41,7 @@
               (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()">
             </po-input>
           }
-          @if (node.id === SENTINEL) {
+          @if (node.id === NEW_ID) {
             <po-input
               name="addLabel"
               p-placeholder="Nome"
@@ -56,7 +56,7 @@
     <!-- Coluna Tipo de Recurso -->
     <ng-template #colTipoRecurso let-node>
       <div class="td td-tipo-recurso">
-        @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
+        @if (node.id !== NEW_ID && node.id !== editingId && !node.hasChildren) {
           <po-tag [p-value]="node.tipoRecurso || 'Valor cotado'" p-text-color="White" [p-color]="tipoRecursoColor(node.tipoRecurso)"></po-tag>
         }
         @if (node.id === editingId && editingIsLeaf) {
@@ -67,7 +67,7 @@
             (ngModelChange)="onEditTipoRecursoChange($event)">
           </po-select>
         }
-        @if (node.id === SENTINEL) {
+        @if (node.id === NEW_ID) {
           <po-select
             name="addTipoRecurso"
             [p-options]="tipoRecursoOptions"
@@ -81,7 +81,7 @@
     <!-- Coluna Recurso -->
     <ng-template #colRecurso let-node>
       <div class="td td-recurso">
-        @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
+        @if (node.id !== NEW_ID && node.id !== editingId && !node.hasChildren) {
           @if (node.recursoId) {
             <a class="recurso-link" [href]="'app://editar-recurso/' + node.recursoId">{{ node.recurso }}</a>
           } @else {
@@ -119,7 +119,7 @@
           </po-lookup>
         }
         <!-- Add: Insumo -->
-        @if (node.id === SENTINEL && addForm.tipoRecurso === 'Insumo') {
+        @if (node.id === NEW_ID && addForm.tipoRecurso === 'Insumo') {
           <po-lookup
             name="addRecurso"
             p-placeholder="Selecionar insumo"
@@ -134,7 +134,7 @@
           </po-lookup>
         }
         <!-- Add: Composição -->
-        @if (node.id === SENTINEL && addForm.tipoRecurso === 'Composição') {
+        @if (node.id === NEW_ID && addForm.tipoRecurso === 'Composição') {
           <po-lookup
             name="addComposicao"
             p-placeholder="Selecionar composição"
@@ -154,7 +154,7 @@
     <!-- Coluna Quantidade -->
     <ng-template #colQuantidade let-node>
       <div class="td td-quantidade">
-        @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
+        @if (node.id !== NEW_ID && node.id !== editingId && !node.hasChildren) {
           <span>{{ node.quantity }}</span>
         }
         @if (node.id === editingId && editingIsLeaf) {
@@ -166,7 +166,7 @@
             (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()">
           </po-decimal>
         }
-        @if (node.id === SENTINEL) {
+        @if (node.id === NEW_ID) {
           <po-decimal
             name="addQuantity"
             p-placeholder="Qtd"
@@ -181,7 +181,7 @@
     <!-- Coluna Unidade -->
     <ng-template #colUnidade let-node>
       <div class="td td-unidade">
-        @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
+        @if (node.id !== NEW_ID && node.id !== editingId && !node.hasChildren) {
           <span>{{ node.unit }}</span>
         }
         @if (node.id === editingId && editingIsLeaf) {
@@ -197,7 +197,7 @@
             [(ngModel)]="editForm.unit">
           </po-lookup>
         }
-        @if (node.id === SENTINEL) {
+        @if (node.id === NEW_ID) {
           <po-lookup
             name="addUnit"
             p-placeholder="Unidade"
@@ -216,7 +216,7 @@
     <!-- Coluna Preço -->
     <ng-template #colPreco let-node>
       <div class="td td-preco">
-        @if (node.id !== SENTINEL && node.id !== editingId && !node.hasChildren) {
+        @if (node.id !== NEW_ID && node.id !== editingId && !node.hasChildren) {
           <span>{{ node.price | currency:'BRL':'symbol':'1.2-2' }}</span>
         }
         @if (node.id === editingId && editingIsLeaf) {
@@ -228,7 +228,7 @@
             (keyup.enter)="saveEdit()" (keyup.escape)="cancelEdit()">
           </po-decimal>
         }
-        @if (node.id === SENTINEL) {
+        @if (node.id === NEW_ID) {
           <po-decimal
             name="addPrice"
             p-placeholder="Preço"
@@ -243,7 +243,7 @@
     <!-- Coluna Valor -->
     <ng-template #colValor let-node>
       <div class="td td-valor">
-        @if (node.id !== editingId && node.id !== SENTINEL) {
+        @if (node.id !== editingId && node.id !== NEW_ID) {
           <span>{{ node.value | currency:'BRL':'symbol':'1.2-2' }}</span>
         }
         @if (node.id === editingId && editingIsLeaf) {
@@ -252,7 +252,7 @@
         @if (node.id === editingId && !editingIsLeaf) {
           <span>{{ node.value | currency:'BRL':'symbol':'1.2-2' }}</span>
         }
-        @if (node.id === SENTINEL) {
+        @if (node.id === NEW_ID) {
           <span>{{ addPreviewValue | currency:'BRL':'symbol':'1.2-2' }}</span>
         }
       </div>
@@ -261,7 +261,7 @@
     <!-- Coluna Ações -->
     <ng-template #colAcoes let-node>
       <div class="td td-acoes">
-        @if (node.id !== SENTINEL && node.id !== editingId) {
+        @if (node.id !== NEW_ID && node.id !== editingId) {
           <div class="actions-row">
             <po-button p-icon="an an-pencil" p-kind="tertiary" p-label="" p-size="small" (p-click)="startEdit(node)" p-tooltip="Editar" p-append-in-body="true"></po-button>
             <po-button p-icon="an an-plus"   p-kind="tertiary" p-label="" p-size="small" (p-click)="startAdd(node.id)" p-tooltip="Adicionar filha" p-append-in-body="true"></po-button>
@@ -274,7 +274,7 @@
             <po-button p-icon="an an-x"     p-kind="tertiary" p-label="" p-size="small" (p-click)="cancelEdit()" p-tooltip="Cancelar" p-append-in-body="true"></po-button>
           </div>
         }
-        @if (node.id === SENTINEL) {
+        @if (node.id === NEW_ID) {
           <div class="actions-row">
             <po-button p-icon="an an-check" p-kind="primary"  p-label="" p-size="small" (p-click)="saveAdd()" p-tooltip="Salvar" p-append-in-body="true"></po-button>
             <po-button p-icon="an an-x"     p-kind="tertiary" p-label="" p-size="small" (p-click)="cancelAdd()" p-tooltip="Cancelar" p-append-in-body="true"></po-button>
@@ -292,7 +292,6 @@
     [visibleNodes]="visibleNodes"
     [editingId]="editingId"
     [selectedId]="selectedId"
-    [sentinel]="SENTINEL"
     [rowHeight]="ROW_HEIGHT"
     (nodeSelect)="selectNode($event)">
   </app-treeview-grid>

@@ -3,7 +3,7 @@ import { AfterViewInit, ChangeDetectorRef, Component, HostListener, OnInit, Temp
 import { FormsModule } from '@angular/forms';
 import { PoButtonModule, PoFieldModule, PoLookupColumn, PoLookupFilter, PoLookupFilteredItemsParams, PoLookupResponseApi, PoNotificationService, PoPageAction, PoPageFilter, PoPageListComponent, PoPageModule, PoTableColumn, PoTagModule, PoTooltipModule } from '@po-ui/ng-components';
 import { Observable, of } from 'rxjs';
-import { SENTINEL_ID, TreeviewGridComponent } from './treeview-component/treeview-grid.component';
+import { NEW_ID, TreeviewGridComponent } from './treeview-component/treeview-grid.component';
 
 export type TipoRecurso = 'Insumo' | 'Composição' | 'Valor cotado';
 
@@ -234,7 +234,7 @@ function buildEapNodes(): TreeNode[] {
   styleUrl: './treeview-page.css',
 })
 export class TreeviewPage implements OnInit, AfterViewInit {
-  readonly SENTINEL = SENTINEL_ID;
+  readonly NEW_ID = NEW_ID;
   readonly ROW_HEIGHT = 50;
 
   @ViewChild('pageList')       private pageList!:      PoPageListComponent;
@@ -282,7 +282,7 @@ export class TreeviewPage implements OnInit, AfterViewInit {
   selectedId: string | null = null;
 
   selectNode(node: FlatNode): void {
-    if (node.id === SENTINEL_ID) return;
+    if (node.id === this.NEW_ID) return;
     this.selectedId = node.id === this.selectedId ? null : node.id;
   }
 
@@ -399,16 +399,16 @@ export class TreeviewPage implements OnInit, AfterViewInit {
         const hasChildren = hasChildrenSet.has(node.id);
         result.push({ ...node, level, hasChildren });
         if (node.expanded && hasChildren) traverse(node.id, level + 1);
-        if (this.pendingAdd?.parentId === node.id) result.push(this.makeSentinel(node.id, level + 1));
+        if (this.pendingAdd?.parentId === node.id) result.push(this.makeNewNode(node.id, level + 1));
       }
     };
     traverse(null, 0);
-    if (this.pendingAdd?.parentId === null) result.unshift(this.makeSentinel(null, 0));
+    if (this.pendingAdd?.parentId === null) result.unshift(this.makeNewNode(null, 0));
     this.visibleNodes = result;
   }
 
-  private makeSentinel(parentId: string | null, level: number): FlatNode {
-    return { id: SENTINEL_ID, label: '', tipoRecurso: 'Valor cotado', quantity: 1, unit: 'UN', price: 0, value: 0, parentId, expanded: false, level, hasChildren: false };
+  private makeNewNode(parentId: string | null, level: number): FlatNode {
+    return { id: this.NEW_ID, label: '', tipoRecurso: 'Valor cotado', quantity: 1, unit: 'UN', price: 0, value: 0, parentId, expanded: false, level, hasChildren: false };
   }
 
   trackById(_i: number, n: FlatNode): string { return n.id; }
@@ -427,7 +427,7 @@ export class TreeviewPage implements OnInit, AfterViewInit {
       if (parent) parent.expanded = true;
     }
     this.refreshVisibleNodes();
-    this.treeviewGrid?.scrollToSentinel();
+    this.treeviewGrid?.scrollToNew();
   }
 
   cancelAdd(): void { this.pendingAdd = null; this.refreshVisibleNodes(); }

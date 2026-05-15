@@ -28,7 +28,7 @@ import {
 } from '@po-ui/ng-components';
 import { FlatNode, TreeviewColumn } from '../treeview-page';
 
-export const SENTINEL_ID = '__new__';
+export const NEW_ID = '__new__';
 
 @Component({
   selector: 'app-treeview-grid',
@@ -47,13 +47,14 @@ export const SENTINEL_ID = '__new__';
 })
 export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
 
+  readonly NEW_ID = NEW_ID;
+
   /** Templates de coluna declarados no componente pai. */
   @Input() colTemplates: Record<string, TemplateRef<any>> = {};
   @Input() defaultColumns: TreeviewColumn[] = [];
   @Input() visibleNodes: FlatNode[] = [];
   @Input() editingId: string | null = null;
   @Input() selectedId: string | null = null;
-  @Input() sentinel = SENTINEL_ID;
   @Input() rowHeight = 50;
 
   @Output() nodeSelect = new EventEmitter<FlatNode>();
@@ -207,9 +208,9 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
 
   // ── Public API ───────────────────────────────────────────────
 
-  scrollToSentinel(): void {
+  scrollToNew(): void {
     this.ngZone.onStable.pipe().subscribe(() => {
-      const idx = this.visibleNodes.findIndex(n => n.id === this.sentinel);
+      const idx = this.visibleNodes.findIndex(n => n.id === NEW_ID);
       if (idx < 0 || !this.viewport) return;
       const rowTop         = idx * this.rowHeight;
       const viewportH      = this.viewport.elementRef.nativeElement.clientHeight;
