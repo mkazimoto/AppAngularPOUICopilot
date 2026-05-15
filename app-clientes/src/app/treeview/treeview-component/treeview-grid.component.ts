@@ -24,11 +24,24 @@ import {
     PoPageSlideComponent,
     PoPageSlideModule,
     PoSwitchLabelPosition,
+    PoTableColumn,
     PoTooltipModule,
 } from '@po-ui/ng-components';
-import { FlatNode, TreeviewColumn } from '../treeview-page';
+import { FlatNode } from '../treeview-page';
 
 export const NEW_ID = '__new__';
+
+/** Extensão de PoTableColumn com propriedades específicas do treeview. */
+export interface TreeviewColumn extends PoTableColumn {
+  /** Identificador da coluna (obrigatório; equivale a PoTableColumn.property). */
+  property: string;
+  /** Largura em pixels usada pelo grid e pelo resize. */
+  widthPx: number;
+  /** Impede que a coluna seja ocultada ou reordenada. */
+  fixed?: boolean;
+  /** Template Angular associado a esta coluna. Preenchido em ngAfterViewInit. */
+  template?: TemplateRef<any>;
+}
 
 @Component({
   selector: 'app-treeview-grid',

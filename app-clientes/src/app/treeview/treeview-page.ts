@@ -1,23 +1,11 @@
 ﻿import { CommonModule } from '@angular/common';
 import { AfterViewInit, ChangeDetectorRef, Component, HostListener, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PoButtonModule, PoFieldModule, PoLookupColumn, PoLookupFilter, PoLookupFilteredItemsParams, PoLookupResponseApi, PoNotificationService, PoPageAction, PoPageFilter, PoPageListComponent, PoPageModule, PoTableColumn, PoTagModule, PoTooltipModule } from '@po-ui/ng-components';
+import { PoButtonModule, PoFieldModule, PoLookupColumn, PoLookupFilter, PoLookupFilteredItemsParams, PoLookupResponseApi, PoNotificationService, PoPageAction, PoPageFilter, PoPageListComponent, PoPageModule, PoTagModule, PoTooltipModule } from '@po-ui/ng-components';
 import { Observable, of } from 'rxjs';
-import { NEW_ID, TreeviewGridComponent } from './treeview-component/treeview-grid.component';
+import { NEW_ID, TreeviewColumn, TreeviewGridComponent } from './treeview-component/treeview-grid.component';
 
 export type TipoRecurso = 'Insumo' | 'Composição' | 'Valor cotado';
-
-/** Extensão de PoTableColumn com propriedades específicas do treeview. */
-export interface TreeviewColumn extends PoTableColumn {
-  /** Identificador da coluna (obrigatório; equivale a PoTableColumn.property). */
-  property: string;
-  /** Largura em pixels usada pelo grid e pelo resize. */
-  widthPx: number;
-  /** Impede que a coluna seja ocultada ou reordenada. */
-  fixed?: boolean;
-  /** Template Angular associado a esta coluna. Preenchido em ngAfterViewInit. */
-  template?: TemplateRef<any>;
-}
 
 export interface TreeNode {
   id: string;
