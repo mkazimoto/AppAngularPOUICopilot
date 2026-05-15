@@ -210,7 +210,7 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
 
   scrollToNew(): void {
     this.ngZone.onStable.pipe().subscribe(() => {
-      const idx = this.visibleNodes.findIndex(n => n.id === NEW_ID);
+      const idx = this.visibleNodes.findIndex(n => this.isNewNode(n.id));
       if (idx < 0 || !this.viewport) return;
       const rowTop         = idx * this.rowHeight;
       const viewportH      = this.viewport.elementRef.nativeElement.clientHeight;
@@ -220,6 +220,18 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
   }
 
   trackById(_i: number, n: FlatNode): string { return n.id; }
+
+  isNewNode(id: string): boolean {
+    return id === NEW_ID;
+  }
+
+  isEditingNode(id: string): boolean {
+    return id === this.editingId;
+  }
+
+  isSelectedNode(id: string): boolean {
+    return id === this.selectedId;
+  }
 
   // ── Private ──────────────────────────────────────────────────
 

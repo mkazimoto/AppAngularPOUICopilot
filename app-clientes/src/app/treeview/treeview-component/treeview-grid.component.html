@@ -33,8 +33,8 @@
       *cdkVirtualFor="let node of visibleNodes; trackBy: trackById"
       class="treeview-row"
       [style.grid-template-columns]="colTemplate"
-      [class.treeview-row--editing]="node.id === editingId || node.id === NEW_ID"
-      [class.treeview-row--selected]="node.id === selectedId && node.id !== NEW_ID"
+      [class.treeview-row--editing]="isEditingNode(node.id) || isNewNode(node.id)"
+      [class.treeview-row--selected]="(isSelectedNode(node.id) && !isNewNode(node.id))"
       [style.height.px]="rowHeight"
       (click)="nodeSelect.emit(node)"
     >
