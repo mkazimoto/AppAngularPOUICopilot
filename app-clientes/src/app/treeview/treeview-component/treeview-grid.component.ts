@@ -1,31 +1,31 @@
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
 import {
-    AfterViewInit,
-    Component,
-    ElementRef,
-    EventEmitter,
-    HostListener,
-    Input,
-    NgZone,
-    OnChanges,
-    OnDestroy,
-    OnInit,
-    Output,
-    SimpleChanges,
-    TemplateRef,
-    ViewChild,
-    afterNextRender,
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Input,
+  NgZone,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  SimpleChanges,
+  TemplateRef,
+  ViewChild,
+  afterNextRender,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
-    PoButtonModule,
-    PoFieldModule,
-    PoPageSlideComponent,
-    PoPageSlideModule,
-    PoSwitchLabelPosition,
-    PoTableColumn,
-    PoTooltipModule,
+  PoButtonModule,
+  PoFieldModule,
+  PoPageSlideComponent,
+  PoPageSlideModule,
+  PoSwitchLabelPosition,
+  PoTableColumn,
+  PoTooltipModule,
 } from '@po-ui/ng-components';
 export interface FlatNode {
   id: string;
