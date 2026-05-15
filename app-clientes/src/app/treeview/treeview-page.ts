@@ -233,7 +233,7 @@ function buildEapNodes(): TreeNode[] {
   templateUrl: './treeview-page.html',
   styleUrl: './treeview-page.css',
 })
-export class Treeview implements OnInit, AfterViewInit {
+export class TreeviewPage implements OnInit, AfterViewInit {
   readonly SENTINEL = SENTINEL_ID;
   readonly ROW_HEIGHT = 50;
 
