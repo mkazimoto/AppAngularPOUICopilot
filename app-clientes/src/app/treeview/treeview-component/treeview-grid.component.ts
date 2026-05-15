@@ -15,6 +15,7 @@ import {
     SimpleChanges,
     TemplateRef,
     ViewChild,
+    afterNextRender,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
@@ -72,7 +73,11 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
   private _resizeStartX     = 0;
   private _resizeStartWidth = 0;
 
-  constructor(private ngZone: NgZone) {}
+  constructor(private ngZone: NgZone) {
+    afterNextRender(() => {
+      this.ngZone.run(() => this.calculateViewportHeight());
+    });
+  }
 
   ngOnInit(): void {
     this.columns = this.loadColumns();
@@ -85,7 +90,6 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
   }
 
   ngAfterViewInit(): void {
-    this.calculateViewportHeight();
     this.resizeObserver = new ResizeObserver(() => {
       this.ngZone.run(() => this.calculateViewportHeight());
     });
