@@ -27,7 +27,8 @@ import {
   PoTableColumn,
   PoTooltipModule,
 } from '@po-ui/ng-components';
-export interface FlatNode {
+
+export interface TreeNodeItem {
   id: string;
   level: number;
   hasChildren: boolean;
@@ -69,12 +70,12 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
   /** Templates de coluna declarados no componente pai. */
   @Input() colTemplates: Record<string, TemplateRef<any>> = {};
   @Input() defaultColumns: TreeviewColumn[] = [];
-  @Input() visibleNodes: FlatNode[] = [];
+  @Input() visibleNodes: TreeNodeItem[] = [];
   @Input() editingId: string | null = null;
   @Input() selectedId: string | null = null;
   @Input() rowHeight = 50;
 
-  @Output() nodeSelect = new EventEmitter<FlatNode>();
+  @Output() nodeSelect = new EventEmitter<TreeNodeItem>();
 
   readonly labelPosition: PoSwitchLabelPosition = PoSwitchLabelPosition.Right;
 
@@ -236,7 +237,7 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
     }).unsubscribe();
   }
 
-  trackById(_i: number, n: FlatNode): string { return n.id; }
+  trackById(_i: number, n: TreeNodeItem): string { return n.id; }
 
   isNewNode(id: string): boolean {
     return id === NEW_ID;

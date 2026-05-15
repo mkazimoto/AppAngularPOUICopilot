@@ -3,11 +3,11 @@ import { AfterViewInit, ChangeDetectorRef, Component, HostListener, OnInit, Temp
 import { FormsModule } from '@angular/forms';
 import { PoButtonModule, PoFieldModule, PoLookupColumn, PoLookupFilter, PoLookupFilteredItemsParams, PoLookupResponseApi, PoNotificationService, PoPageAction, PoPageFilter, PoPageListComponent, PoPageModule, PoTagModule, PoTooltipModule } from '@po-ui/ng-components';
 import { Observable, of } from 'rxjs';
-import { FlatNode, NEW_ID, TreeviewColumn, TreeviewGridComponent } from './treeview-component/treeview-grid.component';
+import { NEW_ID, TreeNodeItem, TreeviewColumn, TreeviewGridComponent } from './treeview-component/treeview-grid.component';
 
 export type TipoRecurso = 'Insumo' | 'Composição' | 'Valor cotado';
 
-export interface TreeNode extends FlatNode {
+export interface TarefaItem extends TreeNodeItem {
   label: string;
   tipoRecurso?: TipoRecurso;
   quantity: number;
@@ -126,8 +126,8 @@ const ATIVIDADES = [
 const UNITS = ['UN', 'H', 'KG', 'M', 'M2', 'M3', 'L'];
 const VALUES = [100, 250, 500, 1000, 1500, 2000, 2500, 3000, 5000, 10000];
 
-function buildEapNodes(): TreeNode[] {
-  const nodes: TreeNode[] = [];
+function buildEapNodes(): TarefaItem[] {
+  const nodes: TarefaItem[] = [];
   let seq = 1;
 
  const rootCode = `${(seq).toString().padStart(3, '0')}`;
@@ -267,13 +267,13 @@ export class TreeviewPage implements OnInit, AfterViewInit {
   }
   // ───────────────────────────────────────────────────────────
 
-  nodes: TreeNode[] = buildEapNodes();
-  visibleNodes: TreeNode[] = [];
+  nodes: TarefaItem[] = buildEapNodes();
+  visibleNodes: TarefaItem[] = [];
   searchTerm = '';
 
   selectedId: string | null = null;
 
-  selectNode(node: FlatNode): void {
+  selectNode(node: TreeNodeItem): void {
     if (node.id === this.NEW_ID) return;
     this.selectedId = node.id === this.selectedId ? null : node.id;
   }
@@ -376,8 +376,8 @@ export class TreeviewPage implements OnInit, AfterViewInit {
       return;
     }
 
-    const result: TreeNode[] = [];
-    const childrenMap = new Map<string | null, TreeNode[]>();
+    const result: TarefaItem[] = [];
+    const childrenMap = new Map<string | null, TarefaItem[]>();
     const hasChildrenSet = new Set<string>();
     for (const node of this.nodes) {
       const key = node.parentId;
@@ -399,13 +399,13 @@ export class TreeviewPage implements OnInit, AfterViewInit {
     this.visibleNodes = result;
   }
 
-  private makeNewNode(parentId: string | null, level: number): TreeNode {
+  private makeNewNode(parentId: string | null, level: number): TarefaItem {
     return { id: this.NEW_ID, label: '', tipoRecurso: 'Valor cotado', quantity: 1, unit: 'UN', price: 0, value: 0, parentId, expanded: false, level, hasChildren: false };
   }
 
-  trackById(_i: number, n: FlatNode): string { return n.id; }
+  trackById(_i: number, n: TreeNodeItem): string { return n.id; }
 
-  toggle(node: FlatNode): void {
+  toggle(node: TreeNodeItem): void {
     const found = this.nodes.find(n => n.id === node.id);
     if (found) { found.expanded = !found.expanded; this.refreshVisibleNodes(); }
   }
@@ -457,7 +457,7 @@ export class TreeviewPage implements OnInit, AfterViewInit {
     this.notification.success('Registro adicionado com sucesso.');
   }
 
-  startEdit(node: TreeNode): void {
+  startEdit(node: TarefaItem): void {
     this.cancelAdd();
     this.editingId = node.id;
     this.selectedId = node.id;
@@ -486,7 +486,7 @@ export class TreeviewPage implements OnInit, AfterViewInit {
     this.refreshVisibleNodes();
   }
 
-  deleteNode(node: TreeNode): void {
+  deleteNode(node: TarefaItem): void {
     const ids = new Set([node.id, ...this.getAllDescendantIds(node.id)]);
     this.nodes = this.nodes.filter(n => !ids.has(n.id));
     this.recalculateAncestors(node.parentId);
