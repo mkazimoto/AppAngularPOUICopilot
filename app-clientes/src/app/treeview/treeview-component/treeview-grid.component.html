@@ -13,17 +13,19 @@
   </po-button>
 
   <!-- ── Sticky header ─────────────────────────────────────── -->
-  <div class="treeview-header" #treeviewHeader [style.grid-template-columns]="colTemplate">
-    @for (col of columns; track col.property) {
-      @if (col.visible !== false) {
-        <div [class]="'th th-' + col.property">
-          {{ col.label }}
-          @if (col.property !== 'acoes') {
-            <span class="col-resize-handle" (mousedown)="resizeStart($event, col.property)"></span>
-          }
-        </div>
+  <div class="treeview-header-outer" #treeviewHeaderOuter>
+    <div class="treeview-header" #treeviewHeader [style.grid-template-columns]="colTemplate">
+      @for (col of columns; track col.property) {
+        @if (col.visible !== false) {
+          <div [class]="'th th-' + col.property">
+            {{ col.label }}
+            @if (col.property !== 'acoes') {
+              <span class="col-resize-handle" (mousedown)="resizeStart($event, col.property)"></span>
+            }
+          </div>
+        }
       }
-    }
+    </div>
   </div>
 
   <!-- ── Virtual scroll body ───────────────────────────────── -->

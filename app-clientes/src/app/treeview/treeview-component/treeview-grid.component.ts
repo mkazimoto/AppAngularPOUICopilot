@@ -83,6 +83,7 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
   columns: TreeviewColumn[] = [];
 
   @ViewChild('treeviewGrid')           treeviewGridRef!:    ElementRef<HTMLElement>;
+  @ViewChild('treeviewHeaderOuter')    treeviewHeaderOuterRef!: ElementRef<HTMLElement>;
   @ViewChild('treeviewHeader')         treeviewHeaderRef!:  ElementRef<HTMLElement>;
   @ViewChild('columnManagerSlide')     columnManagerSlide!: PoPageSlideComponent;
   @ViewChild(CdkVirtualScrollViewport) viewport!:           CdkVirtualScrollViewport;
@@ -93,6 +94,7 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
   private _resizingCol      = -1;
   private _resizeStartX     = 0;
   private _resizeStartWidth = 0;
+  private _hScrollHandler: (() => void) | null = null;
 
   constructor(private ngZone: NgZone) {
     afterNextRender(() => {
@@ -115,10 +117,20 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
       this.ngZone.run(() => this.calculateViewportHeight());
     });
     this.resizeObserver.observe(document.documentElement);
+
+    // Sincroniza rolagem horizontal do viewport com o cabeçalho
+    const viewportEl = this.viewport.elementRef.nativeElement;
+    this._hScrollHandler = () => {
+      this.treeviewHeaderOuterRef.nativeElement.scrollLeft = viewportEl.scrollLeft;
+    };
+    viewportEl.addEventListener('scroll', this._hScrollHandler, { passive: true });
   }
 
   ngOnDestroy(): void {
     this.resizeObserver?.disconnect();
+    if (this._hScrollHandler) {
+      this.viewport?.elementRef.nativeElement.removeEventListener('scroll', this._hScrollHandler);
+    }
   }
 
   // ── Templates ────────────────────────────────────────────────
