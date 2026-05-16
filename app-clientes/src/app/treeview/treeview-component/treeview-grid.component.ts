@@ -175,6 +175,10 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
     return this.columns.filter(c => c.visible !== false).map(c => c.widthPx + 'px').join(' ');
   }
 
+  get totalWidth(): number {
+    return this.columns.filter(c => c.visible !== false).reduce((sum, c) => sum + c.widthPx, 0);
+  }
+
   // ── Column manager ───────────────────────────────────────────
 
   openColumnManager(): void {

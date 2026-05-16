@@ -67,6 +67,11 @@
 .treeview-viewport {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.treeview-viewport ::ng-deep .cdk-virtual-scroll-content-wrapper {
+  min-width: max-content;
 }
 
 /* ─── Row ────────────────────────────────────────────────────── */

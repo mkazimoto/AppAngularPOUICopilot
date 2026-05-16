@@ -14,7 +14,7 @@
 
   <!-- ── Sticky header ─────────────────────────────────────── -->
   <div class="treeview-header-outer" #treeviewHeaderOuter>
-    <div class="treeview-header" #treeviewHeader [style.grid-template-columns]="colTemplate">
+    <div class="treeview-header" #treeviewHeader [style.grid-template-columns]="colTemplate" [style.min-width.px]="totalWidth">
       @for (col of columns; track col.property) {
         @if (col.visible !== false) {
           <div [class]="'th th-' + col.property">
@@ -35,6 +35,7 @@
       *cdkVirtualFor="let node of visibleNodes; trackBy: trackById"
       class="treeview-row"
       [style.grid-template-columns]="colTemplate"
+      [style.min-width.px]="totalWidth"
       [class.treeview-row--editing]="isEditingNode(node.id) || isNewNode(node.id)"
       [class.treeview-row--selected]="(isSelectedNode(node.id) && !isNewNode(node.id))"
       [style.height.px]="rowHeight"
