@@ -1536,8 +1536,10 @@ export class IfcViewer implements OnInit, OnDestroy {
     const file = input.files?.[0];
     if (!file) return;
 
-    if (!file.name.toLowerCase().endsWith('.ifc')) {
-      this.notificationService.error({ message: 'Por favor, selecione um arquivo IFC válido.' });
+    const lowerName = file.name.toLowerCase();
+
+    if (!lowerName.endsWith('.ifc') && !lowerName.endsWith('.frag')) {
+      this.notificationService.error({ message: 'Por favor, selecione um arquivo IFC (.ifc) ou Fragments (.frag) válido.' });
       return;
     }
 
@@ -1552,36 +1554,67 @@ export class IfcViewer implements OnInit, OnDestroy {
       this.destroyViewer();
       await this.initViewer();
 
-      this.loadingMessage.set(`Carregando ${file.name}...`);
-
       const buffer = await file.arrayBuffer();
       const data = new Uint8Array(buffer);
-      this.loadingProgress.set(10);
 
-      const fileModel = await this.ifcLoader!.load(data, false, file.name.replace('.ifc', ''), {
-        processData: {
-          progressCallback: (progress: number) => {
-            this.loadingProgress.set(10 + Math.round(progress * 90));
-            this.loadingMessage.set(`Convertendo modelo: ${Math.round(progress * 100)}%`);
+      if (lowerName.endsWith('.frag')) {
+        await this.loadFragModel(data, file.name);
+      } else {
+        this.loadingMessage.set(`Carregando ${file.name}...`);
+        this.loadingProgress.set(10);
+
+        const fileModel = await this.ifcLoader!.load(data, false, file.name.replace('.ifc', ''), {
+          processData: {
+            progressCallback: (progress: number) => {
+              this.loadingProgress.set(10 + Math.round(progress * 90));
+              this.loadingMessage.set(`Convertendo modelo: ${Math.round(progress * 100)}%`);
+            },
           },
-        },
-      });
+        });
 
-      this.loadingProgress.set(100);
-      this.modelLoaded.set(true);
-      this.loadedFileName.set(file.name);
-      await this.hideIfcSpaces(fileModel);
-      this.buildTree(fileModel);
-      this.notificationService.success({ message: `Arquivo "${file.name}" carregado com sucesso!` });
+        this.loadingProgress.set(100);
+        this.modelLoaded.set(true);
+        this.loadedFileName.set(file.name);
+        await this.hideIfcSpaces(fileModel);
+        this.buildTree(fileModel);
+        this.notificationService.success({ message: `Arquivo "${file.name}" carregado com sucesso!` });
+      }
     } catch (error) {
-      this.notificationService.error({ message: 'Erro ao carregar o arquivo IFC. Verifique se o arquivo é válido.' });
-      console.error('Erro ao carregar IFC:', error);
+      this.notificationService.error({ message: 'Erro ao carregar o arquivo. Verifique se o arquivo é válido.' });
+      console.error('Erro ao carregar arquivo:', error);
     } finally {
       this.isLoading.set(false);
       this.loadingMessage.set('');
       // Reset input para permitir recarregar o mesmo arquivo
       input.value = '';
     }
+  }
+
+  private async loadFragModel(data: Uint8Array, fileName: string): Promise<void> {
+    this.loadingMessage.set(`Carregando ${fileName}...`);
+    this.loadingProgress.set(10);
+
+    const modelId = fileName.replace(/\.frag$/i, '');
+    const fragModel = await this.fragments!.core.load(data.buffer as ArrayBuffer, {
+      modelId,
+      camera: this.world!.camera.three,
+      onProgress: (event) => {
+        const pct = Math.round(event.progress * 90);
+        this.loadingProgress.set(10 + pct);
+        this.loadingMessage.set(`Carregando modelo: ${10 + pct}%`);
+      },
+    });
+
+    this.currentLoadedModel = fragModel;
+    this.loadingProgress.set(100);
+    this.modelLoaded.set(true);
+    this.loadedFileName.set(fileName);
+    // Arquivos .frag não contêm metadados IFC — limpa a árvore estrutural
+    this.treeNodes.set([]);
+    this.filteredTreeNodes.set([]);
+    this.rootNodes = [];
+    this.localIdToNode.clear();
+    this.notificationService.success({ message: `Arquivo "${fileName}" carregado com sucesso!` });
   }
 
   protected triggerFileInput(): void {
