@@ -254,7 +254,7 @@ export class TreeviewPage implements OnInit, AfterViewInit {
     { property: 'unidade',     label: 'Unidade',         widthPx: 130, visible: true },
     { property: 'preco',       label: 'Preço Unitário',  widthPx: 150, visible: true },
     { property: 'valor',       label: 'Valor',           widthPx: 120, visible: true },
-    { property: 'acoes',       label: 'Ações',           widthPx: 100, visible: true, fixed: true },
+    { property: 'acoes',       label: 'Ações',           widthPx: 200, visible: true, fixed: true },
   ];
 
   @HostListener('input', ['$event'])

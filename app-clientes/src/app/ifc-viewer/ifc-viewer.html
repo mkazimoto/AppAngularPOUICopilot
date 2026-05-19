@@ -1,8 +1,8 @@
 <po-page-default p-title="Visualizador de arquivo IFC" [p-actions]="pageActions">
 
   @if (modelLoaded()) {
-    <po-tag p-value="Modelo carregado" [p-type]="tagType" p-icon="an an-check-circle"></po-tag>
-    <po-tag [p-value]="loadedFileName()" p-icon="an an-file"></po-tag>
+  <po-tag p-value="Modelo carregado" [p-type]="tagType" p-icon="an an-check-circle"></po-tag>
+  <po-tag [p-value]="loadedFileName()" p-icon="an an-file"></po-tag>
   }
 
   <input
@@ -15,12 +15,14 @@
   <div class="viewer-wrapper" [class.viewer-wrapper--light]="!darkBackground()">
 
     <!-- Botão flutuante: alternar fundo -->
-    <button class="bg-toggle-btn" (click)="toggleBackground()" [title]="darkBackground() ? 'Mudar para fundo claro' : 'Mudar para fundo escuro'">
+    <button class="bg-toggle-btn" (click)="toggleBackground()"
+      [title]="darkBackground() ? 'Mudar para fundo claro' : 'Mudar para fundo escuro'">
       <span [class]="darkBackground() ? 'an an-sun' : 'an an-moon'"></span>
     </button>
 
     <!-- Botão flutuante: alternar projeção perspectiva / ortogonal -->
-    <button class="projection-toggle-btn" (click)="toggleProjection()" [title]="isPerspective() ? 'Mudar para visão ortogonal' : 'Mudar para visão perspectiva'">
+    <button class="projection-toggle-btn" (click)="toggleProjection()"
+      [title]="isPerspective() ? 'Mudar para visão ortogonal' : 'Mudar para visão perspectiva'">
       <span [class]="isPerspective() ? 'an an-cube' : 'an an-border-all'"></span>
     </button>
 
@@ -29,366 +31,347 @@
       <div #viewerContainer class="viewer-canvas"></div>
 
       @if (isLoading()) {
-        <div class="loading-overlay">
-          <div class="loading-progress-box">
-            <div class="loading-header">
-              <span class="loading-spinner an an-circle-notch"></span>
-              <span class="loading-filename">{{ loadingMessage() }}</span>
-            </div>
-            <po-progress
-              class="ifc-progress"
-              [p-value]="loadingProgress()"
-              p-show-percentage
-              p-disabled-cancel>
-            </po-progress>
+      <div class="loading-overlay">
+        <div class="loading-progress-box">
+          <div class="loading-header">
+            <span class="loading-spinner an an-circle-notch"></span>
+            <span class="loading-filename">{{ loadingMessage() }}</span>
           </div>
+          <po-progress class="ifc-progress" [p-value]="loadingProgress()" p-show-percentage p-disabled-cancel>
+          </po-progress>
         </div>
+      </div>
       }
 
       @if (!modelLoaded() && !isLoading()) {
-        <div class="empty-state">
-          <span class="empty-state-icon an an-building"></span>
-          <p>Nenhum modelo carregado</p>
-          <p>Clique em "Abrir arquivo IFC" para visualizar um modelo BIM</p>
-        </div>
+      <div class="empty-state">
+        <span class="empty-state-icon an an-building"></span>
+        <p>Nenhum modelo carregado</p>
+        <p>Clique em "Abrir arquivo IFC" para visualizar um modelo BIM</p>
+      </div>
       }
     </div>
 
     <!-- Painel flutuante: árvore estrutural IFC -->
-    <div
-      class="tree-panel"
-      [class.tree-panel--collapsed]="!treePanelVisible()"
-      [style.left.px]="panelX()"
-      [style.top.px]="panelY()"
-      [style.width.px]="panelW()"
-      [style.height.px]="treePanelVisible() ? panelH() : null">
+    <div class="tree-panel" [class.tree-panel--collapsed]="!treePanelVisible()" [style.left.px]="panelX()"
+      [style.top.px]="panelY()" [style.width.px]="panelW()" [style.height.px]="treePanelVisible() ? panelH() : null">
 
       <!-- Cabeçalho arrastável -->
-      <div class="tree-header" (mousedown)="onDragStart('tree', $event)" (touchstart)="onDragStartTouch('tree', $event)">
+      <div class="tree-header" (mousedown)="onDragStart('tree', $event)"
+        (touchstart)="onDragStartTouch('tree', $event)">
         <span class="an an-tree-structure"></span>
         <span class="tree-header-title">Estrutura do Modelo</span>
-        <button class="tree-collapse-btn" (mousedown)="$event.stopPropagation()" (touchstart)="$event.stopPropagation()" (click)="togglePanelVisible()" [title]="treePanelVisible() ? 'Minimizar' : 'Expandir'">
+        <button class="tree-collapse-btn" (mousedown)="$event.stopPropagation()" (touchstart)="$event.stopPropagation()"
+          (click)="togglePanelVisible()" [title]="treePanelVisible() ? 'Minimizar' : 'Expandir'">
           <span class="tree-collapse-icons">
             @if (treePanelVisible()) {
-              <span class="an an-chevron-up tree-collapse-main"></span>
-              <span class="an an-window-minimize tree-collapse-secondary"></span>
+            <span class="an an-chevron-up tree-collapse-main"></span>
+            <span class="an an-window-minimize tree-collapse-secondary"></span>
             } @else {
-              <span class="an an-chevron-down tree-collapse-main"></span>
-              <span class="an an-window-maximize tree-collapse-secondary"></span>
+            <span class="an an-chevron-down tree-collapse-main"></span>
+            <span class="an an-window-maximize tree-collapse-secondary"></span>
             }
           </span>
         </button>
       </div>
 
       @if (treePanelVisible()) {
-        <!-- Campo de busca -->
-        <div class="tree-search">
-          <input
-            type="text"
-            class="tree-search-input"
-            placeholder="Pesquisar..."
-            [value]="searchText()"
-            (input)="onSearchChange($event.target.value)"
-            (keydown)="$event.stopPropagation()" />
-          <span class="tree-search-icon an an-search"></span>
+      <!-- Campo de busca -->
+      <div class="tree-search">
+        <input type="text" class="tree-search-input" placeholder="Pesquisar..." [value]="searchText()"
+          (input)="onSearchChange($event.target.value)" (keydown)="$event.stopPropagation()" />
+        <span class="tree-search-icon an an-search"></span>
+      </div>
+
+      <!-- Botões de expansão/colapse -->
+      <div class="tree-actions">
+        <button class="tree-action-btn" (click)="expandAll()" [title]="'Expandir tudo'">
+          <span class="an an-angle-down"></span>
+          <span class="tree-action-label">Expandir</span>
+        </button>
+        <button class="tree-action-btn" (click)="collapseAll()" [title]="'Recolher tudo'">
+          <span class="an an-angle-up"></span>
+          <span class="tree-action-label">Recolher</span>
+        </button>
+      </div>
+
+      @if (isTreeLoading()) {
+      <div class="tree-loading">
+        <span class="an an-circle-notch tree-spin"></span>
+        Carregando estrutura...
+      </div>
+      }
+
+      @if (!isTreeLoading() && treeNodes().length === 0 && !modelLoaded()) {
+      <div class="tree-empty">
+        <span class="an an-info-circle"></span>
+        Nenhum modelo carregado
+      </div>
+      }
+
+      <cdk-virtual-scroll-viewport #treeViewport itemSize="36" class="tree-scroll">
+        <div *cdkVirtualFor="let node of filteredTreeNodes(); trackBy: trackByNodeId" class="tree-node"
+          [class.tree-node--has-children]="node.hasChildren" [class.tree-node--selected]="isNodeSelected(node)"
+          [style.padding-left.px]="node.level * 14 + 8" (click)="onNodeClick(node)"
+          (dblclick)="zoomToNode(node); $event.preventDefault()">
+
+          <span class="tree-toggle-icon">
+            @if (node.hasChildren) {
+            <span [class]="node.isExpanded ? 'an an-caret-down' : 'an an-caret-right'"></span>
+            } @else {
+            <span class="an an-minus tree-leaf-dash"></span>
+            }
+          </span>
+
+          <span class="tree-node-label" [title]="node.name">{{ node.name }}</span>
         </div>
+      </cdk-virtual-scroll-viewport>
 
-        <!-- Botões de expansão/colapse -->
-        <div class="tree-actions">
-          <button 
-            class="tree-action-btn" 
-            (click)="expandAll()" 
-            [title]="'Expandir tudo'">
-            <span class="an an-angle-down"></span>
-            <span class="tree-action-label">Expandir</span>
-          </button>
-          <button 
-            class="tree-action-btn" 
-            (click)="collapseAll()" 
-            [title]="'Recolher tudo'">
-            <span class="an an-angle-up"></span>
-            <span class="tree-action-label">Recolher</span>
-          </button>
-        </div>
-
-        @if (isTreeLoading()) {
-          <div class="tree-loading">
-            <span class="an an-circle-notch tree-spin"></span>
-            Carregando estrutura...
-          </div>
-        }
-
-        @if (!isTreeLoading() && treeNodes().length === 0 && !modelLoaded()) {
-          <div class="tree-empty">
-            <span class="an an-info-circle"></span>
-            Nenhum modelo carregado
-          </div>
-        }
-
-        <cdk-virtual-scroll-viewport #treeViewport itemSize="36" class="tree-scroll">
-          <div
-            *cdkVirtualFor="let node of filteredTreeNodes(); trackBy: trackByNodeId"
-            class="tree-node"
-            [class.tree-node--has-children]="node.hasChildren"
-            [class.tree-node--selected]="isNodeSelected(node)"
-            [style.padding-left.px]="node.level * 14 + 8"
-            (click)="onNodeClick(node)"
-            (dblclick)="zoomToNode(node); $event.preventDefault()">
-
-            <span class="tree-toggle-icon">
-              @if (node.hasChildren) {
-                <span [class]="node.isExpanded ? 'an an-caret-down' : 'an an-caret-right'"></span>
-              } @else {
-                <span class="an an-minus tree-leaf-dash"></span>
-              }
-            </span>
-
-            <span class="tree-node-label" [title]="node.name">{{ node.name }}</span>
-          </div>
-        </cdk-virtual-scroll-viewport>
-
-        <!-- Alças de redimensionamento -->
-        <div class="resize-handle resize-handle--corner" (mousedown)="onResizeStart('tree', 'corner', $event)" (touchstart)="onResizeStartTouch('tree', 'corner', $event)">
-          <span class="an an-arrows-alt"></span>
-        </div>
-        <div class="resize-handle resize-handle--left" (mousedown)="onResizeStart('tree', 'left', $event)" (touchstart)="onResizeStartTouch('tree', 'left', $event)"></div>
-        <div class="resize-handle resize-handle--right" (mousedown)="onResizeStart('tree', 'right', $event)" (touchstart)="onResizeStartTouch('tree', 'right', $event)"></div>
-        <div class="resize-handle resize-handle--top" (mousedown)="onResizeStart('tree', 'top', $event)" (touchstart)="onResizeStartTouch('tree', 'top', $event)"></div>
-        <div class="resize-handle resize-handle--bottom" (mousedown)="onResizeStart('tree', 'bottom', $event)" (touchstart)="onResizeStartTouch('tree', 'bottom', $event)"></div>
+      <!-- Alças de redimensionamento -->
+      <div class="resize-handle resize-handle--corner" (mousedown)="onResizeStart('tree', 'corner', $event)"
+        (touchstart)="onResizeStartTouch('tree', 'corner', $event)">
+        <span class="an an-arrows-alt"></span>
+      </div>
+      <div class="resize-handle resize-handle--left" (mousedown)="onResizeStart('tree', 'left', $event)"
+        (touchstart)="onResizeStartTouch('tree', 'left', $event)"></div>
+      <div class="resize-handle resize-handle--right" (mousedown)="onResizeStart('tree', 'right', $event)"
+        (touchstart)="onResizeStartTouch('tree', 'right', $event)"></div>
+      <div class="resize-handle resize-handle--top" (mousedown)="onResizeStart('tree', 'top', $event)"
+        (touchstart)="onResizeStartTouch('tree', 'top', $event)"></div>
+      <div class="resize-handle resize-handle--bottom" (mousedown)="onResizeStart('tree', 'bottom', $event)"
+        (touchstart)="onResizeStartTouch('tree', 'bottom', $event)"></div>
       }
     </div>
 
     <!-- Painel flutuante: propriedades do objeto selecionado -->
     @if (propPanelVisible()) {
-      <div
-        class="tree-panel"
-        [class.tree-panel--collapsed]="propPanelMinimized()"
-        [style.right.px]="propPanelX()"
-        [style.top.px]="propPanelY()"
-        [style.width.px]="propPanelW()"
-        [style.height.px]="propPanelMinimized() ? null : propPanelH()">
+    <div class="tree-panel" [class.tree-panel--collapsed]="propPanelMinimized()" [style.right.px]="propPanelX()"
+      [style.top.px]="propPanelY()" [style.width.px]="propPanelW()"
+      [style.height.px]="propPanelMinimized() ? null : propPanelH()">
 
-        <!-- Cabeçalho arrastável -->
-        <div class="tree-header" (mousedown)="onDragStart('props', $event)" (touchstart)="onDragStartTouch('props', $event)">
-          <span class="an an-list"></span>
-          <span class="tree-header-title">Propriedades</span>
-          <button class="tree-collapse-btn" (mousedown)="$event.stopPropagation()" (touchstart)="$event.stopPropagation()" (click)="togglePropPanelMinimized()" [title]="propPanelMinimized() ? 'Expandir' : 'Minimizar'">
-            <span class="tree-collapse-icons">
-              @if (propPanelMinimized()) {
-                <span class="an an-chevron-down tree-collapse-main"></span>
-                <span class="an an-window-maximize tree-collapse-secondary"></span>
-              } @else {
-                <span class="an an-chevron-up tree-collapse-main"></span>
-                <span class="an an-window-minimize tree-collapse-secondary"></span>
-              }
-            </span>
-          </button>
-        </div>
-
-        @if (!propPanelMinimized()) {
-        @if (isPropsLoading()) {
-          <div class="tree-loading">
-            <span class="an an-circle-notch tree-spin"></span>
-            Carregando propriedades...
-          </div>
-        }
-
-        @if (!isPropsLoading()) {
-          <div class="props-object-name" [title]="selectedObjectName()">{{ selectedObjectName() }}</div>
-
-          <div class="props-scroll">
-            @for (group of propertyGroups(); track group.name) {
-              <div class="props-group">
-                <div class="props-group-header" (click)="togglePropertyGroup(group)">
-                  <span class="props-group-icon an" [class.an-caret-down]="group.isExpanded" [class.an-caret-right]="!group.isExpanded"></span>
-                  <span class="props-group-name">{{ group.name }}</span>
-                </div>
-                @if (group.isExpanded) {
-                  @for (prop of group.properties; track prop.name) {
-                    <div class="props-row">
-                      <span class="props-key" [title]="prop.name">{{ prop.name }}</span>
-                      <span class="props-value" [title]="prop.value">{{ prop.value }}</span>
-                      <span class="props-unit" [title]="prop.unit ?? ''">{{ prop.unit ?? '' }}</span>
-                    </div>
-                  }
-                }
-              </div>
+      <!-- Cabeçalho arrastável -->
+      <div class="tree-header" (mousedown)="onDragStart('props', $event)"
+        (touchstart)="onDragStartTouch('props', $event)">
+        <span class="an an-list"></span>
+        <span class="tree-header-title">Propriedades</span>
+        <button class="tree-collapse-btn" (mousedown)="$event.stopPropagation()" (touchstart)="$event.stopPropagation()"
+          (click)="togglePropPanelMinimized()" [title]="propPanelMinimized() ? 'Expandir' : 'Minimizar'">
+          <span class="tree-collapse-icons">
+            @if (propPanelMinimized()) {
+            <span class="an an-chevron-down tree-collapse-main"></span>
+            <span class="an an-window-maximize tree-collapse-secondary"></span>
+            } @else {
+            <span class="an an-chevron-up tree-collapse-main"></span>
+            <span class="an an-window-minimize tree-collapse-secondary"></span>
             }
-            @if (propertyGroups().length === 0) {
-              <div class="tree-empty">
-                <span class="an an-info-circle"></span>
-                Sem propriedades disponíveis
-              </div>
-            }
-          </div>
-        }
-
-        <!-- Alças de redimensionamento -->
-        <div class="resize-handle resize-handle--corner" (mousedown)="onResizeStart('props', 'corner', $event)" (touchstart)="onResizeStartTouch('props', 'corner', $event)">
-          <span class="an an-arrows-alt"></span>
-        </div>
-        <div class="resize-handle resize-handle--left" (mousedown)="onResizeStart('props', 'left', $event)" (touchstart)="onResizeStartTouch('props', 'left', $event)"></div>
-        <div class="resize-handle resize-handle--right" (mousedown)="onResizeStart('props', 'right', $event)" (touchstart)="onResizeStartTouch('props', 'right', $event)"></div>
-        <div class="resize-handle resize-handle--top" (mousedown)="onResizeStart('props', 'top', $event)" (touchstart)="onResizeStartTouch('props', 'top', $event)"></div>
-        <div class="resize-handle resize-handle--bottom" (mousedown)="onResizeStart('props', 'bottom', $event)" (touchstart)="onResizeStartTouch('props', 'bottom', $event)"></div>
-        } <!-- fim @if (!propPanelMinimized()) -->
+          </span>
+        </button>
       </div>
+
+      @if (!propPanelMinimized()) {
+      @if (isPropsLoading()) {
+      <div class="tree-loading">
+        <span class="an an-circle-notch tree-spin"></span>
+        Carregando propriedades...
+      </div>
+      }
+
+      @if (!isPropsLoading()) {
+      <div class="props-object-name" [title]="selectedObjectName()">{{ selectedObjectName() }}</div>
+
+      <div class="props-scroll">
+        @for (group of propertyGroups(); track group.name) {
+        <div class="props-group">
+          <div class="props-group-header" (click)="togglePropertyGroup(group)">
+            <span class="props-group-icon an" [class.an-caret-down]="group.isExpanded"
+              [class.an-caret-right]="!group.isExpanded"></span>
+            <span class="props-group-name">{{ group.name }}</span>
+          </div>
+          @if (group.isExpanded) {
+          @for (prop of group.properties; track prop.name) {
+          <div class="props-row">
+            <span class="props-key" [title]="prop.name">{{ prop.name }}</span>
+            <span class="props-value" [title]="prop.value">{{ prop.value }}</span>
+            <span class="props-unit" [title]="prop.unit ?? ''">{{ prop.unit ?? '' }}</span>
+          </div>
+          }
+          }
+        </div>
+        }
+        @if (propertyGroups().length === 0) {
+        <div class="tree-empty">
+          <span class="an an-info-circle"></span>
+          Sem propriedades disponíveis
+        </div>
+        }
+      </div>
+      }
+
+      <!-- Alças de redimensionamento -->
+      <div class="resize-handle resize-handle--corner" (mousedown)="onResizeStart('props', 'corner', $event)"
+        (touchstart)="onResizeStartTouch('props', 'corner', $event)">
+        <span class="an an-arrows-alt"></span>
+      </div>
+      <div class="resize-handle resize-handle--left" (mousedown)="onResizeStart('props', 'left', $event)"
+        (touchstart)="onResizeStartTouch('props', 'left', $event)"></div>
+      <div class="resize-handle resize-handle--right" (mousedown)="onResizeStart('props', 'right', $event)"
+        (touchstart)="onResizeStartTouch('props', 'right', $event)"></div>
+      <div class="resize-handle resize-handle--top" (mousedown)="onResizeStart('props', 'top', $event)"
+        (touchstart)="onResizeStartTouch('props', 'top', $event)"></div>
+      <div class="resize-handle resize-handle--bottom" (mousedown)="onResizeStart('props', 'bottom', $event)"
+        (touchstart)="onResizeStartTouch('props', 'bottom', $event)"></div>
+      } <!-- fim @if (!propPanelMinimized()) -->
+    </div>
     }
 
     <!-- Painel flutuante: filtro de tipos de objetos IFC -->
     @if (filterPanelVisible()) {
-      <div
-        class="tree-panel filter-panel"
-        [class.tree-panel--collapsed]="filterPanelMinimized()"
-        [style.right.px]="filterPanelX()"
-        [style.top.px]="filterPanelY()"
-        [style.width.px]="filterPanelW()"
-        [style.height.px]="filterPanelMinimized() ? null : filterPanelH()">
+    <div class="tree-panel filter-panel" [class.tree-panel--collapsed]="filterPanelMinimized()"
+      [style.right.px]="filterPanelX()" [style.top.px]="filterPanelY()" [style.width.px]="filterPanelW()"
+      [style.height.px]="filterPanelMinimized() ? null : filterPanelH()">
 
-        <!-- Cabeçalho arrastável -->
-        <div class="tree-header" (mousedown)="onDragStart('filter', $event)" (touchstart)="onDragStartTouch('filter', $event)">
-          <span class="an an-filter"></span>
-          <span class="tree-header-title">Filtro de Tipos</span>
-          <button class="tree-collapse-btn" (mousedown)="$event.stopPropagation()" (touchstart)="$event.stopPropagation()" (click)="toggleFilterPanelMinimized()" [title]="filterPanelMinimized() ? 'Expandir' : 'Minimizar'">
-            <span class="tree-collapse-icons">
-              @if (filterPanelMinimized()) {
-                <span class="an an-chevron-down tree-collapse-main"></span>
-                <span class="an an-window-maximize tree-collapse-secondary"></span>
-              } @else {
-                <span class="an an-chevron-up tree-collapse-main"></span>
-                <span class="an an-window-minimize tree-collapse-secondary"></span>
-              }
-            </span>
-          </button>
+      <!-- Cabeçalho arrastável -->
+      <div class="tree-header" (mousedown)="onDragStart('filter', $event)"
+        (touchstart)="onDragStartTouch('filter', $event)">
+        <span class="an an-filter"></span>
+        <span class="tree-header-title">Filtro de Tipos</span>
+        <button class="tree-collapse-btn" (mousedown)="$event.stopPropagation()" (touchstart)="$event.stopPropagation()"
+          (click)="toggleFilterPanelMinimized()" [title]="filterPanelMinimized() ? 'Expandir' : 'Minimizar'">
+          <span class="tree-collapse-icons">
+            @if (filterPanelMinimized()) {
+            <span class="an an-chevron-down tree-collapse-main"></span>
+            <span class="an an-window-maximize tree-collapse-secondary"></span>
+            } @else {
+            <span class="an an-chevron-up tree-collapse-main"></span>
+            <span class="an an-window-minimize tree-collapse-secondary"></span>
+            }
+          </span>
+        </button>
+      </div>
+
+      @if (!filterPanelMinimized()) {
+      <!-- Botões de seleção rápida -->
+      <div class="filter-quick-actions">
+        <button class="filter-action-btn" (click)="toggleAllTypeFilters(true)" [title]="'Mostrar todos'">
+          <span class="an an-check"></span>
+          <span>Mostrar Todos</span>
+        </button>
+        <button class="filter-action-btn" (click)="toggleAllTypeFilters(false)" [title]="'Ocultar todos'">
+          <span class="an an-times"></span>
+          <span>Ocultar Todos</span>
+        </button>
+      </div>
+
+      <!-- Lista de tipos com checkboxes -->
+      <div class="filter-list">
+        @if (objectTypeFilters().length === 0) {
+        <div class="filter-empty">
+          <span class="an an-info-circle"></span>
+          Nenhum tipo disponível
         </div>
+        }
 
-        @if (!filterPanelMinimized()) {
-          <!-- Botões de seleção rápida -->
-          <div class="filter-quick-actions">
-            <button 
-              class="filter-action-btn" 
-              (click)="toggleAllTypeFilters(true)" 
-              [title]="'Mostrar todos'">
-              <span class="an an-check"></span>
-              <span>Mostrar Todos</span>
-            </button>
-            <button 
-              class="filter-action-btn" 
-              (click)="toggleAllTypeFilters(false)" 
-              [title]="'Ocultar todos'">
-              <span class="an an-times"></span>
-              <span>Ocultar Todos</span>
-            </button>
-          </div>
-
-          <!-- Lista de tipos com checkboxes -->
-          <div class="filter-list">
-            @if (objectTypeFilters().length === 0) {
-              <div class="filter-empty">
-                <span class="an an-info-circle"></span>
-                Nenhum tipo disponível
-              </div>
-            }
-
-            @for (filter of objectTypeFilters(); track filter.type) {
-              <div class="filter-item">
-                <label class="filter-checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    class="filter-checkbox"
-                    [checked]="filter.isVisible"
-                    (change)="toggleTypeFilter(filter)" />
-                  <span class="filter-checkbox-checkmark"></span>
-                  <span class="filter-type-name" [title]="filter.displayName">{{ filter.displayName }}</span>
-                </label>
-              </div>
-            }
-          </div>
-
-          <!-- Alças de redimensionamento -->
-          <div class="resize-handle resize-handle--corner" (mousedown)="onResizeStart('filter', 'corner', $event)" (touchstart)="onResizeStartTouch('filter', 'corner', $event)">
-            <span class="an an-arrows-alt"></span>
-          </div>
-          <div class="resize-handle resize-handle--left" (mousedown)="onResizeStart('filter', 'left', $event)" (touchstart)="onResizeStartTouch('filter', 'left', $event)"></div>
-          <div class="resize-handle resize-handle--right" (mousedown)="onResizeStart('filter', 'right', $event)" (touchstart)="onResizeStartTouch('filter', 'right', $event)"></div>
-          <div class="resize-handle resize-handle--top" (mousedown)="onResizeStart('filter', 'top', $event)" (touchstart)="onResizeStartTouch('filter', 'top', $event)"></div>
-          <div class="resize-handle resize-handle--bottom" (mousedown)="onResizeStart('filter', 'bottom', $event)" (touchstart)="onResizeStartTouch('filter', 'bottom', $event)"></div>
+        @for (filter of objectTypeFilters(); track filter.type) {
+        <div class="filter-item">
+          <label class="filter-checkbox-label">
+            <input type="checkbox" class="filter-checkbox" [checked]="filter.isVisible"
+              (change)="toggleTypeFilter(filter)" />
+            <span class="filter-checkbox-checkmark"></span>
+            <span class="filter-type-name" [title]="filter.displayName">{{ filter.displayName }}</span>
+          </label>
+        </div>
         }
       </div>
+
+      <!-- Alças de redimensionamento -->
+      <div class="resize-handle resize-handle--corner" (mousedown)="onResizeStart('filter', 'corner', $event)"
+        (touchstart)="onResizeStartTouch('filter', 'corner', $event)">
+        <span class="an an-arrows-alt"></span>
+      </div>
+      <div class="resize-handle resize-handle--left" (mousedown)="onResizeStart('filter', 'left', $event)"
+        (touchstart)="onResizeStartTouch('filter', 'left', $event)"></div>
+      <div class="resize-handle resize-handle--right" (mousedown)="onResizeStart('filter', 'right', $event)"
+        (touchstart)="onResizeStartTouch('filter', 'right', $event)"></div>
+      <div class="resize-handle resize-handle--top" (mousedown)="onResizeStart('filter', 'top', $event)"
+        (touchstart)="onResizeStartTouch('filter', 'top', $event)"></div>
+      <div class="resize-handle resize-handle--bottom" (mousedown)="onResizeStart('filter', 'bottom', $event)"
+        (touchstart)="onResizeStartTouch('filter', 'bottom', $event)"></div>
+      }
+    </div>
     }
 
     @if (floorPanelVisible()) {
-      <div
-        class="tree-panel filter-panel"
-        [class.tree-panel--collapsed]="floorPanelMinimized()"
-        [style.right.px]="floorPanelX()"
-        [style.top.px]="floorPanelY()"
-        [style.width.px]="floorPanelW()"
-        [style.height.px]="floorPanelMinimized() ? null : floorPanelH()">
+    <div class="tree-panel filter-panel" [class.tree-panel--collapsed]="floorPanelMinimized()"
+      [style.right.px]="floorPanelX()" [style.top.px]="floorPanelY()" [style.width.px]="floorPanelW()"
+      [style.height.px]="floorPanelMinimized() ? null : floorPanelH()">
 
-        <!-- Cabeçalho arrastável -->
-        <div class="tree-header" (mousedown)="onDragStart('floor', $event)" (touchstart)="onDragStartTouch('floor', $event)">
-          <span class="an an-layer-group"></span>
-          <span class="tree-header-title">Filtro de Pavimentos</span>
-          <button class="tree-collapse-btn" (mousedown)="$event.stopPropagation()" (touchstart)="$event.stopPropagation()" (click)="toggleFloorPanelMinimized()" [title]="floorPanelMinimized() ? 'Expandir' : 'Minimizar'">
-            <span class="tree-collapse-icons">
-              @if (floorPanelMinimized()) {
-                <span class="an an-chevron-down tree-collapse-main"></span>
-                <span class="an an-window-maximize tree-collapse-secondary"></span>
-              } @else {
-                <span class="an an-chevron-up tree-collapse-main"></span>
-                <span class="an an-window-minimize tree-collapse-secondary"></span>
-              }
-            </span>
-          </button>
+      <!-- Cabeçalho arrastável -->
+      <div class="tree-header" (mousedown)="onDragStart('floor', $event)"
+        (touchstart)="onDragStartTouch('floor', $event)">
+        <span class="an an-layer-group"></span>
+        <span class="tree-header-title">Filtro de Pavimentos</span>
+        <button class="tree-collapse-btn" (mousedown)="$event.stopPropagation()" (touchstart)="$event.stopPropagation()"
+          (click)="toggleFloorPanelMinimized()" [title]="floorPanelMinimized() ? 'Expandir' : 'Minimizar'">
+          <span class="tree-collapse-icons">
+            @if (floorPanelMinimized()) {
+            <span class="an an-chevron-down tree-collapse-main"></span>
+            <span class="an an-window-maximize tree-collapse-secondary"></span>
+            } @else {
+            <span class="an an-chevron-up tree-collapse-main"></span>
+            <span class="an an-window-minimize tree-collapse-secondary"></span>
+            }
+          </span>
+        </button>
+      </div>
+
+      @if (!floorPanelMinimized()) {
+      <!-- Botões de seleção rápida -->
+      <div class="filter-quick-actions">
+        <button class="filter-action-btn" (click)="toggleAllFloorFilters(true)" title="Mostrar todos">
+          <span class="an an-check"></span>
+          <span>Mostrar Todos</span>
+        </button>
+        <button class="filter-action-btn" (click)="toggleAllFloorFilters(false)" title="Ocultar todos">
+          <span class="an an-times"></span>
+          <span>Ocultar Todos</span>
+        </button>
+      </div>
+
+      <!-- Lista de pavimentos com checkboxes -->
+      <div class="filter-list">
+        @if (floorFilters().length === 0) {
+        <div class="filter-empty">
+          <span class="an an-info-circle"></span>
+          Nenhum pavimento disponível
         </div>
-
-        @if (!floorPanelMinimized()) {
-          <!-- Botões de seleção rápida -->
-          <div class="filter-quick-actions">
-            <button class="filter-action-btn" (click)="toggleAllFloorFilters(true)" title="Mostrar todos">
-              <span class="an an-check"></span>
-              <span>Mostrar Todos</span>
-            </button>
-            <button class="filter-action-btn" (click)="toggleAllFloorFilters(false)" title="Ocultar todos">
-              <span class="an an-times"></span>
-              <span>Ocultar Todos</span>
-            </button>
-          </div>
-
-          <!-- Lista de pavimentos com checkboxes -->
-          <div class="filter-list">
-            @if (floorFilters().length === 0) {
-              <div class="filter-empty">
-                <span class="an an-info-circle"></span>
-                Nenhum pavimento disponível
-              </div>
-            }
-            @for (floor of floorFilters(); track floor.storeyId) {
-              <div class="filter-item">
-                <label class="filter-checkbox-label">
-                  <input
-                    type="checkbox"
-                    class="filter-checkbox"
-                    [checked]="floor.isVisible"
-                    (change)="toggleFloorFilter(floor)" />
-                  <span class="filter-checkbox-checkmark"></span>
-                  <span class="filter-type-name" [title]="floor.displayName">{{ floor.displayName }}</span>
-                </label>
-              </div>
-            }
-          </div>
-
-          <!-- Alças de redimensionamento -->
-          <div class="resize-handle resize-handle--corner" (mousedown)="onResizeStart('floor', 'corner', $event)" (touchstart)="onResizeStartTouch('floor', 'corner', $event)">
-            <span class="an an-arrows-alt"></span>
-          </div>
-          <div class="resize-handle resize-handle--left" (mousedown)="onResizeStart('floor', 'left', $event)" (touchstart)="onResizeStartTouch('floor', 'left', $event)"></div>
-          <div class="resize-handle resize-handle--right" (mousedown)="onResizeStart('floor', 'right', $event)" (touchstart)="onResizeStartTouch('floor', 'right', $event)"></div>
-          <div class="resize-handle resize-handle--top" (mousedown)="onResizeStart('floor', 'top', $event)" (touchstart)="onResizeStartTouch('floor', 'top', $event)"></div>
-          <div class="resize-handle resize-handle--bottom" (mousedown)="onResizeStart('floor', 'bottom', $event)" (touchstart)="onResizeStartTouch('floor', 'bottom', $event)"></div>
+        }
+        @for (floor of floorFilters(); track floor.storeyId) {
+        <div class="filter-item">
+          <label class="filter-checkbox-label">
+            <input type="checkbox" class="filter-checkbox" [checked]="floor.isVisible"
+              (change)="toggleFloorFilter(floor)" />
+            <span class="filter-checkbox-checkmark"></span>
+            <span class="filter-type-name" [title]="floor.displayName">{{ floor.displayName }}</span>
+          </label>
+        </div>
         }
       </div>
+
+      <!-- Alças de redimensionamento -->
+      <div class="resize-handle resize-handle--corner" (mousedown)="onResizeStart('floor', 'corner', $event)"
+        (touchstart)="onResizeStartTouch('floor', 'corner', $event)">
+        <span class="an an-arrows-alt"></span>
+      </div>
+      <div class="resize-handle resize-handle--left" (mousedown)="onResizeStart('floor', 'left', $event)"
+        (touchstart)="onResizeStartTouch('floor', 'left', $event)"></div>
+      <div class="resize-handle resize-handle--right" (mousedown)="onResizeStart('floor', 'right', $event)"
+        (touchstart)="onResizeStartTouch('floor', 'right', $event)"></div>
+      <div class="resize-handle resize-handle--top" (mousedown)="onResizeStart('floor', 'top', $event)"
+        (touchstart)="onResizeStartTouch('floor', 'top', $event)"></div>
+      <div class="resize-handle resize-handle--bottom" (mousedown)="onResizeStart('floor', 'bottom', $event)"
+        (touchstart)="onResizeStartTouch('floor', 'bottom', $event)"></div>
+      }
+    </div>
     }
 
   </div>
