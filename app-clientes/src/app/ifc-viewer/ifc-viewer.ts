@@ -65,6 +65,13 @@ interface SpatialNode {
   children?: SpatialNode[];
 }
 
+interface JsonSpatialNode {
+  expressID: number;
+  type: string;
+  Name: string;
+  children: JsonSpatialNode[];
+}
+
 @Component({
   selector: 'app-ifc-viewer',
   templateUrl: './ifc-viewer.html',
@@ -133,14 +140,14 @@ export class IfcViewer implements OnInit, OnDestroy {
       label: 'Abrir arquivo IFC',
       icon: 'an an-upload',
       action: () => this.triggerFileInput(),
-    },
+    },  
     {
-      label: 'OTC-Conference Center.ifc',
+      label: 'OTC-Conference Center.frag',
       icon: 'an an-cloud-download',
       action: () => this.loadFromUrl(
-        'https://mkazimoto.github.io/AppAngularPOUICopilot/ifc/OTC-Conference%20Center.ifc',
-        'OTC-Conference Center.ifc'
-      ),
+        'ifc/OTC-Conference%20Center.frag',
+        'OTC-Conference Center.frag'
+      ),  
     },
   ];
 
@@ -1399,6 +1406,58 @@ export class IfcViewer implements OnInit, OnDestroy {
     }
   }
 
+  private buildNodeFromJson(item: JsonSpatialNode, level: number): IfcNode {
+    const id = `n${this.nodeCounter++}`;
+    const categoryCode = item.type.toUpperCase();
+    const category = this.translateCategory(item.type);
+    const children = (item.children ?? []).map(child => this.buildNodeFromJson(child, level + 1));
+
+    const structuralElements = ['IFCBUILDING', 'IFCBUILDINGSTOREY', 'IFCSITE', 'IFCPROJECT'];
+    const isStructural = structuralElements.includes(categoryCode);
+    const shouldExpand = level < 3 || isStructural;
+
+    const nameVal = item.Name?.trim();
+    const name = nameVal ? `${category}: ${nameVal}` : category;
+
+    return {
+      id,
+      localId: item.expressID ?? null,
+      category,
+      categoryCode,
+      name,
+      level,
+      hasChildren: children.length > 0,
+      isExpanded: shouldExpand,
+      children,
+    };
+  }
+
+  private buildTreeFromJson(jsonData: JsonSpatialNode): void {
+    this.isTreeLoading.set(true);
+    try {
+      this.nodeCounter = 0;
+      const root = this.buildNodeFromJson(jsonData, 0);
+      this.rootNodes = [root];
+
+      this.updateFlatList();
+      this.extractUniqueTypes();
+      this.extractFloors();
+
+      this.localIdToNode.clear();
+      for (const node of this.getAllNodes(this.rootNodes)) {
+        if (node.localId !== null) {
+          this.localIdToNode.set(node.localId, node);
+        }
+      }
+
+      this.cdr.detectChanges();
+    } catch (e) {
+      console.error('Erro ao construir árvore IFC a partir do JSON:', e);
+    } finally {
+      this.isTreeLoading.set(false);
+    }
+  }
+
   // ── Viewer init ──────────────────────────────────────────────────────────
 
   private async initViewer(): Promise<void> {
@@ -1644,24 +1703,40 @@ export class IfcViewer implements OnInit, OnDestroy {
       const data = new Uint8Array(buffer);
       this.loadingProgress.set(20);
 
-      const modelName = fileName.replace('.ifc', '');
-      const fileModel = await this.ifcLoader!.load(data, false, modelName, {
-        processData: {
-          progressCallback: (progress: number) => {
-            this.loadingProgress.set(20 + Math.round(progress * 80));
-            this.loadingMessage.set(`Convertendo modelo: ${Math.round(progress * 100)}%`);
+      if (fileName.toLowerCase().endsWith('.frag')) {
+        await this.loadFragModel(data, fileName);
+        // Tenta carregar o arquivo JSON com a estrutura espacial correspondente
+        const jsonUrl = url.replace(/\.frag$/i, '.json');
+        try {
+          this.loadingMessage.set('Carregando estrutura do modelo...');
+          const jsonResponse = await fetch(jsonUrl);
+          if (jsonResponse.ok) {
+            const jsonData = await jsonResponse.json() as JsonSpatialNode;
+            this.buildTreeFromJson(jsonData);
+          }
+        } catch (e) {
+          console.warn('Arquivo JSON de estrutura não encontrado ou inválido:', e);
+        }
+      } else {
+        const modelName = fileName.replace('.ifc', '');
+        const fileModel = await this.ifcLoader!.load(data, false, modelName, {
+          processData: {
+            progressCallback: (progress: number) => {
+              this.loadingProgress.set(20 + Math.round(progress * 80));
+              this.loadingMessage.set(`Convertendo modelo: ${Math.round(progress * 100)}%`);
+            },
           },
-        },
-      });
+        });
 
-      this.loadingProgress.set(100);
-      this.modelLoaded.set(true);
-      this.loadedFileName.set(fileName);
-      await this.hideIfcSpaces(fileModel);
-      this.buildTree(fileModel);
-      this.notificationService.success({ message: `Arquivo "${fileName}" carregado com sucesso!` });
+        this.loadingProgress.set(100);
+        this.modelLoaded.set(true);
+        this.loadedFileName.set(fileName);
+        await this.hideIfcSpaces(fileModel);
+        this.buildTree(fileModel);
+        this.notificationService.success({ message: `Arquivo "${fileName}" carregado com sucesso!` });
+      }
     } catch (error) {
-      this.notificationService.error({ message: 'Erro ao carregar o arquivo IFC a partir da URL.' });
+      this.notificationService.error({ message: 'Erro ao carregar o arquivo a partir da URL.' });
       console.error('Erro ao carregar IFC da URL:', error);
     } finally {
       this.isLoading.set(false);
