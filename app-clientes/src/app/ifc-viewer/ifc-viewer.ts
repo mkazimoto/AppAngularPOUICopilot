@@ -149,7 +149,24 @@ export class IfcViewer implements OnInit, OnDestroy {
         'OTC-Conference Center.frag'
       ),  
     },
+    {
+      label: '20210219Architecture.frag',
+      icon: 'an an-cloud-download',
+      action: () => this.loadFromUrl(
+        'ifc/20210219Architecture.frag',
+        '20210219Architecture.frag'
+      ),  
+    },
+    {
+      label: 'SampleHouse.frag',
+      icon: 'an an-cloud-download',
+      action: () => this.loadFromUrl(
+        'ifc/SampleHouse.frag',
+        'SampleHouse.frag'
+      ),  
+    },
   ];
+
 
   private components: OBC.Components | null = null;
   private world: OBC.SimpleWorld<OBC.SimpleScene, OBC.OrthoPerspectiveCamera, OBC.SimpleRenderer> | null = null;
@@ -762,7 +779,7 @@ export class IfcViewer implements OnInit, OnDestroy {
       document.addEventListener('touchend', this.onTouchEnd);
     }
     await this.initViewer();
-    await this.loadDefaultModel();
+    await this.loadFromUrl('ifc/OTC-Conference Center.frag', 'OTC-Conference Center.frag');
   }
 
   ngOnDestroy(): void {
@@ -1551,45 +1568,7 @@ export class IfcViewer implements OnInit, OnDestroy {
       }
     });
   }
-
-  private async loadDefaultModel(): Promise<void> {
-    if (!this.ifcLoader || !this.fragments) return;
-
-    const fileName = 'SampleHouse.ifc';
-    this.isLoading.set(true);
-    this.loadingProgress.set(0);
-    this.loadingMessage.set(`Carregando ${fileName}...`);
-
-    try {
-      const response = await fetch(`ifc/${fileName}`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const buffer = await response.arrayBuffer();
-      const data = new Uint8Array(buffer);
-      this.loadingProgress.set(10);
-
-      const defaultModel = await this.ifcLoader.load(data, false, fileName.replace('.ifc', ''), {
-        processData: {
-          progressCallback: (progress: number) => {
-            this.loadingProgress.set(10 + Math.round(progress * 90));
-            this.loadingMessage.set(`Convertendo modelo: ${Math.round(progress * 100)}%`);
-          },
-        },
-      });
-
-      this.loadingProgress.set(100);
-      this.modelLoaded.set(true);
-      this.loadedFileName.set(fileName);
-      await this.hideIfcSpaces(defaultModel);
-      this.buildTree(defaultModel);
-    } catch (error) {
-      this.notificationService.error({ message: 'Erro ao carregar o modelo padrão.' });
-      console.error('Erro ao carregar modelo padrão:', error);
-    } finally {
-      this.isLoading.set(false);
-      this.loadingMessage.set('');
-    }
-  }
-
+  
   async onFileSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
