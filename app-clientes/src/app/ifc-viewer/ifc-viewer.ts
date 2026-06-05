@@ -1692,6 +1692,7 @@ export class IfcViewer implements OnInit, OnDestroy {
           if (jsonResponse.ok) {
             const jsonData = await jsonResponse.json() as JsonSpatialNode;
             this.buildTreeFromJson(jsonData);
+            await this.applyAllFilters();
           }
         } catch (e) {
           console.warn('Arquivo JSON de estrutura não encontrado ou inválido:', e);
