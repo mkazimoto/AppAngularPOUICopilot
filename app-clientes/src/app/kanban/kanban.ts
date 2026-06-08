@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import {
   PoAvatarModule,
   PoBadgeModule,
@@ -54,7 +54,7 @@ export interface KanbanColumn {
   templateUrl: './kanban.html',
   styleUrl: './kanban.css',
 })
-export class Kanban {
+export class Kanban implements OnInit {
   @ViewChild('detailModal') detailModal!: PoModalComponent;
   @ViewChild('previewModal') previewModal!: PoModalComponent;
 
@@ -268,6 +268,17 @@ export class Kanban {
 
   selectedTask: KanbanTask | null = null;
   selectedAttachment: KanbanAttachment | null = null;
+  cardActionsMap = new Map<number, PoDropdownAction[]>();
+
+  ngOnInit(): void {
+    this.buildCardActions();
+  }
+
+  buildCardActions(): void {
+    this.tasks.forEach(task => {
+      this.cardActionsMap.set(task.id, this.computeCardActions(task));
+    });
+  }
 
   modalCloseAction: PoModalAction = {
     label: 'Fechar',
@@ -348,6 +359,7 @@ export class Kanban {
     } else if (direction === 'back' && currentIndex > 0) {
       task.column = columnIds[currentIndex - 1];
     }
+    this.buildCardActions();
   }
 
   isFirstColumn(columnId: string): boolean {
@@ -358,29 +370,29 @@ export class Kanban {
     return this.columns[this.columns.length - 1].id === columnId;
   }
 
-  getCardActions(task: KanbanTask, columnId: string): PoDropdownAction[] {
+  computeCardActions(task: KanbanTask): PoDropdownAction[] {
     const actions: PoDropdownAction[] = [
       { label: 'Ver Detalhes', icon: 'an an-eye', action: () => this.openDetail(task) },
     ];
 
-    switch (columnId) {
+    switch (task.column) {
       case 'todo':
-        actions.push({ label: 'Iniciar Tarefa', icon: 'an an-play', action: () => this.moveTask(task, 'forward') });
+        actions.push({ label: 'Iniciar Tarefa', icon: 'an an-play', action: () => { this.moveTask(task, 'forward'); } });
         break;
       case 'doing':
         actions.push(
-          { label: 'Pausar Tarefa', icon: 'an an-pause', action: () => this.moveTask(task, 'back') },
-          { label: 'Enviar para Revisão', icon: 'an an-check', action: () => this.moveTask(task, 'forward') },
+          { label: 'Pausar Tarefa', icon: 'an an-pause', action: () => { this.moveTask(task, 'back'); } },
+          { label: 'Enviar para Revisão', icon: 'an an-check', action: () => { this.moveTask(task, 'forward'); } },
         );
         break;
       case 'review':
         actions.push(
-          { label: 'Retornar ao Progresso', icon: 'an an-arrow-left', action: () => this.moveTask(task, 'back') },
-          { label: 'Aprovar e Concluir', icon: 'an an-check-circle', action: () => this.moveTask(task, 'forward') },
+          { label: 'Retornar ao Progresso', icon: 'an an-arrow-left', action: () => { this.moveTask(task, 'back'); } },
+          { label: 'Aprovar e Concluir', icon: 'an an-check-circle', action: () => { this.moveTask(task, 'forward'); } },
         );
         break;
       case 'done':
-        actions.push({ label: 'Reabrir Tarefa', icon: 'an an-arrow-arc-left', action: () => this.moveTask(task, 'back') });
+        actions.push({ label: 'Reabrir Tarefa', icon: 'an an-arrow-arc-left', action: () => { this.moveTask(task, 'back'); } });
         break;
     }
 
@@ -391,6 +403,7 @@ export class Kanban {
 
   deleteTask(task: KanbanTask): void {
     this.tasks = this.tasks.filter(t => t.id !== task.id);
+    this.cardActionsMap.delete(task.id);
   }
 
   previewAttachment(file: KanbanAttachment): void {

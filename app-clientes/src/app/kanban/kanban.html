@@ -2,7 +2,7 @@
 
   <div class="kanban-board">
 
-    @for (column of columns; track column) {
+    @for (column of columns; track column.id) {
     <div class="kanban-column">
 
       <!-- Cabeçalho da coluna -->
@@ -22,7 +22,7 @@
         (dragover)="onDragOver($event, column.id)"
         (dragleave)="onDragLeave(column.id)"
         (drop)="onDrop(column.id)">
-        @for (task of getTasksByColumn(column.id); track task) {
+        @for (task of getTasksByColumn(column.id); track task.id) {
         <div
           class="kanban-card"
           draggable="true"
@@ -72,11 +72,13 @@
               </span>
             }
 
-            <div class="kanban-card-actions">
+            <div class="kanban-card-actions"
+              (mousedown)="$event.stopPropagation()"
+              (dragstart)="$event.stopPropagation(); $event.preventDefault()">
               <po-dropdown
                 p-label="☰"
                 p-size="large"
-                [p-actions]="getCardActions(task, column.id)">
+                [p-actions]="cardActionsMap.get(task.id) || []">
               </po-dropdown>
             </div>
           </div>
