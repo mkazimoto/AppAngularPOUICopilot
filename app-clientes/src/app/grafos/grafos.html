@@ -87,10 +87,25 @@
 
       <!-- SVG: arestas ortogonais -->
       <svg class="gf-svg" [attr.width]="canvasW()" [attr.height]="canvasH()">
+        <defs>
+          @for (color of LAYER_COLORS; track $index) {
+            <marker
+              [attr.id]="'gf-arrow-' + $index"
+              markerWidth="12"
+              markerHeight="8"
+              refX="10"
+              refY="4"
+              orient="auto"
+              markerUnits="userSpaceOnUse">
+              <polygon points="0 0, 12 4, 0 8" [attr.fill]="color"/>
+            </marker>
+          }
+        </defs>
         @for (e of edges(); track trackEdge($index, e)) {
           <g>
             <path
               [attr.d]="e.d"
+              [attr.marker-end]="edgeMarker(e)"
               class="gf-conn"
               [class.gf-conn-hot]="isEdgeActive(e) && hovered() !== null"
               [class.gf-conn-dim]="!isEdgeActive(e)"

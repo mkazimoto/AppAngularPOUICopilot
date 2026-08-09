@@ -273,6 +273,12 @@ export class Grafos {
     return f ? this.layerColor(f.layer) : '#94a3b8';
   }
 
+  edgeMarker(e: RoutedEdge): string {
+    const f = this.nodeById().get(e.from);
+    const li = f ? f.layer : 0;
+    return `url(#gf-arrow-${li % this.LAYER_COLORS.length})`;
+  }
+
   isNodeDim(id: string): boolean {
     const h = this.hovered();
     return h !== null && h !== id && !this.adjacency().get(h)?.has(id);
@@ -351,8 +357,17 @@ export class Grafos {
       `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" font-family="Segoe UI, Arial, sans-serif">`
     );
     parts.push(`<rect width="${w}" height="${h}" fill="#f8fafc"/>`);
+    parts.push('<defs>');
+    this.LAYER_COLORS.forEach((color, i) => {
+      parts.push(
+        `<marker id="gf-arrow-${i}" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0 0, 12 4, 0 8" fill="${color}"/></marker>`
+      );
+    });
+    parts.push('</defs>');
     for (const e of this.edges()) {
-      parts.push(`<path d="${e.d}" fill="none" stroke="${this.edgeStroke(e)}" stroke-width="2"/>`);
+      parts.push(
+        `<path d="${e.d}" fill="none" stroke="${this.edgeStroke(e)}" stroke-width="2" marker-end="${this.edgeMarker(e)}"/>`
+      );
       if (e.label && this.showEdgeLabels()) {
         parts.push(
           `<text x="${e.lx}" y="${e.ly - 6}" text-anchor="middle" font-size="11" fill="#334155">${this.esc(e.label)}</text>`
