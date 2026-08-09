@@ -55,7 +55,7 @@ export class Carros {
   termoBusca = '';
 
   readonly breadcrumb: PoBreadcrumb = {
-    items: [{ label: 'Home', link: '/dashboard' }, { label: 'Aluguel de Carros' }],
+    items: [{ label: 'Home', link: '/clientes' }, { label: 'Aluguel de Carros' }],
   };
 
   readonly tagTypeSuccess = PoTagType.Success;

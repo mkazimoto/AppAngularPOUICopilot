@@ -52,7 +52,7 @@ export class Produtos {
   carrinho: Array<{ produto: Produto; quantidade: number }> = [];
 
   readonly breadcrumb: PoBreadcrumb = {
-    items: [{ label: 'Home', link: '/dashboard' }, { label: 'Produtos' }],
+    items: [{ label: 'Home', link: '/clientes' }, { label: 'Produtos' }],
   };
 
   readonly tagTypeSuccess = PoTagType.Success;

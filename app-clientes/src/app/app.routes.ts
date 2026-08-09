@@ -2,10 +2,6 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   {
-    path: 'dashboard',
-    loadComponent: () => import('./dashboard/dashboard').then((m) => m.Dashboard),
-  },
-  {
     path: 'clientes',
     loadComponent: () => import('./clientes/clientes').then((m) => m.Clientes),
   },
@@ -73,5 +69,5 @@ export const routes: Routes = [
     path: 'ifc-viewer',
     loadComponent: () => import('./ifc-viewer/ifc-viewer').then((m) => m.IfcViewer),
   },
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: '', redirectTo: 'clientes', pathMatch: 'full' },
 ];
