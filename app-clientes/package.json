@@ -22,7 +22,6 @@
     "@po-ui/ng-components": "^21.23.1",
     "@thatopen/components": "^3.4.2",
     "@types/three": "^0.184.0",
-    "cytoscape": "^3.34.0",
     "rxjs": "~7.8.0",
     "three": "^0.184.0",
     "tslib": "^2.3.0",
