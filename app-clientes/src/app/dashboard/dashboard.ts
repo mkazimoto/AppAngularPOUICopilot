@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { PoBreadcrumb, PoPageModule } from '@po-ui/ng-components';
 
 interface Kpi {
   rotulo: string;
@@ -42,12 +43,16 @@ const DONUT_STROKE = 30;
 
 @Component({
   selector: 'app-dashboard',
-  imports: [],
+  imports: [PoPageModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Dashboard {
+  readonly breadcrumb: PoBreadcrumb = {
+    items: [{ label: 'Painel de Controle' }],
+  };
+
   readonly dataHoje = new Date().toLocaleDateString('pt-BR', {
     weekday: 'long',
     day: '2-digit',

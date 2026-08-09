@@ -5,7 +5,8 @@
 .dash {
   --dash-bg: #f3f4f8;
   --dash-card: #ffffff;
-  --dash-borda: #e5e7eb;
+  --dash-borda: #cbd5e1;
+  --dash-borda-grafico: #e2e8f0;
   --dash-texto: #1f2937;
   --dash-texto-suave: #6b7280;
   --dash-texto-fraco: #9ca3af;
@@ -17,8 +18,6 @@
   --dash-raio: 14px;
 
   background: var(--dash-bg);
-  min-height: 100vh;
-  padding: 28px;
   color: var(--dash-texto);
   font-family: 'Roboto', 'Segoe UI', system-ui, -apple-system, sans-serif;
   box-sizing: border-box;
@@ -33,24 +32,11 @@
 /* ── Cabeçalho ── */
 .dash-cabecalho {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: flex-end;
   gap: 16px;
   flex-wrap: wrap;
   margin-bottom: 24px;
-}
-
-.dash-titulo {
-  margin: 0;
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.dash-subtitulo {
-  margin: 4px 0 0;
-  color: var(--dash-texto-suave);
-  font-size: 14px;
 }
 
 .dash-periodo {
@@ -99,7 +85,7 @@
 
 .kpi-card {
   background: var(--dash-card);
-  border: 1px solid var(--dash-borda);
+  border: 2px solid var(--dash-borda);
   border-radius: var(--dash-raio);
   box-shadow: var(--dash-sombra);
   padding: 20px;
@@ -199,7 +185,7 @@
 
 .card {
   background: var(--dash-card);
-  border: 1px solid var(--dash-borda);
+  border: 2px solid var(--dash-borda);
   border-radius: var(--dash-raio);
   box-shadow: var(--dash-sombra);
   padding: 22px;
@@ -249,8 +235,17 @@
 }
 
 /* ── Gráfico de área ── */
+.grafico-area,
+.donut-wrap,
+.barras {
+  border: 1px solid var(--dash-borda-grafico);
+  border-radius: 10px;
+  background: #fcfcfe;
+}
+
 .grafico-area {
   width: 100%;
+  padding: 14px 12px 6px;
 }
 
 .grafico-svg {
@@ -293,6 +288,7 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 18px;
+  padding: 16px 12px;
 }
 
 .donut-svg {
@@ -352,6 +348,7 @@
 .barras {
   display: grid;
   gap: 14px;
+  padding: 14px 16px;
 }
 
 .barra-linha {

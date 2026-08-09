@@ -1,11 +1,11 @@
-<div class="dash">
-  <!-- ── Cabeçalho ── -->
-  <header class="dash-cabecalho">
-    <div>
-      <h1 class="dash-titulo">Painel de Controle</h1>
-      <p class="dash-subtitulo">Visão geral do desempenho · {{ dataHoje }}</p>
-    </div>
+<po-page-default
+  p-title="Painel de Controle"
+  [p-subtitle]="'Visão geral do desempenho · ' + dataHoje"
+  [p-breadcrumb]="breadcrumb">
 
+  <div class="dash">
+  <!-- ── Seletor de período ── -->
+  <div class="dash-cabecalho">
     <div class="dash-periodo" role="group" aria-label="Período do relatório">
       @for (p of periodos; track p) {
         <button
@@ -18,7 +18,7 @@
         </button>
       }
     </div>
-  </header>
+  </div>
 
   <!-- ── KPIs ── -->
   <section class="dash-kpis" aria-label="Indicadores principais">
@@ -216,4 +216,5 @@
       </div>
     </article>
   </section>
-</div>
+  </div>
+</po-page-default>

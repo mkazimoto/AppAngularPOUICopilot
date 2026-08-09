@@ -73,5 +73,5 @@ export const routes: Routes = [
     path: 'ifc-viewer',
     loadComponent: () => import('./ifc-viewer/ifc-viewer').then((m) => m.IfcViewer),
   },
-  { path: '', redirectTo: 'clientes', pathMatch: 'full' },
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 ];
