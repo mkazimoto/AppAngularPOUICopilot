@@ -16,6 +16,7 @@ export class App {
   readonly toolbarTitle = `App PO-UI gerado pelo Copilot com o Modelo Claude Sonnet 4.6 e DeepSeek v4 Flash - Versão do PO-UI ${this.poUiVersion}`;
 
   readonly menus: Array<PoMenuItem> = [
+    { label: 'Dashboard', shortLabel: 'Dashboard', link: '/dashboard', icon: 'an an-share-network' },
     { label: 'Clientes', shortLabel: 'Clientes', link: '/clientes', icon: 'an an-users' },
     { label: 'Produtos', shortLabel: 'Produtos', link: '/produtos', icon: 'an an-shopping-bag' },
     { label: 'PetSocial', shortLabel: 'PetSocial', link: '/petsocial', icon: 'an an-paw-print' },

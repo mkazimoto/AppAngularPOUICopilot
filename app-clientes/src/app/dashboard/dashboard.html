@@ -1,0 +1,219 @@
+<div class="dash">
+  <!-- ── Cabeçalho ── -->
+  <header class="dash-cabecalho">
+    <div>
+      <h1 class="dash-titulo">Painel de Controle</h1>
+      <p class="dash-subtitulo">Visão geral do desempenho · {{ dataHoje }}</p>
+    </div>
+
+    <div class="dash-periodo" role="group" aria-label="Período do relatório">
+      @for (p of periodos; track p) {
+        <button
+          type="button"
+          class="dash-periodo-btn"
+          [class.dash-periodo-btn--ativo]="periodo() === p"
+          [attr.aria-pressed]="periodo() === p"
+          (click)="periodo.set(p)">
+          {{ p }}
+        </button>
+      }
+    </div>
+  </header>
+
+  <!-- ── KPIs ── -->
+  <section class="dash-kpis" aria-label="Indicadores principais">
+    @for (kpi of kpis; track kpi.rotulo) {
+      <article class="kpi-card" [style.--kpi-cor]="kpi.cor">
+        <div class="kpi-card-topo">
+          <span class="kpi-icone" aria-hidden="true">
+            @switch (kpi.icone) {
+              @case ('dolar') {
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="1" x2="12" y2="23"></line>
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+              }
+              @case ('carrinho') {
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="9" cy="21" r="1"></circle>
+                  <circle cx="20" cy="21" r="1"></circle>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+              }
+              @case ('usuarios') {
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+              }
+              @case ('alvo') {
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <circle cx="12" cy="12" r="6"></circle>
+                  <circle cx="12" cy="12" r="2"></circle>
+                </svg>
+              }
+            }
+          </span>
+          <span class="kpi-delta" [class.kpi-delta--down]="kpi.tendencia === 'down'">
+            <span aria-hidden="true">{{ kpi.tendencia === 'up' ? '▲' : '▼' }}</span>
+            {{ formatarDelta(kpi.delta) }}
+            <span class="kpi-delta-periodo">vs mês anterior</span>
+          </span>
+        </div>
+        <div class="kpi-valor">{{ kpi.valor }}</div>
+        <div class="kpi-rotulo">{{ kpi.rotulo }}</div>
+        <div class="kpi-barra" aria-hidden="true">
+          <span [style.--kpi-porcentagem]="'100%'"></span>
+        </div>
+      </article>
+    }
+  </section>
+
+  <!-- ── Linha principal: área + donut ── -->
+  <section class="dash-grade" aria-label="Gráficos principais">
+    <article class="card card--grafico">
+      <header class="card-cabecalho">
+        <div>
+          <h2 class="card-titulo">Receita ao longo do tempo</h2>
+          <p class="card-subtitulo">Total: {{ formatarBRL(serie().max) }}</p>
+        </div>
+        <span class="card-legend">
+          <span class="card-legend-item"><i class="legenda-cor" style="background:#4f46e5"></i> Receita</span>
+        </span>
+      </header>
+
+      <div class="grafico-area" role="img" [attr.aria-label]="'Gráfico de área da receita no período ' + periodo()">
+        <svg [attr.viewBox]="'0 0 ' + CHART_W + ' ' + CHART_H" preserveAspectRatio="none" class="grafico-svg">
+          <defs>
+            <linearGradient id="dash-area-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#4f46e5" stop-opacity="0.28"></stop>
+              <stop offset="100%" stop-color="#4f46e5" stop-opacity="0.02"></stop>
+            </linearGradient>
+          </defs>
+
+          @for (t of serie().ticksY; track t.y) {
+            <line
+              [attr.x1]="PAD.left"
+              [attr.x2]="CHART_W - PAD.right"
+              [attr.y1]="t.y"
+              [attr.y2]="t.y"
+              class="grafico-grid" />
+            <text
+              [attr.x]="PAD.left - 8"
+              [attr.y]="t.y + 4"
+              text-anchor="end"
+              class="grafico-rotulo-y">{{ formatarEixo(t.valor) }}</text>
+          }
+
+          <path [attr.d]="serie().area" fill="url(#dash-area-grad)"></path>
+          <path [attr.d]="serie().linha" fill="none" class="grafico-linha"></path>
+
+          @for (p of serie().pts; track p.rotulo) {
+            <circle [attr.cx]="p.x" [attr.cy]="p.y" r="4" class="grafico-ponto"></circle>
+            <text [attr.x]="p.x" [attr.y]="CHART_H - 14" text-anchor="middle" class="grafico-rotulo-x">{{ p.rotulo }}</text>
+          }
+        </svg>
+      </div>
+    </article>
+
+    <article class="card card--donut">
+      <header class="card-cabecalho">
+        <h2 class="card-titulo">Vendas por categoria</h2>
+      </header>
+
+      <div class="donut-wrap" role="img" aria-label="Gráfico de rosca da distribuição de vendas por categoria">
+        <svg [attr.viewBox]="'0 0 ' + (DONUT_R * 2 + DONUT_STROKE + 8) + ' ' + (DONUT_R * 2 + DONUT_STROKE + 8)" class="donut-svg">
+          <g transform="rotate(-90 100 100)">
+            @for (seg of donut().segs; track seg.rotulo) {
+              <circle
+                cx="100"
+                cy="100"
+                [attr.r]="DONUT_R"
+                fill="none"
+                [attr.stroke]="seg.cor"
+                [attr.stroke-width]="DONUT_STROKE"
+                [attr.stroke-dasharray]="seg.dash + ' ' + donut().circ"
+                [attr.stroke-dashoffset]="seg.offset" />
+            }
+          </g>
+        </svg>
+        <div class="donut-centro">
+          <strong>{{ formatarEixo(donut().total) }}</strong>
+          <span>Total</span>
+        </div>
+      </div>
+
+      <ul class="donut-legenda">
+        @for (seg of donut().segs; track seg.rotulo) {
+          <li>
+            <i class="legenda-cor" [style.background]="seg.cor" aria-hidden="true"></i>
+            <span class="legenda-rotulo">{{ seg.rotulo }}</span>
+            <span class="legenda-valor">{{ (seg.frac * 100).toFixed(1) }}%</span>
+          </li>
+        }
+      </ul>
+    </article>
+  </section>
+
+  <!-- ── Linha secundária: barras + pedidos ── -->
+  <section class="dash-grade" aria-label="Desempenho e pedidos recentes">
+    <article class="card card--barras">
+      <header class="card-cabecalho">
+        <div>
+          <h2 class="card-titulo">Vendas por categoria</h2>
+          <p class="card-subtitulo">Comparativo em barras</p>
+        </div>
+      </header>
+
+      <div class="barras" role="img" aria-label="Gráfico de barras de vendas por categoria">
+        @for (b of barras(); track b.rotulo) {
+          <div class="barra-linha">
+            <span class="barra-rotulo">{{ b.rotulo }}</span>
+            <div class="barra-trilho" aria-hidden="true">
+              <div class="barra-preenchida" [style.width.%]="b.altura" [style.background]="b.cor"></div>
+            </div>
+            <span class="barra-valor">{{ formatarEixo(b.valor) }}</span>
+          </div>
+        }
+      </div>
+    </article>
+
+    <article class="card card--pedidos">
+      <header class="card-cabecalho">
+        <h2 class="card-titulo">Pedidos recentes</h2>
+      </header>
+
+      <div class="tabela-wrap">
+        <table class="dash-tabela">
+          <thead>
+            <tr>
+              <th scope="col">Pedido</th>
+              <th scope="col">Cliente</th>
+              <th scope="col">Produto</th>
+              <th scope="col" class="celula-num">Valor</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (ped of pedidos; track ped.id) {
+              <tr>
+                <td class="celula-id">{{ ped.id }}</td>
+                <td>{{ ped.cliente }}</td>
+                <td>{{ ped.produto }}</td>
+                <td class="celula-num">{{ formatarBRL(ped.valor) }}</td>
+                <td>
+                  <span class="status" [class.status--concluido]="ped.status === 'concluido'" [class.status--pendente]="ped.status === 'pendente'" [class.status--cancelado]="ped.status === 'cancelado'">
+                    {{ statusLabel(ped.status) }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+</div>
