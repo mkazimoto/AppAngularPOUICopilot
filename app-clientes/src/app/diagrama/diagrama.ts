@@ -911,7 +911,7 @@ export class Diagrama implements OnInit, AfterViewInit {
   }
 
   private radialLayout(map: Map<string, string[]>, roots: string[]): Map<string, Point> {
-    const STEP = 160;
+    const STEP = 250;
     const CHAIN_ROT = Math.PI / 8; // gira cadeias de nós únicos para evitar raio reto
 
     // Árvore de primeiro-pai (DAG seguro)
