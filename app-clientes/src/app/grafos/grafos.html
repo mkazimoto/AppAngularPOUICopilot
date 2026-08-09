@@ -25,7 +25,7 @@
 
     <div class="gf-zoom-controls">
       <button class="gf-zoom-btn" title="Reduzir zoom" [disabled]="zoom() <= ZOOM_MIN" (click)="zoomOut()">−</button>
-      <span class="gf-zoom-label" (click)="resetZoom()" title="Resetar zoom">{{ zoomPercent() }}%</span>
+      <span class="gf-zoom-label" (click)="resetView()" title="Resetar visualização (zoom e posição)">{{ zoomPercent() }}%</span>
       <button class="gf-zoom-btn" title="Aumentar zoom" [disabled]="zoom() >= ZOOM_MAX" (click)="zoomIn()">+</button>
     </div>
 
@@ -67,15 +67,18 @@
 
   <!-- ── Canvas ── -->
   @if (nodes().length > 0) {
-  <div class="gf-scroll">
+  <div class="gf-scroll" #gfScroll>
     <div class="gf-canvas-outer"
-         [style.width.px]="canvasW() * zoom()"
-         [style.height.px]="canvasH() * zoom()">
+         [style.width.px]="canvasOuterW()"
+         [style.height.px]="canvasOuterH()">
     <div class="gf-canvas"
+         [class.gf-panning]="isPanning()"
          [style.width.px]="canvasW()"
          [style.height.px]="canvasH()"
-         [style.transform]="'scale(' + zoom() + ')'"
-         [style.transformOrigin]="'0 0'">
+         [style.transform]="'translate(' + panX() + 'px, ' + panY() + 'px) scale(' + zoom() + ')'"
+         [style.transformOrigin]="'0 0'"
+         title="Arraste com o mouse para mover o diagrama"
+         (mousedown)="onCanvasMouseDown($event)">
 
       <!-- SVG: arestas ortogonais -->
       <svg class="gf-svg" [attr.width]="canvasW()" [attr.height]="canvasH()">
@@ -122,8 +125,8 @@
            [style.top.px]="n.y"
            [style.border-left-color]="layerColor(n.layer)"
            [style.--gf-layer]="layerColor(n.layer)"
-           (mouseenter)="hovered.set(n.id)"
-           (mouseleave)="hovered.set(null)">
+           (mouseenter)="!isPanning() && hovered.set(n.id)"
+           (mouseleave)="!isPanning() && hovered.set(null)">
 
         <div class="gf-avatar" [style.background]="layerColor(n.layer)">{{ n.layer }}</div>
 

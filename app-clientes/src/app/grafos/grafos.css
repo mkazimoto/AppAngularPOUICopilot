@@ -165,6 +165,19 @@
   position: absolute;
   top: 0;
   left: 0;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.gf-canvas.gf-panning {
+  cursor: grabbing;
+}
+
+.gf-canvas.gf-panning .gf-node {
+  cursor: grabbing;
+  transition: none;
 }
 
 /* ── SVG arestas ─────────────────────────────────────────────────────────── */

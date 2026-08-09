@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, signal, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ElementRef,
+  OnDestroy,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   PoButtonModule,
@@ -67,7 +75,7 @@ interface Sample {
   styleUrl: './grafos.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Grafos {
+export class Grafos implements OnDestroy {
   // ── Constantes de layout ────────────────────────────────────────────────
   readonly NODE_W = 200;
   readonly NODE_H = 60;
@@ -91,6 +99,7 @@ export class Grafos {
   readonly ZOOM_MIN = 0.3;
   readonly ZOOM_MAX = 2.5;
   readonly ZOOM_STEP = 0.2;
+  readonly PAN_MARGIN = 200;
 
   // ── Amostras ────────────────────────────────────────────────────────────
   readonly samples: Sample[] = [
@@ -215,6 +224,9 @@ export class Grafos {
   canvasW = signal(900);
   canvasH = signal(500);
   zoom = signal(1);
+  panX = signal(0);
+  panY = signal(0);
+  isPanning = signal(false);
   hovered = signal<string | null>(null);
   showEdgeLabels = signal(true);
   jsonText = signal('');
@@ -242,8 +254,11 @@ export class Grafos {
   readonly statEdges = computed(() => this.edges().length);
   readonly statLayers = computed(() => this.layers().length);
   readonly zoomPercent = computed(() => Math.round(this.zoom() * 100));
+  readonly canvasOuterW = computed(() => this.canvasW() * this.zoom() + 2 * this.PAN_MARGIN);
+  readonly canvasOuterH = computed(() => this.canvasH() * this.zoom() + 2 * this.PAN_MARGIN);
 
   @ViewChild('jsonModal') jsonModal!: PoModalComponent;
+  @ViewChild('gfScroll') gfScroll!: ElementRef<HTMLElement>;
 
   primaryAction: PoModalAction = {
     label: 'Aplicar',
@@ -333,7 +348,7 @@ export class Grafos {
     (event.target as HTMLInputElement).value = '';
   }
 
-  // ── Zoom ────────────────────────────────────────────────────────────────
+  // ── Zoom / pan ──────────────────────────────────────────────────────────
 
   zoomIn(): void {
     this.zoom.update((z) => Math.min(this.ZOOM_MAX, +(z + this.ZOOM_STEP).toFixed(2)));
@@ -343,8 +358,60 @@ export class Grafos {
     this.zoom.update((z) => Math.max(this.ZOOM_MIN, +(z - this.ZOOM_STEP).toFixed(2)));
   }
 
-  resetZoom(): void {
+  resetView(): void {
     this.zoom.set(1);
+    this.centerView();
+    this.scrollToCenter();
+  }
+
+  // ── Pan (arrastar com o mouse move o diagrama) ──────────────────────────
+
+  private panStart = { x: 0, y: 0, panX: 0, panY: 0 };
+
+  onCanvasMouseDown(event: MouseEvent): void {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    this.hovered.set(null);
+    this.panStart = { x: event.clientX, y: event.clientY, panX: this.panX(), panY: this.panY() };
+    this.isPanning.set(true);
+    window.addEventListener('mousemove', this.onPanMove);
+    window.addEventListener('mouseup', this.onPanUp);
+  }
+
+  private onPanMove = (event: MouseEvent): void => {
+    const range = 2 * this.PAN_MARGIN;
+    this.panX.set(
+      Math.min(range, Math.max(0, this.panStart.panX + event.clientX - this.panStart.x))
+    );
+    this.panY.set(
+      Math.min(range, Math.max(0, this.panStart.panY + event.clientY - this.panStart.y))
+    );
+  };
+
+  private onPanUp = (): void => {
+    this.isPanning.set(false);
+    window.removeEventListener('mousemove', this.onPanMove);
+    window.removeEventListener('mouseup', this.onPanUp);
+  };
+
+  private centerView(): void {
+    this.panX.set(this.PAN_MARGIN);
+    this.panY.set(this.PAN_MARGIN);
+  }
+
+  private scrollToCenter(): void {
+    setTimeout(() => {
+      const el = this.gfScroll?.nativeElement;
+      if (el) {
+        el.scrollLeft = this.PAN_MARGIN;
+        el.scrollTop = this.PAN_MARGIN;
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('mousemove', this.onPanMove);
+    window.removeEventListener('mouseup', this.onPanUp);
   }
 
   // ── Export SVG ──────────────────────────────────────────────────────────
@@ -570,6 +637,8 @@ export class Grafos {
     this.canvasW.set(Math.max(maxX + this.PADDING, 700));
     this.canvasH.set(Math.max(maxY + this.PADDING, 400));
     this.zoom.set(1);
+    this.centerView();
+    this.scrollToCenter();
     this.hovered.set(null);
   }
 
