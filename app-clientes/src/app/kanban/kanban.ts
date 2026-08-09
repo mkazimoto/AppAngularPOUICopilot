@@ -1,75 +1,24 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
+import { PoPageModule, PoTagType } from '@po-ui/ng-components';
 import {
-  PoAvatarModule,
-  PoBadgeModule,
-  PoButtonModule,
-  PoDividerModule,
-  PoDropdownAction,
-  PoDropdownModule,
-  PoInfoModule,
-  PoModalAction,
-  PoModalComponent,
-  PoModalModule,
-  PoPageModule,
-  PoProgressModule,
-  PoProgressStatus,
-  PoTagModule,
-  PoTagType,
-} from '@po-ui/ng-components';
-
-export type AttachmentType = 'image' | 'pdf' | 'doc' | 'spreadsheet' | 'text' | 'code';
-
-export interface KanbanAttachment {
-  name: string;
-  type: AttachmentType;
-  url: string;
-}
-
-export interface KanbanTask {
-  id: number;
-  title: string;
-  description: string;
-  priority: string;
-  priorityType: PoTagType;
-  assignee: string;
-  photo: string;
-  column: string;
-  dueDate?: string;
-  tags?: string[];
-  effort?: string;
-  progress: number;
-  attachmentFiles?: KanbanAttachment[];
-}
-
-export interface KanbanColumn {
-  id: string;
-  title: string;
-  badgeStatus: 'positive' | 'negative' | 'warning' | 'disabled';
-}
+  KanbanBoardComponent,
+  KanbanColumn,
+  KanbanTask,
+} from './kanban-board/kanban-board.component';
 
 @Component({
   selector: 'app-kanban',
-  imports: [CommonModule, PoPageModule, PoAvatarModule, PoTagModule, PoButtonModule, PoBadgeModule, PoModalModule, PoInfoModule, PoDividerModule, PoProgressModule, PoDropdownModule],
+  imports: [PoPageModule, KanbanBoardComponent],
   templateUrl: './kanban.html',
   styleUrl: './kanban.css',
 })
-export class Kanban implements OnInit {
-  @ViewChild('detailModal') detailModal!: PoModalComponent;
-  @ViewChild('previewModal') previewModal!: PoModalComponent;
-
-  readonly PoTagType = PoTagType;
-  readonly PoProgressStatus = PoProgressStatus;
-
-  columns: KanbanColumn[] = [
+export class Kanban {
+  readonly columns: KanbanColumn[] = [
     { id: 'todo', title: 'A Fazer', badgeStatus: 'disabled' },
     { id: 'doing', title: 'Em Progresso', badgeStatus: 'warning' },
     { id: 'review', title: 'Em Revisão', badgeStatus: 'positive' },
     { id: 'done', title: 'Concluído', badgeStatus: 'positive' },
   ];
-
-  draggingTaskId: number | null = null;
-  dragOverColumnId: string | null = null;
 
   tasks: KanbanTask[] = [
     {
@@ -266,164 +215,18 @@ export class Kanban implements OnInit {
     },
   ];
 
-  selectedTask: KanbanTask | null = null;
-  selectedAttachment: KanbanAttachment | null = null;
-  cardActionsMap = new Map<number, PoDropdownAction[]>();
-
-  ngOnInit(): void {
-    this.buildCardActions();
+  /** Gancho de integração: tarefa movida de coluna. */
+  onMover(task: KanbanTask): void {
+    console.info('kanban:mover', task);
   }
 
-  buildCardActions(): void {
-    this.tasks.forEach(task => {
-      this.cardActionsMap.set(task.id, this.computeCardActions(task));
-    });
+  /** Gancho de integração: tarefa excluída. */
+  onExcluir(task: KanbanTask): void {
+    console.info('kanban:excluir', task);
   }
 
-  modalCloseAction: PoModalAction = {
-    label: 'Fechar',
-    action: () => this.detailModal.close(),
-  };
-
-  previewCloseAction: PoModalAction = {
-    label: 'Fechar',
-    action: () => this.previewModal.close(),
-  };
-
-  getProgressStatus(progress: number): PoProgressStatus {
-    return progress === 100 ? PoProgressStatus.Success : PoProgressStatus.Default;
-  }
-
-  getColumnLabel(columnId: string): string {
-    return this.columns.find(c => c.id === columnId)?.title ?? columnId;
-  }
-
-  openDetail(task: KanbanTask): void {
-    this.selectedTask = task;
-    this.detailModal.open();
-  }
-
-  getTasksByColumn(columnId: string): KanbanTask[] {
-    return this.tasks.filter(t => t.column === columnId);
-  }
-
-  getColumnCount(columnId: string): number {
-    return this.tasks.filter(t => t.column === columnId).length;
-  }
-
-  // Drag & Drop
-  onDragStart(task: KanbanTask): void {
-    this.draggingTaskId = task.id;
-  }
-
-  onDragEnd(): void {
-    this.draggingTaskId = null;
-    this.dragOverColumnId = null;
-  }
-
-  onDragOver(event: DragEvent, columnId: string): void {
-    event.preventDefault();
-    this.dragOverColumnId = columnId;
-  }
-
-  onDragLeave(columnId: string): void {
-    if (this.dragOverColumnId === columnId) {
-      this.dragOverColumnId = null;
-    }
-  }
-
-  onDrop(columnId: string): void {
-    if (this.draggingTaskId !== null) {
-      const task = this.tasks.find(t => t.id === this.draggingTaskId);
-      if (task) {
-        task.column = columnId;
-      }
-    }
-    this.draggingTaskId = null;
-    this.dragOverColumnId = null;
-  }
-
-  isDragging(task: KanbanTask): boolean {
-    return this.draggingTaskId === task.id;
-  }
-
-  isDropTarget(columnId: string): boolean {
-    return this.dragOverColumnId === columnId;
-  }
-
-  moveTask(task: KanbanTask, direction: 'forward' | 'back'): void {
-    const columnIds = this.columns.map(c => c.id);
-    const currentIndex = columnIds.indexOf(task.column);
-    if (direction === 'forward' && currentIndex < columnIds.length - 1) {
-      task.column = columnIds[currentIndex + 1];
-    } else if (direction === 'back' && currentIndex > 0) {
-      task.column = columnIds[currentIndex - 1];
-    }
-    this.buildCardActions();
-  }
-
-  isFirstColumn(columnId: string): boolean {
-    return this.columns[0].id === columnId;
-  }
-
-  isLastColumn(columnId: string): boolean {
-    return this.columns[this.columns.length - 1].id === columnId;
-  }
-
-  computeCardActions(task: KanbanTask): PoDropdownAction[] {
-    const actions: PoDropdownAction[] = [
-      { label: 'Ver Detalhes', icon: 'an an-eye', action: () => this.openDetail(task) },
-    ];
-
-    switch (task.column) {
-      case 'todo':
-        actions.push({ label: 'Iniciar Tarefa', icon: 'an an-play', action: () => { this.moveTask(task, 'forward'); } });
-        break;
-      case 'doing':
-        actions.push(
-          { label: 'Pausar Tarefa', icon: 'an an-pause', action: () => { this.moveTask(task, 'back'); } },
-          { label: 'Enviar para Revisão', icon: 'an an-check', action: () => { this.moveTask(task, 'forward'); } },
-        );
-        break;
-      case 'review':
-        actions.push(
-          { label: 'Retornar ao Progresso', icon: 'an an-arrow-left', action: () => { this.moveTask(task, 'back'); } },
-          { label: 'Aprovar e Concluir', icon: 'an an-check-circle', action: () => { this.moveTask(task, 'forward'); } },
-        );
-        break;
-      case 'done':
-        actions.push({ label: 'Reabrir Tarefa', icon: 'an an-arrow-arc-left', action: () => { this.moveTask(task, 'back'); } });
-        break;
-    }
-
-    actions.push({ label: 'Excluir Tarefa', icon: 'an an-trash', action: () => this.deleteTask(task) });
-
-    return actions;
-  }
-
-  deleteTask(task: KanbanTask): void {
-    this.tasks = this.tasks.filter(t => t.id !== task.id);
-    this.cardActionsMap.delete(task.id);
-  }
-
-  previewAttachment(file: KanbanAttachment): void {
-    this.selectedAttachment = file;
-    this.previewModal.open();
-  }
-
-  openAttachment(file: KanbanAttachment): void {
-    window.open(file.url, '_blank');
-  }
-
-  getAttachmentIcon(type: AttachmentType): string {
-    const icons: Record<AttachmentType, string> = {
-      image: 'an an-image',
-      pdf: 'an an-file',
-      doc: 'an an-file-text',
-      spreadsheet: 'an an-table',
-      text: 'an an-file-text',
-      code: 'an an-code',
-    };
-    return icons[type] ?? 'an an-file';
+  /** Gancho de integração: detalhes abertos. */
+  onDetalhes(task: KanbanTask): void {
+    console.info('kanban:detalhes', task);
   }
 }
