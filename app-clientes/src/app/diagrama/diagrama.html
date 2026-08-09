@@ -3,7 +3,8 @@
   <!-- ═══════════ Toolbar ═══════════ -->
   <div class="dg-toolbar">
     <po-button p-label="Novo" p-kind="secondary" p-icon="an an-file-plus" (p-click)="clearAll()"></po-button>
-    <po-button p-label="Exemplo" p-kind="secondary" p-icon="an an-sparkle" (p-click)="loadSample()"></po-button>
+    <po-button p-label="Exemplo" p-kind="secondary" p-icon="an an-shapes" title="Carregar exemplo de hierarquia" (p-click)="loadSample('tree')"></po-button>
+    <po-button p-label="Fluxograma" p-kind="secondary" p-icon="an an-share-network" title="Carregar exemplo de fluxograma" (p-click)="loadSample('flow')"></po-button>
 
     <span class="dg-toolbar-sep"></span>
 
@@ -248,6 +249,8 @@
               <!-- Label -->
               <text
                 class="dg-node-label"
+                text-anchor="middle"
+                dominant-baseline="central"
                 [attr.x]="node.width / 2"
                 [attr.y]="node.height / 2"
                 [attr.font-size]="node.fontSize"

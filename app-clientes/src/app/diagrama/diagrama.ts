@@ -668,11 +668,54 @@ export class Diagrama implements OnInit, AfterViewInit {
     this.placingShape.set(null);
   }
 
-  loadSample(): void {
-    const N = (type: ShapeType, label: string): DiagramNode => {
-      const n = this.createNode(type, 0, 0, label);
-      return n;
-    };
+  loadSample(kind: 'tree' | 'flow' = 'tree'): void {
+    if (kind === 'flow') {
+      this.loadFlowSample();
+    } else {
+      this.loadTreeSample();
+    }
+  }
+
+  private loadTreeSample(): void {
+    const N = (type: ShapeType, label: string): DiagramNode => this.createNode(type, 0, 0, label);
+    const C = (from: DiagramNode, to: DiagramNode): DiagramConnection =>
+      this.createConnection(from.id, to.id);
+
+    const dir = N('ellipse', 'Diretoria');
+    const tec = N('roundedRectangle', 'Tecnologia');
+    const com = N('roundedRectangle', 'Comercial');
+    const fin = N('roundedRectangle', 'Financeiro');
+    const dev = N('rectangle', 'Desenvolvimento');
+    const qa = N('rectangle', 'Qualidade');
+    const ven = N('rectangle', 'Vendas');
+    const mkt = N('rectangle', 'Marketing');
+    const con = N('rectangle', 'Contábil');
+    const tes = N('rectangle', 'Tesouraria');
+
+    this.nodes.set([dir, tec, com, fin, dev, qa, ven, mkt, con, tes]);
+    this.connections.set([
+      C(dir, tec),
+      C(dir, com),
+      C(dir, fin),
+      C(tec, dev),
+      C(tec, qa),
+      C(com, ven),
+      C(com, mkt),
+      C(fin, con),
+      C(fin, tes),
+    ]);
+    this.layoutMode.set('tree');
+    this.applyLayout('tree');
+    this.clearSelection();
+    this.pendingFrom.set(null);
+    this.placingShape.set(null);
+  }
+
+  private loadFlowSample(): void {
+    const N = (type: ShapeType, label: string): DiagramNode => this.createNode(type, 0, 0, label);
+    const C = (from: DiagramNode, to: DiagramNode, label = ''): DiagramConnection =>
+      this.createConnection(from.id, to.id, label);
+
     const s1 = N('circle', 'Início');
     const r1 = N('rectangle', 'Receber Requisição');
     const r2 = N('rectangle', 'Validar Orçamento');
@@ -684,18 +727,8 @@ export class Diagrama implements OnInit, AfterViewInit {
     const r5 = N('rectangle', 'Registrar no Estoque');
     const r6 = N('rectangle', 'Notificar Reprovação');
     const e2 = N('circle', 'Fim');
-    const t1 = N('text', 'Processo de Compras');
-    t1.x = 60;
-    t1.y = 40;
-    t1.fontSize = 22;
-    t1.fontBold = true;
-    t1.fill = 'transparent';
-    t1.stroke = 'transparent';
 
-    const C = (from: DiagramNode, to: DiagramNode, label = ''): DiagramConnection =>
-      this.createConnection(from.id, to.id, label);
-
-    this.nodes.set([s1, r1, r2, d1, r3, e1, r4, d2, r5, r6, e2, t1]);
+    this.nodes.set([s1, r1, r2, d1, r3, e1, r4, d2, r5, r6, e2]);
     this.connections.set([
       C(s1, r1, 'Início'),
       C(r1, r2),
@@ -710,10 +743,11 @@ export class Diagrama implements OnInit, AfterViewInit {
       C(r5, e2),
       C(r6, e2),
     ]);
+    this.layoutMode.set('layered');
+    this.applyLayout('layered');
     this.clearSelection();
     this.pendingFrom.set(null);
     this.placingShape.set(null);
-    this.applyLayout(this.layoutMode());
   }
 
   // ── Layout algorithms ────────────────────────────────────────────────
@@ -773,69 +807,73 @@ export class Diagrama implements OnInit, AfterViewInit {
   }
 
   private treeLayout(map: Map<string, string[]>, roots: string[]): Map<string, Point> {
-    const pos = new Map<string, Point>();
     const dir = this.treeDirection();
-    const gx = 80;
-    const gy = 120;
+    const GX = 90; // gap entre subárvores irmãs
+    const GY = 90; // folga vertical entre níveis
     const subtreeW = new Map<string, number>();
+    const visited = new Set<string>();
 
+    // Largura da subárvore considerando apenas o primeiro pai (DAG seguro)
     const compute = (id: string): number => {
-      const kids = map.get(id) ?? [];
-      const n = this.nodeById(id)!;
+      if (visited.has(id)) return 0;
+      visited.add(id);
+      const n = this.nodeById(id);
+      if (!n) return 0;
       const own = dir === 'TB' ? n.width : n.height;
-      let w: number;
-      if (kids.length === 0) {
-        w = own;
-      } else {
-        w = Math.max(own, kids.reduce((s, k) => s + compute(k) + gx, 0) - gx);
+      const kids = (map.get(id) ?? []).filter((k) => !visited.has(k) && this.nodeById(k));
+      let w = own;
+      if (kids.length) {
+        w = Math.max(own, kids.reduce((s, k) => s + compute(k) + GX, 0) - GX);
       }
       subtreeW.set(id, w);
       return w;
     };
 
+    // Altura de nível uniforme: espaçamento vertical constante e organizado
+    let levelSpan = 0;
+    for (const n of this.nodes()) levelSpan = Math.max(levelSpan, dir === 'TB' ? n.height : n.width);
+    const levelH = levelSpan + GY;
+
+    const pos = new Map<string, Point>();
+    const placed = new Set<string>();
     const place = (id: string, start: number, depth: number): void => {
-      const n = this.nodeById(id)!;
+      if (placed.has(id)) return;
+      placed.add(id);
+      const n = this.nodeById(id);
+      if (!n) return;
       const own = dir === 'TB' ? n.width : n.height;
-      const levelSize = dir === 'TB' ? n.height : n.width;
-      const along = start + (subtreeW.get(id)! - own) / 2;
-      const down = depth * (levelSize + gy);
+      const along = start + ((subtreeW.get(id) ?? own) - own) / 2;
+      const down = depth * levelH;
       pos.set(id, dir === 'TB' ? { x: along, y: down } : { x: down, y: along });
       let cur = start;
       for (const k of map.get(id) ?? []) {
+        if (placed.has(k) || !subtreeW.has(k)) continue;
         place(k, cur, depth + 1);
-        cur += subtreeW.get(k)! + gx;
+        cur += (subtreeW.get(k) ?? 0) + GX;
       }
     };
 
-    // Multiple roots: stack them vertically as sibling trees
-    if (roots.length > 1) {
-      let cursor = 0;
-      for (const r of roots) {
-        compute(r);
-        place(r, cursor, 0);
-        const w = subtreeW.get(r)!;
-        cursor += dir === 'TB' ? w + gx : w + gy;
-      }
-    } else {
-      compute(roots[0]);
-      place(roots[0], 0, 0);
+    for (const r of roots) compute(r);
+    let cursor = 0;
+    for (const r of roots) {
+      if (!subtreeW.has(r)) continue;
+      place(r, cursor, 0);
+      cursor += (subtreeW.get(r) ?? 0) + GX;
     }
     return pos;
   }
 
   private layeredLayout(map: Map<string, string[]>, roots: string[]): Map<string, Point> {
+    // Camada = profundidade a partir da raiz (fluxo da esquerda para a direita)
     const layer = new Map<string, number>();
-    const memo = new Map<string, number>();
-    const assign = (id: string): number => {
-      if (memo.has(id)) return memo.get(id)!;
-      const kids = map.get(id) ?? [];
-      let d = 0;
-      for (const k of kids) d = Math.max(d, assign(k) + 1);
-      memo.set(id, d);
+    const assign = (id: string, d: number): void => {
+      if (d <= (layer.get(id) ?? -1)) return;
       layer.set(id, d);
-      return d;
+      for (const k of map.get(id) ?? []) {
+        if (this.nodeById(k)) assign(k, d + 1);
+      }
     };
-    for (const r of roots) assign(r);
+    for (const r of roots) assign(r, 0);
     for (const n of this.nodes()) if (!layer.has(n.id)) layer.set(n.id, 0);
 
     const groups = new Map<number, DiagramNode[]>();
@@ -845,55 +883,93 @@ export class Diagrama implements OnInit, AfterViewInit {
       groups.get(l)!.push(n);
     }
     const sorted = [...groups.keys()].sort((a, b) => a - b);
-    const COL_GAP = 140;
     const ROW_GAP = 60;
-    const maxColH = Math.max(...sorted.map((l) => groups.get(l)!.reduce((s, n) => s + n.height + ROW_GAP, 0)));
+
+    // Espaçamento horizontal entre colunas baseado na maior largura de nó
+    // (evita sobreposição quando há nós largos, como elipses)
+    let maxW = 0;
+    for (const n of this.nodes()) maxW = Math.max(maxW, n.width);
+    const COL_GAP = maxW + 80;
+
+    // Espaçamento vertical uniforme
+    let maxH = 0;
+    for (const n of this.nodes()) maxH = Math.max(maxH, n.height);
+    const rowH = maxH + ROW_GAP;
+
     const pos = new Map<string, Point>();
+    const maxColH = Math.max(...sorted.map((l) => (groups.get(l)!.length - 1) * rowH + maxH));
     for (const l of sorted) {
       const col = groups.get(l)!;
-      const colH = col.reduce((s, n) => s + n.height + ROW_GAP, 0);
+      const colH = (col.length - 1) * rowH + maxH;
       let yy = (maxColH - colH) / 2;
       for (const n of col) {
         pos.set(n.id, { x: l * COL_GAP, y: yy });
-        yy += n.height + ROW_GAP;
+        yy += rowH;
       }
     }
     return pos;
   }
 
   private radialLayout(map: Map<string, string[]>, roots: string[]): Map<string, Point> {
+    const STEP = 160;
+    const CHAIN_ROT = Math.PI / 8; // gira cadeias de nós únicos para evitar raio reto
+
+    // Árvore de primeiro-pai (DAG seguro)
+    const children = new Map<string, string[]>();
+    const parentOf = new Map<string, string>();
+    const collect = (id: string): void => {
+      const kids: string[] = [];
+      for (const k of map.get(id) ?? []) {
+        if (!this.nodeById(k) || parentOf.has(k)) continue;
+        parentOf.set(k, id);
+        kids.push(k);
+        collect(k);
+      }
+      children.set(id, kids);
+    };
+    for (const r of roots) {
+      if (!parentOf.has(r)) {
+        parentOf.set(r, '');
+        collect(r);
+      }
+    }
+
+    // Contagem de folhas por subárvore (ponderação angular)
     const leafCount = new Map<string, number>();
     const count = (id: string): number => {
       if (leafCount.has(id)) return leafCount.get(id)!;
-      const kids = map.get(id) ?? [];
-      if (kids.length === 0) {
-        leafCount.set(id, 1);
-        return 1;
-      }
-      const s = kids.reduce((sum, k) => sum + count(k), 0);
+      const kids = children.get(id) ?? [];
+      const s = kids.length ? kids.reduce((sum, k) => sum + count(k), 0) : 1;
       leafCount.set(id, s);
       return s;
     };
-    const STEP = 170;
+    for (const r of roots) if (parentOf.get(r) === '') count(r);
+
     const pos = new Map<string, Point>();
     const place = (id: string, start: number, end: number, depth: number): void => {
       const ang = (start + end) / 2;
       const r = depth * STEP;
       pos.set(id, { x: Math.cos(ang) * r, y: Math.sin(ang) * r });
-      const kids = map.get(id) ?? [];
+      const kids = children.get(id) ?? [];
       const total = kids.reduce((s, k) => s + (leafCount.get(k) ?? 1), 0) || 1;
       let cur = start;
       for (const k of kids) {
         const span = ((end - start) * (leafCount.get(k) ?? 1)) / total;
-        place(k, cur, cur + span, depth + 1);
+        if (kids.length === 1) {
+          // cadeia: gira o arco para criar uma espiral organizada
+          place(k, start + CHAIN_ROT, end + CHAIN_ROT, depth + 1);
+        } else {
+          place(k, cur, cur + span, depth + 1);
+        }
         cur += span;
       }
     };
-    // First root at center, additional roots on the first ring
+
     place(roots[0], 0, Math.PI * 2, 0);
     if (roots.length > 1) {
       const span = (Math.PI * 2) / (roots.length - 1);
       roots.slice(1).forEach((r, i) => {
+        if (!parentOf.has(r)) return;
         const ang = Math.PI + span * (i + 0.5);
         pos.set(r, { x: Math.cos(ang) * STEP, y: Math.sin(ang) * STEP });
       });
