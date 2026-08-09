@@ -69,13 +69,13 @@
   @if (nodes().length > 0) {
   <div class="gf-scroll" #gfScroll>
     <div class="gf-canvas-outer"
-         [style.width.px]="canvasOuterW()"
-         [style.height.px]="canvasOuterH()">
+         [style.width.px]="canvasW() * zoom()"
+         [style.height.px]="canvasH() * zoom()">
     <div class="gf-canvas"
          [class.gf-panning]="isPanning()"
          [style.width.px]="canvasW()"
          [style.height.px]="canvasH()"
-         [style.transform]="'translate(' + panX() + 'px, ' + panY() + 'px) scale(' + zoom() + ')'"
+         [style.transform]="'scale(' + zoom() + ')'"
          [style.transformOrigin]="'0 0'"
          title="Arraste com o mouse para mover o diagrama"
          (mousedown)="onCanvasMouseDown($event)">

@@ -99,7 +99,6 @@ export class Grafos implements OnDestroy {
   readonly ZOOM_MIN = 0.3;
   readonly ZOOM_MAX = 2.5;
   readonly ZOOM_STEP = 0.2;
-  readonly PAN_MARGIN = 200;
 
   // ── Amostras ────────────────────────────────────────────────────────────
   readonly samples: Sample[] = [
@@ -224,8 +223,6 @@ export class Grafos implements OnDestroy {
   canvasW = signal(900);
   canvasH = signal(500);
   zoom = signal(1);
-  panX = signal(0);
-  panY = signal(0);
   isPanning = signal(false);
   hovered = signal<string | null>(null);
   showEdgeLabels = signal(true);
@@ -254,8 +251,6 @@ export class Grafos implements OnDestroy {
   readonly statEdges = computed(() => this.edges().length);
   readonly statLayers = computed(() => this.layers().length);
   readonly zoomPercent = computed(() => Math.round(this.zoom() * 100));
-  readonly canvasOuterW = computed(() => this.canvasW() * this.zoom() + 2 * this.PAN_MARGIN);
-  readonly canvasOuterH = computed(() => this.canvasH() * this.zoom() + 2 * this.PAN_MARGIN);
 
   @ViewChild('jsonModal') jsonModal!: PoModalComponent;
   @ViewChild('gfScroll') gfScroll!: ElementRef<HTMLElement>;
@@ -360,32 +355,35 @@ export class Grafos implements OnDestroy {
 
   resetView(): void {
     this.zoom.set(1);
-    this.centerView();
-    this.scrollToCenter();
+    this.scrollToTopLeft();
   }
 
-  // ── Pan (arrastar com o mouse move o diagrama) ──────────────────────────
+  // ── Pan (arrastar com o mouse move as barras de rolagem) ────────────────
 
-  private panStart = { x: 0, y: 0, panX: 0, panY: 0 };
+  private dragStart = { x: 0, y: 0, scrollX: 0, scrollY: 0 };
 
   onCanvasMouseDown(event: MouseEvent): void {
     if (event.button !== 0) return;
     event.preventDefault();
     this.hovered.set(null);
-    this.panStart = { x: event.clientX, y: event.clientY, panX: this.panX(), panY: this.panY() };
+    const el = this.gfScroll?.nativeElement;
+    if (!el) return;
+    this.dragStart = {
+      x: event.clientX,
+      y: event.clientY,
+      scrollX: el.scrollLeft,
+      scrollY: el.scrollTop,
+    };
     this.isPanning.set(true);
     window.addEventListener('mousemove', this.onPanMove);
     window.addEventListener('mouseup', this.onPanUp);
   }
 
   private onPanMove = (event: MouseEvent): void => {
-    const range = 2 * this.PAN_MARGIN;
-    this.panX.set(
-      Math.min(range, Math.max(0, this.panStart.panX + event.clientX - this.panStart.x))
-    );
-    this.panY.set(
-      Math.min(range, Math.max(0, this.panStart.panY + event.clientY - this.panStart.y))
-    );
+    const el = this.gfScroll?.nativeElement;
+    if (!el) return;
+    el.scrollLeft = this.dragStart.scrollX - (event.clientX - this.dragStart.x);
+    el.scrollTop = this.dragStart.scrollY - (event.clientY - this.dragStart.y);
   };
 
   private onPanUp = (): void => {
@@ -394,17 +392,12 @@ export class Grafos implements OnDestroy {
     window.removeEventListener('mouseup', this.onPanUp);
   };
 
-  private centerView(): void {
-    this.panX.set(this.PAN_MARGIN);
-    this.panY.set(this.PAN_MARGIN);
-  }
-
-  private scrollToCenter(): void {
+  private scrollToTopLeft(): void {
     setTimeout(() => {
       const el = this.gfScroll?.nativeElement;
       if (el) {
-        el.scrollLeft = this.PAN_MARGIN;
-        el.scrollTop = this.PAN_MARGIN;
+        el.scrollLeft = 0;
+        el.scrollTop = 0;
       }
     });
   }
@@ -637,8 +630,7 @@ export class Grafos implements OnDestroy {
     this.canvasW.set(Math.max(maxX + this.PADDING, 700));
     this.canvasH.set(Math.max(maxY + this.PADDING, 400));
     this.zoom.set(1);
-    this.centerView();
-    this.scrollToCenter();
+    this.scrollToTopLeft();
     this.hovered.set(null);
   }
 
