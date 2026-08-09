@@ -32,6 +32,7 @@ export class App {
     { label: 'Tree View Editável', shortLabel: 'Tree View', link: '/treeview', icon: 'an an-tree-structure' },
     { label: 'Visualizador IFC', shortLabel: 'IFC', link: '/ifc-viewer', icon: 'an an-cube' },
     { label: 'Visualizador de Diagramas', shortLabel: 'Diagramas', link: '/diagrama', icon: 'an an-share-network' },
+    { label: 'Grafos em Camadas', shortLabel: 'Grafos', link: '/grafos', icon: 'an an-network' },
   ];
 
 

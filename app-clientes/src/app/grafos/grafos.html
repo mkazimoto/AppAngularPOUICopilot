@@ -1,0 +1,174 @@
+<po-page-default p-title="Visualizador de Grafos em Camadas">
+
+  <!-- ── Toolbar ── -->
+  <div class="gf-toolbar">
+    <po-button
+      p-label="Carregar JSON"
+      p-icon="an an-file-plus"
+      p-kind="primary"
+      (p-click)="openJsonModal()">
+    </po-button>
+    <po-button
+      p-label="Exportar SVG"
+      p-icon="an an-download"
+      p-kind="secondary"
+      [p-disabled]="nodes().length === 0"
+      (p-click)="exportSvg()">
+    </po-button>
+
+    <po-select
+      p-label="Exemplo"
+      [p-options]="sampleOptions"
+      [ngModel]="selectedSample()"
+      (ngModelChange)="applySample($event)">
+    </po-select>
+
+    <po-switch
+      p-label="Rótulos"
+      p-label-on="Visíveis"
+      p-label-off="Ocultos"
+      [ngModel]="showEdgeLabels()"
+      (ngModelChange)="showEdgeLabels.set($event)">
+    </po-switch>
+
+    <div class="gf-zoom-controls">
+      <button class="gf-zoom-btn" title="Reduzir zoom" [disabled]="zoom() <= ZOOM_MIN" (click)="zoomOut()">−</button>
+      <span class="gf-zoom-label" (click)="resetZoom()" title="Resetar zoom">{{ zoomPercent() }}%</span>
+      <button class="gf-zoom-btn" title="Aumentar zoom" [disabled]="zoom() >= ZOOM_MAX" (click)="zoomIn()">+</button>
+    </div>
+
+    <span class="gf-stats">
+      <strong>{{ statNodes() }}</strong> nós ·
+      <strong>{{ statEdges() }}</strong> arestas ·
+      <strong>{{ statLayers() }}</strong> camadas
+    </span>
+  </div>
+
+  <!-- ── Legenda das camadas ── -->
+  @if (layers().length > 0) {
+    <div class="gf-legend">
+      @for (layer of layers(); track $index) {
+        <span class="gf-legend-item">
+          <span class="gf-legend-dot" [style.background]="layerColor($index)"></span>
+          Camada {{ $index }}
+        </span>
+      }
+    </div>
+  }
+
+  <!-- ── Erro ── -->
+  @if (errorMsg()) {
+    <div class="gf-error" role="alert">
+      <span class="gf-error-icon">⚠</span>
+      <span>{{ errorMsg() }}</span>
+    </div>
+  }
+
+  <!-- ── Estado vazio ── -->
+  @if (nodes().length === 0 && !errorMsg()) {
+    <div class="gf-empty">
+      <i class="an an-network gf-empty-icon"></i>
+      <p>Nenhum grafo carregado. Carregue um JSON com nós e arestas ou escolha um exemplo.</p>
+      <po-button p-label="Carregar JSON" p-kind="primary" p-icon="an an-file-plus" (p-click)="openJsonModal()"></po-button>
+    </div>
+  }
+
+  <!-- ── Canvas ── -->
+  @if (nodes().length > 0) {
+  <div class="gf-scroll">
+    <div class="gf-canvas-outer"
+         [style.width.px]="canvasW() * zoom()"
+         [style.height.px]="canvasH() * zoom()">
+    <div class="gf-canvas"
+         [style.width.px]="canvasW()"
+         [style.height.px]="canvasH()"
+         [style.transform]="'scale(' + zoom() + ')'"
+         [style.transformOrigin]="'0 0'">
+
+      <!-- SVG: arestas ortogonais -->
+      <svg class="gf-svg" [attr.width]="canvasW()" [attr.height]="canvasH()">
+        @for (e of edges(); track trackEdge($index, e)) {
+          <g>
+            <path
+              [attr.d]="e.d"
+              class="gf-conn"
+              [class.gf-conn-hot]="isEdgeActive(e) && hovered() !== null"
+              [class.gf-conn-dim]="!isEdgeActive(e)"
+              [style.stroke]="edgeStroke(e)" />
+            @if (showEdgeLabels() && e.label) {
+              <text
+                [attr.x]="e.lx"
+                [attr.y]="e.ly - 6"
+                class="gf-edge-label"
+                text-anchor="middle">{{ e.label }}</text>
+            }
+          </g>
+        }
+      </svg>
+
+      <!-- Nós (somente visualização) -->
+      @for (n of nodes(); track trackNode($index, n)) {
+      <div class="gf-node"
+           [class.gf-node-hot]="hovered() === n.id"
+           [class.gf-node-dim]="isNodeDim(n.id)"
+           [style.left.px]="n.x"
+           [style.top.px]="n.y"
+           [style.border-left-color]="layerColor(n.layer)"
+           (mouseenter)="hovered.set(n.id)"
+           (mouseleave)="hovered.set(null)">
+
+        <div class="gf-avatar" [style.background]="layerColor(n.layer)">{{ n.layer }}</div>
+
+        <div class="gf-info">
+          <span class="gf-name" [title]="n.label">{{ n.label }}</span>
+          @if (n.group) {
+            <span class="gf-group" [title]="n.group">{{ n.group }}</span>
+          } @else {
+            <span class="gf-group gf-group-layer">Camada {{ n.layer }}</span>
+          }
+        </div>
+      </div>
+      }
+    </div>
+    </div>
+  </div>
+  }
+
+  <!-- ── Modal de JSON ── -->
+  <po-modal
+    #jsonModal
+    p-title="Carregar grafo (JSON)"
+    [p-primary-action]="primaryAction"
+    [p-secondary-action]="secondaryAction"
+    p-size="lg">
+
+    <p class="gf-modal-hint">
+      Formato esperado:
+      <code>&#123; "nodes": [&#123; "id": "a", "label": "A" &#125;], "edges": [&#123; "from": "a", "to": "b" &#125;] &#125;</code>
+    </p>
+
+    <po-textarea
+      name="jsonInput"
+      p-label="JSON (nós e arestas)"
+      [p-placeholder]="jsonPlaceholder"
+      [p-rows]="12"
+      [ngModel]="jsonText()"
+      (ngModelChange)="onJsonChange($event)">
+    </po-textarea>
+
+    <div class="gf-modal-actions">
+      <label class="gf-file-btn">
+        <i class="an an-file"></i> Carregar arquivo .json
+        <input type="file" accept=".json,application/json,text/plain" style="display:none" (change)="onFileSelected($event)">
+      </label>
+      <span class="gf-sample-label">Ou escolha um exemplo:</span>
+      <po-select
+        [p-options]="sampleOptions"
+        [ngModel]="selectedSample()"
+        (ngModelChange)="applySample($event)">
+      </po-select>
+    </div>
+
+  </po-modal>
+
+</po-page-default>

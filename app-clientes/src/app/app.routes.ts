@@ -66,6 +66,10 @@ export const routes: Routes = [
     loadComponent: () => import('./treeview/treeview-page').then((m) => m.TreeviewPage),
   },
   {
+    path: 'grafos',
+    loadComponent: () => import('./grafos/grafos').then((m) => m.Grafos),
+  },
+  {
     path: 'ifc-viewer',
     loadComponent: () => import('./ifc-viewer/ifc-viewer').then((m) => m.IfcViewer),
   },
