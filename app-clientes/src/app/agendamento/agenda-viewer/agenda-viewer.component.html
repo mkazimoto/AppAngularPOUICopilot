@@ -1,0 +1,290 @@
+<!-- Toolbar: novo agendamento + seletor de visão + navegação -->
+<div class="agenda-toolbar">
+  @if (pEditable()) {
+    <po-button
+      p-label="Novo Agendamento"
+      p-icon="an an-plus"
+      p-kind="primary"
+      (p-click)="novoAgendamento()">
+    </po-button>
+  }
+
+  <po-button-group
+    [p-buttons]="viewButtons()"
+    p-toggle="single">
+  </po-button-group>
+
+  <div class="agenda-nav">
+    <po-button
+      p-icon="an an-caret-left"
+      p-kind="secondary"
+      [attr.p-tooltip]="viewMode() === 'mensal' ? 'Mês anterior' : 'Semana anterior'"
+      (p-click)="navAnterior()">
+    </po-button>
+
+    <span class="agenda-nav-label">{{ labelNavegacao() }}</span>
+
+    <po-button
+      p-icon="an an-caret-right"
+      p-kind="secondary"
+      [attr.p-tooltip]="viewMode() === 'mensal' ? 'Próximo mês' : 'Próxima semana'"
+      (p-click)="navProxima()">
+    </po-button>
+
+    <po-button
+      p-label="Hoje"
+      p-kind="tertiary"
+      (p-click)="navegarParaHoje()">
+    </po-button>
+  </div>
+</div>
+
+<!-- Legenda de tipos -->
+<div class="agenda-legenda">
+  @for (tipo of pTipoOptions(); track tipo.value) {
+    <span class="legenda-item" [style.--leg-color]="corTipo(tipo.value)">{{ tipo.label }}</span>
+  }
+</div>
+
+<!-- Vista Semanal -->
+@if (viewMode() === 'semanal') {
+  <div class="agenda-container">
+
+    <!-- Cabeçalho dos dias -->
+    <div class="agenda-header">
+      <div class="time-gutter"></div>
+      @for (dia of dias(); track dia.date) {
+        <div
+          class="day-header"
+          [class.day-header--hoje]="dia.isHoje">
+          <span class="day-header__name">{{ dia.diaSemana }}</span>
+          <span class="day-header__number" [class.day-header__number--hoje]="dia.isHoje">
+            {{ dia.numero }}
+          </span>
+          @if (dia.numero === 1 || $first) {
+            <span class="day-header__mes">
+              {{ dia.mes }}/{{ dia.ano }}
+            </span>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Corpo com scroll -->
+    <div class="agenda-scroll">
+
+      <!-- Coluna de horários -->
+      <div class="time-gutter-body">
+        @for (h of horarios(); track h) {
+          <div class="time-gutter-cell">
+            @if (isHoraCheia(h)) {
+              <span class="time-gutter-label">{{ h }}</span>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Colunas dos dias -->
+      <div class="agenda-columns">
+        @for (dia of dias(); track dia.date) {
+          <div
+            class="day-column"
+            [class.day-column--hoje]="dia.isHoje">
+
+            <!-- Células de horário (clicáveis para novo agendamento / drop zone) -->
+            @for (h of horarios(); track h) {
+              <div
+                class="time-slot"
+                [class.time-slot--hora-cheia]="isHoraCheia(h)"
+                [class.time-slot--ocupado]="getAgendamentosNasCelula(dia.date, h)"
+                [class.time-slot--drag-over]="isDragOver(dia.date, h)"
+                (click)="abrirNovoAgendamento(dia.date, h)"
+                (dragover)="onDragOver(dia.date, h, $event)"
+                (dragleave)="onDragLeave()"
+                (drop)="onDrop(dia.date, h, $event)"
+                [title]="'Clique para agendar ' + h">
+              </div>
+            }
+
+            <!-- Blocos de agendamento (posicionados absolutamente) -->
+            @for (ag of getAgendamentosDia(dia.date); track ag.id) {
+              <div
+                class="appointment"
+                [class.appointment--dragging]="ag.id === draggingId()"
+                [class.appointment--resizing]="ag.id === resizingId()"
+                [class.appointment--somente-leitura]="!pEditable()"
+                [style.--ag-color]="corTipo(ag.tipo)"
+                [style.top.px]="calcTop(ag.horaInicio)"
+                [style.height.px]="calcHeight(ag.horaInicio, ag.horaFim)"
+                [style.min-height.px]="48"
+                [attr.draggable]="pEditable()"
+                (dragstart)="onDragStart(ag, $event)"
+                (dragend)="onDragEnd()"
+                (click)="abrirEdicao(ag, $event)"
+                [title]="ag.titulo + ' — ' + (ag.cliente ?? '') + ' (' + ag.horaInicio + '–' + ag.horaFim + ')'">
+
+                <!-- Handle de redimensionamento — início -->
+                @if (pEditable()) {
+                  <div
+                    class="resize-handle resize-handle--top"
+                    (mousedown)="onResizeStart(ag, 'start', $event)"
+                    title="Arrastar para ajustar horário de início"></div>
+                }
+                <span class="appointment__time">{{ ag.horaInicio }}–{{ ag.horaFim }}</span>
+                <span class="appointment__title">{{ ag.titulo }}</span>
+                <span class="appointment__client">{{ ag.cliente }}</span>
+                <!-- Handle de redimensionamento — fim -->
+                @if (pEditable()) {
+                  <div
+                    class="resize-handle resize-handle--bottom"
+                    (mousedown)="onResizeStart(ag, 'end', $event)"
+                    title="Arrastar para ajustar horário de fim"></div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Vista Mensal -->
+@if (viewMode() === 'mensal') {
+  <div class="mes-container">
+
+    <!-- Cabeçalho dos dias da semana -->
+    <div class="mes-header">
+      @for (nome of nomesDiasSemana; track nome) {
+        <div class="mes-header-cell">{{ nome }}</div>
+      }
+    </div>
+
+    <!-- Semanas do mês -->
+    @for (semana of semanasMes(); track $index) {
+      <div class="mes-row">
+        @for (dia of semana; track dia.date) {
+          <div
+            class="mes-cell"
+            [class.mes-cell--hoje]="dia.isHoje"
+            [class.mes-cell--outro-mes]="!!dia.outOfMonth"
+            (click)="irParaSemana(dia.date)"
+            [title]="tooltipMes(dia)">
+            <span class="mes-cell__numero" [class.mes-cell__numero--hoje]="dia.isHoje">
+              {{ dia.numero }}
+              @if (dia.numero === 1) {
+                <span class="mes-cell__mes-mini">{{ nomeMesAbrev(dia.mes) }}</span>
+              }
+            </span>
+            <div class="mes-eventos">
+              @for (ag of getAgendamentosDia(dia.date).slice(0, 3); track ag.id) {
+                <div
+                  class="mes-appointment"
+                  [style.--ag-color]="corTipo(ag.tipo)"
+                  (click)="abrirEdicao(ag, $event)"
+                  [title]="ag.titulo + ' — ' + ag.horaInicio + '–' + ag.horaFim">
+                  {{ ag.horaInicio }} {{ ag.titulo }}
+                </div>
+              }
+              @if (getAgendamentosDia(dia.date).length > 3) {
+                <div class="mes-mais">+{{ getAgendamentosDia(dia.date).length - 3 }} mais</div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+}
+
+<!-- Modal de agendamento -->
+<po-modal
+  #modalAgendamento
+  [p-title]="titleModal()"
+  p-size="sm"
+  [p-primary-action]="confirmAction"
+  [p-secondary-action]="cancelAction">
+
+  <form [formGroup]="form">
+
+    <div class="po-row">
+      <div class="po-col-12">
+        <po-input
+          p-name="titulo"
+          p-label="Título *"
+          p-placeholder="Ex.: Consulta Médica"
+          p-required
+          formControlName="titulo">
+        </po-input>
+      </div>
+    </div>
+
+    <div class="po-row">
+      <div class="po-col-12">
+        <po-input
+          p-name="cliente"
+          p-label="Cliente / Responsável"
+          p-placeholder="Ex.: João Silva"
+          formControlName="cliente">
+        </po-input>
+      </div>
+    </div>
+
+    <div class="po-row">
+      <div class="po-col-sm-12 po-col-md-4">
+        <po-input
+          p-name="dia"
+          p-label="Data"
+          p-mask="9999-99-99"
+          p-placeholder="AAAA-MM-DD"
+          formControlName="dia">
+        </po-input>
+      </div>
+      <div class="po-col-sm-6 po-col-md-4">
+        <po-input
+          p-name="horaInicio"
+          p-label="Hora Início *"
+          p-mask="99:99"
+          p-placeholder="HH:MM"
+          p-required
+          formControlName="horaInicio">
+        </po-input>
+      </div>
+      <div class="po-col-sm-6 po-col-md-4">
+        <po-input
+          p-name="horaFim"
+          p-label="Hora Fim *"
+          p-mask="99:99"
+          p-placeholder="HH:MM"
+          p-required
+          formControlName="horaFim">
+        </po-input>
+      </div>
+    </div>
+
+    <div class="po-row">
+      <div class="po-col-12">
+        <po-select
+          p-name="tipo"
+          p-label="Tipo"
+          [p-options]="selectOptions()"
+          formControlName="tipo">
+        </po-select>
+      </div>
+    </div>
+
+    <!-- Ação de exclusão (apenas no modo edição) -->
+    @if (idEditando()) {
+      <div class="modal-delete-row">
+        <po-button
+          p-label="Excluir Agendamento"
+          p-kind="secondary"
+          p-icon="an an-trash"
+          (p-click)="excluir()">
+        </po-button>
+      </div>
+    }
+
+  </form>
+
+</po-modal>
