@@ -1,19 +1,12 @@
 <po-page-default p-title="Visualizador de Grafos em Camadas">
 
-  <!-- ── Toolbar ── -->
+  <!-- ── Toolbar (carregamento de dados) ── -->
   <div class="gf-toolbar">
     <po-button
       p-label="Carregar JSON"
       p-icon="an an-file-plus"
       p-kind="primary"
       (p-click)="openJsonModal()">
-    </po-button>
-    <po-button
-      p-label="Exportar SVG"
-      p-icon="an an-download"
-      p-kind="secondary"
-      [p-disabled]="nodes().length === 0"
-      (p-click)="exportSvg()">
     </po-button>
 
     <po-select
@@ -22,31 +15,7 @@
       [ngModel]="selectedSample()"
       (ngModelChange)="applySample($event)">
     </po-select>
-
-    <div class="gf-zoom-controls">
-      <button class="gf-zoom-btn" title="Reduzir zoom" [disabled]="zoom() <= ZOOM_MIN" (click)="zoomOut()">−</button>
-      <span class="gf-zoom-label" (click)="resetView()" title="Resetar visualização (zoom e posição)">{{ zoomPercent() }}%</span>
-      <button class="gf-zoom-btn" title="Aumentar zoom" [disabled]="zoom() >= ZOOM_MAX" (click)="zoomIn()">+</button>
-    </div>
-
-    <span class="gf-stats">
-      <strong>{{ statNodes() }}</strong> nós ·
-      <strong>{{ statEdges() }}</strong> arestas ·
-      <strong>{{ statLayers() }}</strong> camadas
-    </span>
   </div>
-
-  <!-- ── Legenda das camadas ── -->
-  @if (layers().length > 0) {
-    <div class="gf-legend">
-      @for (layer of layers(); track $index) {
-        <span class="gf-legend-item">
-          <span class="gf-legend-dot" [style.background]="layerColor($index)"></span>
-          Camada {{ $index }}
-        </span>
-      }
-    </div>
-  }
 
   <!-- ── Erro ── -->
   @if (errorMsg()) {
@@ -57,7 +26,7 @@
   }
 
   <!-- ── Estado vazio ── -->
-  @if (nodes().length === 0 && !errorMsg()) {
+  @if (parsedNodes().length === 0 && !errorMsg()) {
     <div class="gf-empty">
       <i class="an an-network gf-empty-icon"></i>
       <p>Nenhum grafo carregado. Carregue um JSON com nós e arestas ou escolha um exemplo.</p>
@@ -65,84 +34,13 @@
     </div>
   }
 
-  <!-- ── Canvas ── -->
-  @if (nodes().length > 0) {
-  <div class="gf-scroll" #gfScroll>
-    <div class="gf-canvas-outer"
-         [style.width.px]="canvasW() * zoom()"
-         [style.height.px]="canvasH() * zoom()">
-    <div class="gf-canvas"
-         [class.gf-panning]="isPanning()"
-         [style.width.px]="canvasW()"
-         [style.height.px]="canvasH()"
-         [style.transform]="'scale(' + zoom() + ')'"
-         [style.transformOrigin]="'0 0'"
-         title="Arraste com o mouse para mover o diagrama"
-         (mousedown)="onCanvasMouseDown($event)">
-
-      <!-- SVG: arestas ortogonais -->
-      <svg class="gf-svg" [attr.width]="canvasW()" [attr.height]="canvasH()">
-        <defs>
-          @for (color of LAYER_COLORS; track $index) {
-            <marker
-              [attr.id]="'gf-arrow-' + $index"
-              markerWidth="12"
-              markerHeight="8"
-              refX="10"
-              refY="4"
-              orient="auto"
-              markerUnits="userSpaceOnUse">
-              <polygon points="0 0, 12 4, 0 8" [attr.fill]="color"/>
-            </marker>
-          }
-        </defs>
-        @for (e of edges(); track trackEdge($index, e)) {
-          <g>
-            <path
-              [attr.d]="e.d"
-              [attr.marker-end]="edgeMarker(e)"
-              class="gf-conn"
-              [class.gf-conn-hot]="isEdgeActive(e) && hovered() !== null"
-              [class.gf-conn-dim]="!isEdgeActive(e)"
-              [style.stroke]="edgeStroke(e)" />
-            @if (showEdgeLabels() && e.label) {
-              <text
-                [attr.x]="e.lx"
-                [attr.y]="e.ly - 6"
-                class="gf-edge-label"
-                text-anchor="middle">{{ e.label }}</text>
-            }
-          </g>
-        }
-      </svg>
-
-      <!-- Nós (somente visualização) -->
-      @for (n of nodes(); track trackNode($index, n)) {
-      <div class="gf-node"
-           [class.gf-node-hot]="hovered() === n.id"
-           [class.gf-node-dim]="isNodeDim(n.id)"
-           [style.left.px]="n.x"
-           [style.top.px]="n.y"
-           [style.border-left-color]="layerColor(n.layer)"
-           [style.--gf-layer]="layerColor(n.layer)"
-           (mouseenter)="!isPanning() && hovered.set(n.id)"
-           (mouseleave)="!isPanning() && hovered.set(null)">
-
-        <div class="gf-avatar" [style.background]="layerColor(n.layer)">{{ n.layer }}</div>
-
-        <div class="gf-info">
-          <span class="gf-name" [title]="n.label">{{ n.label }}</span>
-          @if (n.group) {
-            <span class="gf-group" [title]="n.group">{{ n.group }}</span>
-          } @else {
-            <span class="gf-group gf-group-layer">Camada {{ n.layer }}</span>
-          }
-        </div>
-      </div>
-      }
-    </div>
-    </div>
-  </div>
+  <!-- ── Visualizador reutilizável ── -->
+  @if (parsedNodes().length > 0) {
+    <app-grafo-viewer
+      [pNodes]="parsedNodes()"
+      [pEdges]="parsedEdges()"
+      (pNodeClick)="onNodeClick($event)">
+    </app-grafo-viewer>
   }
 
   <!-- ── Modal de JSON ── -->

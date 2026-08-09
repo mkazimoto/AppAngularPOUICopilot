@@ -1,0 +1,124 @@
+<!-- ── Toolbar ── -->
+@if (pShowToolbar()) {
+<div class="gv-toolbar">
+  <po-button
+    p-label="Exportar SVG"
+    p-icon="an an-download"
+    p-kind="secondary"
+    [p-disabled]="nodes().length === 0"
+    (p-click)="exportSvg()">
+  </po-button>
+
+  <div class="gv-zoom-controls">
+    <button class="gv-zoom-btn" title="Reduzir zoom" aria-label="Reduzir zoom"
+      [disabled]="zoom() <= ZOOM_MIN" (click)="zoomOut()">−</button>
+    <button class="gv-zoom-label" title="Resetar visualização (zoom e posição)"
+      (click)="resetView()">{{ zoomPercent() }}%</button>
+    <button class="gv-zoom-btn" title="Aumentar zoom" aria-label="Aumentar zoom"
+      [disabled]="zoom() >= ZOOM_MAX" (click)="zoomIn()">+</button>
+  </div>
+
+  <span class="gv-stats">
+    <strong>{{ statNodes() }}</strong> nós ·
+    <strong>{{ statEdges() }}</strong> arestas ·
+    <strong>{{ statLayers() }}</strong> camadas
+  </span>
+</div>
+}
+
+<!-- ── Legenda das camadas ── -->
+@if (pShowLegend() && layers().length > 0) {
+<div class="gv-legend">
+  @for (layer of layers(); track $index) {
+    <span class="gv-legend-item">
+      <span class="gv-legend-dot" [style.background]="layerColor($index)"></span>
+      Camada {{ $index }}
+    </span>
+  }
+</div>
+}
+
+<!-- ── Canvas ── -->
+@if (nodes().length > 0) {
+<div class="gv-scroll" #gfScroll>
+  <div class="gv-canvas-outer"
+       [style.width.px]="canvasW() * zoom()"
+       [style.height.px]="canvasH() * zoom()">
+    <div class="gv-canvas"
+         [class.gv-panning]="isPanning()"
+         [style.width.px]="canvasW()"
+         [style.height.px]="canvasH()"
+         [style.transform]="'scale(' + zoom() + ')'"
+         [style.transformOrigin]="'0 0'"
+         title="Arraste com o mouse para mover o diagrama"
+         (mousedown)="onCanvasMouseDown($event)">
+
+      <!-- SVG: arestas ortogonais -->
+      <svg class="gv-svg" [attr.width]="canvasW()" [attr.height]="canvasH()">
+        <defs>
+          @for (color of LAYER_COLORS; track $index) {
+            <marker
+              [attr.id]="'gf-arrow-' + $index"
+              markerWidth="12"
+              markerHeight="8"
+              refX="10"
+              refY="4"
+              orient="auto"
+              markerUnits="userSpaceOnUse">
+              <polygon points="0 0, 12 4, 0 8" [attr.fill]="color"/>
+            </marker>
+          }
+        </defs>
+        @for (e of edges(); track trackEdge($index, e)) {
+          <g>
+            <path
+              [attr.d]="e.d"
+              [attr.marker-end]="edgeMarker(e)"
+              class="gv-conn"
+              [class.gv-conn-hot]="isEdgeActive(e) && hovered() !== null"
+              [class.gv-conn-dim]="!isEdgeActive(e)"
+              [style.stroke]="edgeStroke(e)" />
+            @if (e.label) {
+              <text
+                [attr.x]="e.lx"
+                [attr.y]="e.ly - 6"
+                class="gv-edge-label"
+                text-anchor="middle">{{ e.label }}</text>
+            }
+          </g>
+        }
+      </svg>
+
+      <!-- Nós -->
+      @for (n of nodes(); track trackNode($index, n)) {
+      <div class="gv-node"
+           [class.gv-node-hot]="hovered() === n.id"
+           [class.gv-node-dim]="isNodeDim(n.id)"
+           [style.left.px]="n.x"
+           [style.top.px]="n.y"
+           [style.border-left-color]="layerColor(n.layer)"
+           [style.--gf-layer]="layerColor(n.layer)"
+           role="button"
+           tabindex="0"
+           [attr.aria-label]="'Nó ' + n.label"
+           (click)="onNodeClick(n)"
+           (keydown)="onNodeKeydown($event, n)"
+           (mouseenter)="!isPanning() && hovered.set(n.id)"
+           (mouseleave)="!isPanning() && hovered.set(null)">
+
+        <div class="gv-avatar" [style.background]="layerColor(n.layer)">{{ n.layer }}</div>
+
+        <div class="gv-info">
+          <span class="gv-name" [title]="n.label">{{ n.label }}</span>
+          @if (n.group) {
+            <span class="gv-group" [title]="n.group">{{ n.group }}</span>
+          } @else {
+            <span class="gv-group gv-group-layer">Camada {{ n.layer }}</span>
+          }
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+</div>
+}
