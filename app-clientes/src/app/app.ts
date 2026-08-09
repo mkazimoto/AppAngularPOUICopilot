@@ -13,7 +13,7 @@ import poUiPackage from '@po-ui/ng-components/package.json';
 })
 export class App {
   readonly poUiVersion = poUiPackage.version;
-  readonly toolbarTitle = `App PO-UI gerado pelo Copilot com o Modelo Claude Sonnet 4.6 - Versão do PO-UI ${this.poUiVersion}`;
+  readonly toolbarTitle = `App PO-UI gerado pelo Copilot com o Modelo Claude Sonnet 4.6 e DeepSeek v4 Flash - Versão do PO-UI ${this.poUiVersion}`;
 
   readonly menus: Array<PoMenuItem> = [
     { label: 'Dashboard', shortLabel: 'Dashboard', link: '/dashboard', icon: 'an an-chart-bar' },
