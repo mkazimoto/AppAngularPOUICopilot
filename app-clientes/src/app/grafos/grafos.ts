@@ -216,7 +216,7 @@ export class Grafos {
   canvasH = signal(500);
   zoom = signal(1);
   hovered = signal<string | null>(null);
-  showEdgeLabels = signal(false);
+  showEdgeLabels = signal(true);
   jsonText = signal('');
   errorMsg = signal('');
   selectedSample = signal(this.samples[0].key);

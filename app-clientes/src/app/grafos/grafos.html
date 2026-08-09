@@ -23,14 +23,6 @@
       (ngModelChange)="applySample($event)">
     </po-select>
 
-    <po-switch
-      p-label="Rótulos"
-      p-label-on="Visíveis"
-      p-label-off="Ocultos"
-      [ngModel]="showEdgeLabels()"
-      (ngModelChange)="showEdgeLabels.set($event)">
-    </po-switch>
-
     <div class="gf-zoom-controls">
       <button class="gf-zoom-btn" title="Reduzir zoom" [disabled]="zoom() <= ZOOM_MIN" (click)="zoomOut()">−</button>
       <span class="gf-zoom-label" (click)="resetZoom()" title="Resetar zoom">{{ zoomPercent() }}%</span>
