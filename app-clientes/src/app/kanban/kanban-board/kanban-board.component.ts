@@ -156,7 +156,13 @@ export class KanbanBoardComponent {
 
   // ── Drag & Drop ─────────────────────────────────────────────────────────
 
-  onDragStart(task: KanbanTask): void {
+  onDragStart(task: KanbanTask, event: DragEvent): void {
+    // Se o arrasto começar na área de ações (dropdown do card), cancela o
+    // drag para não "engolir" o clique do menu.
+    if ((event.target as HTMLElement | null)?.closest('.kanban-card-actions')) {
+      event.preventDefault();
+      return;
+    }
     if (this.pEditable()) {
       this.draggingTaskId.set(task.id);
     }
@@ -209,7 +215,30 @@ export class KanbanBoardComponent {
     }
   }
 
+  // Cache das ações para manter a referência estável do array entre ciclos de
+  // change detection (evita o NG0956 de recriação dos itens do po-dropdown).
+  private readonly actionsCache = new Map<
+    number,
+    { key: string; actions: PoDropdownAction[] }
+  >();
+
   cardActions(task: KanbanTask): PoDropdownAction[] {
+    const key = this.actionsCacheKey();
+    const entry = this.actionsCache.get(task.id);
+    if (entry && entry.key === key) {
+      return entry.actions;
+    }
+    const actions = this.buildCardActions(task);
+    this.actionsCache.set(task.id, { key, actions });
+    return actions;
+  }
+
+  private actionsCacheKey(): string {
+    const columnIds = this.pColumns().map(c => c.id).join('>');
+    return `${this.pEditable()}|${columnIds}`;
+  }
+
+  private buildCardActions(task: KanbanTask): PoDropdownAction[] {
     const actions: PoDropdownAction[] = [
       { label: 'Ver Detalhes', icon: 'an an-eye', action: () => this.openDetail(task) },
     ];

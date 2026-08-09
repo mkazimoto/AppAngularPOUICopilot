@@ -28,7 +28,7 @@
             [class.kanban-card--priority-danger]="task.priorityType === PoTagType.Danger"
             [class.kanban-card--priority-warning]="task.priorityType === PoTagType.Warning"
             [class.kanban-card--priority-info]="task.priorityType === PoTagType.Info"
-            (dragstart)="onDragStart(task)"
+            (dragstart)="onDragStart(task, $event)"
             (dragend)="onDragEnd()">
 
             <!-- Header do card: avatar + nome -->
@@ -71,8 +71,8 @@
               }
 
               <div class="kanban-card-actions"
-                (mousedown)="$event.stopPropagation()"
-                (dragstart)="$event.stopPropagation(); $event.preventDefault()">
+                draggable="false"
+                (mousedown)="$event.stopPropagation()">
                 <po-dropdown
                   p-label="☰"
                   p-size="large"
