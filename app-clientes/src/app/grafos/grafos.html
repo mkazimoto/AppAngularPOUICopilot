@@ -129,6 +129,7 @@
            [style.left.px]="n.x"
            [style.top.px]="n.y"
            [style.border-left-color]="layerColor(n.layer)"
+           [style.--gf-layer]="layerColor(n.layer)"
            (mouseenter)="hovered.set(n.id)"
            (mouseleave)="hovered.set(null)">
 

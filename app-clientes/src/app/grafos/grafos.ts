@@ -377,7 +377,7 @@ export class Grafos {
     for (const n of this.nodes()) {
       const c = this.layerColor(n.layer);
       parts.push(
-        `<rect x="${n.x}" y="${n.y}" width="${this.NODE_W}" height="${this.NODE_H}" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>`
+        `<rect x="${n.x}" y="${n.y}" width="${this.NODE_W}" height="${this.NODE_H}" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>`
       );
       parts.push(`<rect x="${n.x}" y="${n.y}" width="6" height="${this.NODE_H}" fill="${c}"/>`);
       parts.push(
