@@ -1,12 +1,14 @@
 import { Injectable, signal } from '@angular/core';
 
+export type ClienteStatus = 'ativo' | 'inativo' | 'pendente';
+
 export interface Cliente {
   codigo: number;
   nome: string;
   email: string;
   telefone: string;
   cidade: string;
-  status: string;
+  status: ClienteStatus;
 }
 
 @Injectable({ providedIn: 'root' })

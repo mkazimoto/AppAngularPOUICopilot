@@ -1,6 +1,7 @@
 <po-page-edit
-  [p-title]="titulo"
-  [p-breadcrumb]="breadcrumb"
+  [p-title]="titulo()"
+  [p-breadcrumb]="breadcrumb()"
+  [p-disable-submit]="!editForm.valid"
   (p-save)="salvar()"
   (p-cancel)="cancelar()">
 
@@ -11,8 +12,8 @@
           name="codigo"
           p-name="codigo"
           p-label="Código"
-          [ngModel]="cliente.codigo"
-          (ngModelChange)="cliente.codigo = $event"
+          [ngModel]="cliente().codigo"
+          (ngModelChange)="cliente.update(c => ({ ...c, codigo: $event }))"
           p-disabled>
         </po-input>
       </div>
@@ -21,8 +22,8 @@
           name="nome"
           p-name="nome"
           p-label="Nome"
-          [ngModel]="cliente.nome"
-          (ngModelChange)="cliente.nome = $event"
+          [ngModel]="cliente().nome"
+          (ngModelChange)="cliente.update(c => ({ ...c, nome: $event }))"
           p-required
           p-max-length="100">
         </po-input>
@@ -35,8 +36,8 @@
           name="email"
           p-name="email"
           p-label="E-mail"
-          [ngModel]="cliente.email"
-          (ngModelChange)="cliente.email = $event"
+          [ngModel]="cliente().email"
+          (ngModelChange)="cliente.update(c => ({ ...c, email: $event }))"
           p-required
           p-max-length="100">
         </po-input>
@@ -46,8 +47,8 @@
           name="telefone"
           p-name="telefone"
           p-label="Telefone"
-          [ngModel]="cliente.telefone"
-          (ngModelChange)="cliente.telefone = $event"
+          [ngModel]="cliente().telefone"
+          (ngModelChange)="cliente.update(c => ({ ...c, telefone: $event }))"
           p-mask="(99) 99999-9999">
         </po-input>
       </div>
@@ -59,8 +60,8 @@
           name="cidade"
           p-name="cidade"
           p-label="Cidade"
-          [ngModel]="cliente.cidade"
-          (ngModelChange)="cliente.cidade = $event"
+          [ngModel]="cliente().cidade"
+          (ngModelChange)="cliente.update(c => ({ ...c, cidade: $event }))"
           p-max-length="100">
         </po-input>
       </div>
@@ -69,8 +70,8 @@
           name="status"
           p-name="status"
           p-label="Status"
-          [ngModel]="cliente.status"
-          (ngModelChange)="cliente.status = $event"
+          [ngModel]="cliente().status"
+          (ngModelChange)="cliente.update(c => ({ ...c, status: $event }))"
           [p-options]="statusOptions"
           p-required>
         </po-select>

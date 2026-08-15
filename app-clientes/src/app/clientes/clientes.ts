@@ -1,13 +1,16 @@
-import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
+  PoDialogService,
+  PoDialogType,
   PoPageModule,
   PoTableColumn,
   PoTableModule,
   PoButtonModule,
   PoTagModule,
+  PoNotificationService,
 } from '@po-ui/ng-components';
-import { ClienteService } from './cliente.service';
+import { Cliente, ClienteService } from './cliente.service';
 
 @Component({
   selector: 'app-clientes',
@@ -17,13 +20,13 @@ import { ClienteService } from './cliente.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Clientes {
-  constructor(
-    private router: Router,
-    private clienteService: ClienteService,
-  ) {}
+  private readonly router = inject(Router);
+  private readonly clienteService = inject(ClienteService);
+  private readonly poDialog = inject(PoDialogService);
+  private readonly poNotification = inject(PoNotificationService);
 
   readonly clientes = computed(() => this.clienteService.clientes());
-  colunas: PoTableColumn[] = [
+  readonly colunas: PoTableColumn[] = [
     { property: 'codigo', label: 'Código', width: '8%' },
     { property: 'nome', label: 'Nome' },
     { property: 'email', label: 'E-mail' },
@@ -42,21 +45,21 @@ export class Clientes {
     },
   ];
 
-  pageActions = [
+  readonly pageActions = [
     { label: 'Novo', action: this.novo.bind(this), icon: 'an an-plus' },
   ];
 
-  acoes = [
+  readonly acoes = [
     {
       label: 'Editar',
       icon: 'an an-pencil-simple',
-      action: (item: any) => this.editar(item),
+      action: (item: Cliente) => this.editar(item),
     },
     {
       label: 'Excluir',
       icon: 'an an-trash',
       type: 'danger',
-      action: (item: any) => this.excluir(item),
+      action: (item: Cliente) => this.excluir(item),
     },
   ];
 
@@ -64,11 +67,18 @@ export class Clientes {
     this.router.navigate(['/clientes/novo']);
   }
 
-  editar(item: any) {
+  editar(item: Cliente) {
     this.router.navigate(['/clientes/editar', item.codigo]);
   }
 
-  excluir(item: any) {
-    this.clienteService.remove(item.codigo);
+  excluir(item: Cliente) {
+    this.poDialog.openDialog(PoDialogType.Confirm, {
+      title: 'Excluir cliente',
+      message: `Deseja excluir ${item.nome}?`,
+      confirm: () => {
+        this.clienteService.remove(item.codigo);
+        this.poNotification.success('Cliente excluído com sucesso!');
+      },
+    });
   }
 }
