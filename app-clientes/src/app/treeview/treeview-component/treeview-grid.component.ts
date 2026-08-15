@@ -5,19 +5,17 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
   HostListener,
-  Input,
   NgZone,
-  OnChanges,
   OnDestroy,
   OnInit,
-  Output,
-  SimpleChanges,
   TemplateRef,
   ViewChild,
   afterNextRender,
   computed,
+  effect,
+  input,
+  output,
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -67,19 +65,19 @@ export interface TreeviewColumn extends PoTableColumn {
   styleUrl: './treeview-grid.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
+export class TreeviewGridComponent implements OnInit, AfterViewInit, OnDestroy {
 
   readonly NEW_ID = NEW_ID;
 
   /** Templates de coluna declarados no componente pai. */
-  @Input() colTemplates: Record<string, TemplateRef<any>> = {};
-  @Input() defaultColumns: TreeviewColumn[] = [];
-  @Input() visibleNodes: TreeNodeItem[] = [];
-  @Input() editingId: string | null = null;
-  @Input() selectedId: string | null = null;
-  @Input() rowHeight = 50;
+  readonly colTemplates = input<Record<string, TemplateRef<any>>>({});
+  readonly defaultColumns = input<TreeviewColumn[]>([]);
+  readonly visibleNodes = input<TreeNodeItem[]>([]);
+  readonly editingId = input<string | null>(null);
+  readonly selectedId = input<string | null>(null);
+  readonly rowHeight = input(50);
 
-  @Output() nodeSelect = new EventEmitter<TreeNodeItem>();
+  readonly nodeSelect = output<TreeNodeItem>();
 
   readonly labelPosition: PoSwitchLabelPosition = PoSwitchLabelPosition.Right;
 
@@ -92,7 +90,7 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
   @ViewChild('columnManagerSlide')     columnManagerSlide!: PoPageSlideComponent;
   @ViewChild(CdkVirtualScrollViewport) viewport!:           CdkVirtualScrollViewport;
 
-  @Input() columnsStorageKey = 'treeview_columns';
+  readonly columnsStorageKey = input('treeview_columns');
 
   private resizeObserver!: ResizeObserver;
   private _resizingCol      = -1;
@@ -101,6 +99,11 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
   private _hScrollHandler: (() => void) | null = null;
 
   constructor(private ngZone: NgZone) {
+    effect(() => {
+      if (Object.keys(this.colTemplates()).length > 0) {
+        this.applyTemplates();
+      }
+    });
     afterNextRender(() => {
       this.ngZone.run(() => this.calculateViewportHeight());
     });
@@ -108,12 +111,6 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
 
   ngOnInit(): void {
     this.columns.set(this.loadColumns());
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['colTemplates'] && Object.keys(this.colTemplates).length > 0) {
-      this.applyTemplates();
-    }
   }
 
   ngAfterViewInit(): void {
@@ -140,36 +137,39 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
   // ── Templates ────────────────────────────────────────────────
 
   private applyTemplates(): void {
+    const templates = this.colTemplates();
     this.columns.update(cols =>
-      cols.map(col => ({ ...col, template: this.colTemplates[col.property] ?? col.template })),
+      cols.map(col => ({ ...col, template: templates[col.property] ?? col.template })),
     );
   }
 
   // ── Column persistence ───────────────────────────────────────
 
   private loadColumns(): TreeviewColumn[] {
+    const storageKey = this.columnsStorageKey();
+    const defaults = this.defaultColumns();
     try {
-      const saved = localStorage.getItem(this.columnsStorageKey);
-      if (!saved) return this.defaultColumns.map(c => ({ ...c }));
+      const saved = localStorage.getItem(storageKey);
+      if (!saved) return defaults.map(c => ({ ...c }));
       const parsed: { property: string; visible: boolean; widthPx: number }[] = JSON.parse(saved);
       const ordered: TreeviewColumn[] = parsed
         .map(s => {
-          const def = this.defaultColumns.find(d => d.property === s.property);
+          const def = defaults.find(d => d.property === s.property);
           return def ? ({ ...def, visible: s.visible, widthPx: s.widthPx } as TreeviewColumn) : null;
         })
         .filter((c): c is TreeviewColumn => c !== null);
-      this.defaultColumns.forEach(def => {
+      defaults.forEach(def => {
         if (!ordered.find(o => o.property === def.property)) ordered.push({ ...def });
       });
       return ordered;
     } catch {
-      return this.defaultColumns.map(c => ({ ...c }));
+      return defaults.map(c => ({ ...c }));
     }
   }
 
   saveColumns(): void {
     const payload = this.columns().map(c => ({ property: c.property, visible: c.visible, widthPx: c.widthPx }));
-    localStorage.setItem(this.columnsStorageKey, JSON.stringify(payload));
+    localStorage.setItem(this.columnsStorageKey(), JSON.stringify(payload));
   }
 
   // ── Column layout (computeds: recalculados só quando `columns` muda) ───
@@ -189,7 +189,7 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
   }
 
   restoreColumns(): void {
-    this.columns.set(this.defaultColumns.map(c => ({ ...c })));
+    this.columns.set(this.defaultColumns().map(c => ({ ...c })));
     this.applyTemplates();
     this.saveColumns();
   }
@@ -250,11 +250,11 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
 
   scrollToNew(): void {
     this.ngZone.onStable.pipe().subscribe(() => {
-      const idx = this.visibleNodes.findIndex(n => this.isNewNode(n.id));
+      const idx = this.visibleNodes().findIndex(n => this.isNewNode(n.id));
       if (idx < 0 || !this.viewport) return;
-      const rowTop         = idx * this.rowHeight;
+      const rowTop         = idx * this.rowHeight();
       const viewportH      = this.viewport.elementRef.nativeElement.clientHeight;
-      const centeredOffset = rowTop - (viewportH - this.rowHeight) / 2;
+      const centeredOffset = rowTop - (viewportH - this.rowHeight()) / 2;
       this.viewport.scrollToOffset(Math.max(0, centeredOffset), 'smooth');
     }).unsubscribe();
   }
@@ -266,11 +266,11 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
   }
 
   isEditingNode(id: string): boolean {
-    return id === this.editingId;
+    return id === this.editingId();
   }
 
   isSelectedNode(id: string): boolean {
-    return id === this.selectedId;
+    return id === this.selectedId();
   }
 
   // ── Private ──────────────────────────────────────────────────

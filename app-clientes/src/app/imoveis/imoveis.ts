@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal, ViewChild } from '@angular/core';
 import {
   PoDividerModule,
   PoInfoModule,
@@ -54,14 +54,24 @@ export interface Imovel {
   ],
   templateUrl: './imoveis.html',
   styleUrls: ['./imoveis.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Imoveis implements OnInit {
+export class Imoveis {
   @ViewChild('modalImovel') modalImovel!: PoModalComponent;
 
   readonly PoTagType = PoTagType;
-  imovelSelecionado: Imovel | null = null;
-  filtroAtivo = 'todos';
-  slidesDestaque: PoSlideItem[] = [];
+  readonly imovelSelecionado = signal<Imovel | null>(null);
+  readonly filtroAtivo = signal('todos');
+
+  readonly slidesDestaque = computed<PoSlideItem[]>(() =>
+    this.imoveisDestaque()
+      .slice(0, 3)
+      .map(i => ({
+        image: i.fotos[0],
+        alt: i.titulo,
+        action: () => this.abrirDetalhes(i),
+      }))
+  );
 
   readonly imoveis: Imovel[] = [
     {
@@ -203,31 +213,19 @@ export class Imoveis implements OnInit {
     },
   ];
 
-  get imoveisFiltrados(): Imovel[] {
-    if (this.filtroAtivo === 'todos') return this.imoveis;
-    if (this.filtroAtivo === 'venda')
+  readonly imoveisFiltrados = computed<Imovel[]>(() => {
+    const filtroAtivo = this.filtroAtivo();
+    if (filtroAtivo === 'todos') return this.imoveis;
+    if (filtroAtivo === 'venda')
       return this.imoveis.filter(i => i.tipoNegocio === 'Venda');
-    if (this.filtroAtivo === 'aluguel')
+    if (filtroAtivo === 'aluguel')
       return this.imoveis.filter(i => i.tipoNegocio === 'Aluguel');
-    if (this.filtroAtivo === 'destaque')
+    if (filtroAtivo === 'destaque')
       return this.imoveis.filter(i => i.destaque);
     return this.imoveis;
-  }
+  });
 
-  get imoveisDestaque(): Imovel[] {
-    return this.imoveis.filter(i => i.destaque);
-  }
-
-  ngOnInit(): void {
-    this.slidesDestaque = this.imoveis
-      .filter(i => i.destaque)
-      .slice(0, 3)
-      .map(i => ({
-        image: i.fotos[0],
-        alt: i.titulo,
-        action: () => this.abrirDetalhes(i),
-      }));
-  }
+  readonly imoveisDestaque = computed(() => this.imoveis.filter(i => i.destaque));
 
   getSlides(imovel: Imovel): string[] {
     return imovel.fotos;
@@ -241,17 +239,17 @@ export class Imoveis implements OnInit {
   }
 
   abrirDetalhes(imovel: Imovel): void {
-    this.imovelSelecionado = imovel;
+    this.imovelSelecionado.set(imovel);
     this.modalImovel.open();
   }
 
   fecharModal(): void {
     this.modalImovel.close();
-    this.imovelSelecionado = null;
+    this.imovelSelecionado.set(null);
   }
 
   setFiltro(filtro: string): void {
-    this.filtroAtivo = filtro;
+    this.filtroAtivo.set(filtro);
   }
 
   readonly acaoPrimaria: PoModalAction = {

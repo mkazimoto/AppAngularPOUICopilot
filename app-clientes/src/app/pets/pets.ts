@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import {
   PoAvatarModule,
   PoButtonModule,
@@ -35,10 +35,11 @@ interface PetStory {
   imports: [PoPageModule, PoAvatarModule, PoButtonModule, PoDividerModule, PoTagModule, PoWidgetModule],
   templateUrl: './pets.html',
   styleUrl: './pets.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Pets {
   readonly PoTagType = PoTagType;
-  filtroAtivo = 'todos';
+  readonly filtroAtivo = signal('todos');
 
   readonly filtros = [
     { label: 'Todos', value: 'todos' },
@@ -55,7 +56,7 @@ export class Pets {
     { nome: 'Max', src: 'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg', novo: false },
   ];
 
-  posts: PetPost[] = [
+  readonly posts = signal<PetPost[]>([
     {
       id: 1,
       petName: 'Thor',
@@ -140,19 +141,25 @@ export class Pets {
       hashtags: ['#rex', '#pastoralemao', '#brinquedo'],
       curtido: false,
     },
-  ];
+  ]);
 
-  get postsFiltrados(): PetPost[] {
-    if (this.filtroAtivo === 'todos') return this.posts;
-    return this.posts.filter(p => p.especie === this.filtroAtivo);
-  }
+  readonly postsFiltrados = computed<PetPost[]>(() => {
+    const filtroAtivo = this.filtroAtivo();
+    if (filtroAtivo === 'todos') return this.posts();
+    return this.posts().filter(p => p.especie === filtroAtivo);
+  });
 
   curtir(post: PetPost): void {
-    post.curtidas += post.curtido ? -1 : 1;
-    post.curtido = !post.curtido;
+    this.posts.update(posts =>
+      posts.map(p =>
+        p.id === post.id
+          ? { ...p, curtido: !p.curtido, curtidas: p.curtidas + (p.curtido ? -1 : 1) }
+          : p
+      )
+    );
   }
 
   filtrar(value: string): void {
-    this.filtroAtivo = value;
+    this.filtroAtivo.set(value);
   }
 }

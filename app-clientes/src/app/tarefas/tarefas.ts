@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, NgZone, signal } from '@angular/core';
 import {
     PoContainerModule,
     PoDividerModule,
@@ -35,6 +35,7 @@ export interface Tarefa {
   ],
   templateUrl: './tarefas.html',
   styleUrl: './tarefas.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Tarefas {
   /** Projeto: 01/03/2026 a 31/05/2026 — 92 dias */
@@ -42,19 +43,11 @@ export class Tarefas {
   /** Hoje: 19/03/2026 = dia 18 a partir de 01/03 */
   readonly todayDay = 18;
 
-  // --- Drag state ---
-  dragTaskId: number | null = null;
-  private dragStartX = 0;
-  private dragInitialStartDay = 0;
-  private dragContainerWidth = 0;
-
-  // --- Resize state ---
-  resizeTaskId: number | null = null;
-  resizeEdge: 'left' | 'right' | null = null;
-  private resizeStartX = 0;
-  private resizeInitialStartDay = 0;
-  private resizeInitialDuration = 0;
-  private resizeContainerWidth = 0;
+  /** Tarefa em arrasto (highlight na barra). */
+  readonly dragTaskId = signal<number | null>(null);
+  /** Tarefa em redimensionamento (highlight na barra). */
+  readonly resizeTaskId = signal<number | null>(null);
+  readonly resizeEdge = signal<'left' | 'right' | null>(null);
 
   private readonly projectStart = new Date(2026, 2, 1); // 01/03/2026
 
@@ -64,9 +57,7 @@ export class Tarefas {
     { label: 'Maio 2026', widthPct: (31 / 92) * 100 },
   ];
 
-  get todayPct(): number {
-    return (this.todayDay / this.totalDays) * 100;
-  }
+  readonly todayPct = computed(() => (this.todayDay / this.totalDays) * 100);
 
   colunas: PoTableColumn[] = [
     { property: 'id', label: '#', width: '5%' },
@@ -99,7 +90,7 @@ export class Tarefas {
     { property: 'progresso', label: 'Progresso', type: 'columnTemplate', width: '14%' },
   ];
 
-  tarefas: Tarefa[] = [
+  readonly tarefas = signal<Tarefa[]>([
     {
       id: 1,
       titulo: 'Planejamento',
@@ -204,7 +195,9 @@ export class Tarefas {
       duration: 16,
       barColor: '#20c997',
     },
-  ];
+  ]);
+
+  constructor(private ngZone: NgZone) {}
 
   getBarStyle(t: Tarefa): Record<string, string> {
     return {
@@ -214,75 +207,105 @@ export class Tarefas {
     };
   }
 
-  /** Inicia o arrastar da barra */
+  /** Inicia o arrastar da barra (gesto fora do zone, commit no mouseup). */
   onBarMouseDown(event: MouseEvent, tarefa: Tarefa): void {
     event.preventDefault();
-    const containerEl = (event.currentTarget as HTMLElement).parentElement!;
-    this.dragTaskId = tarefa.id;
-    this.dragStartX = event.clientX;
-    this.dragInitialStartDay = tarefa.startDay;
-    this.dragContainerWidth = containerEl.clientWidth;
+    const barEl = (event.currentTarget as HTMLElement).closest('.gantt-bar') as HTMLElement;
+    const containerEl = barEl.parentElement!;
+    this.dragTaskId.set(tarefa.id);
     document.body.style.cursor = 'grabbing';
     document.body.style.userSelect = 'none';
+    const startX = event.clientX;
+    const initialStartDay = tarefa.startDay;
+    const dayWidth = containerEl.clientWidth / this.totalDays;
+    let currentStart = initialStartDay;
+
+    this.ngZone.runOutsideAngular(() => {
+      const onMove = (e: MouseEvent): void => {
+        currentStart = Math.max(
+          0,
+          Math.min(this.totalDays - tarefa.duration, initialStartDay + Math.round((e.clientX - startX) / dayWidth))
+        );
+        barEl.style.left = `${(currentStart / this.totalDays) * 100}%`;
+      };
+      const onUp = (): void => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        this.dragTaskId.set(null);
+        if (currentStart !== initialStartDay) {
+          this.commitTarefa(tarefa.id, { startDay: currentStart });
+        }
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
   }
 
-  @HostListener('document:mousemove', ['$event'])
-  onMouseMove(event: MouseEvent): void {
-    if (this.dragTaskId !== null) {
-      const dayWidth = this.dragContainerWidth / this.totalDays;
-      const deltaDays = Math.round((event.clientX - this.dragStartX) / dayWidth);
-      const tarefa = this.tarefas.find(t => t.id === this.dragTaskId)!;
-      const newStart = Math.max(0, Math.min(this.totalDays - tarefa.duration, this.dragInitialStartDay + deltaDays));
-      tarefa.startDay = newStart;
-      this.updateDatesFromDays(tarefa);
-    }
-    if (this.resizeTaskId !== null) {
-      const dayWidth = this.resizeContainerWidth / this.totalDays;
-      const deltaDays = Math.round((event.clientX - this.resizeStartX) / dayWidth);
-      const tarefa = this.tarefas.find(t => t.id === this.resizeTaskId)!;
-      if (this.resizeEdge === 'right') {
-        tarefa.duration = Math.max(1, Math.min(this.totalDays - tarefa.startDay, this.resizeInitialDuration + deltaDays));
-        this.updateDatesFromDays(tarefa);
-      } else {
-        const newStart = Math.max(0, Math.min(this.resizeInitialStartDay + this.resizeInitialDuration - 1, this.resizeInitialStartDay + deltaDays));
-        tarefa.duration = this.resizeInitialDuration - (newStart - this.resizeInitialStartDay);
-        tarefa.startDay = newStart;
-        this.updateDatesFromDays(tarefa);
-      }
-    }
-  }
-
-  @HostListener('document:mouseup')
-  onMouseUp(): void {
-    this.dragTaskId = null;
-    this.resizeTaskId = null;
-    this.resizeEdge = null;
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-  }
-
-  /** Inicia redimensionamento pelo handle esquerdo ou direito */
+  /** Inicia redimensionamento pelo handle esquerdo ou direito (gesto fora do zone). */
   onResizeMouseDown(event: MouseEvent, tarefa: Tarefa, edge: 'left' | 'right'): void {
     event.preventDefault();
     event.stopPropagation();
+    const barEl = (event.currentTarget as HTMLElement).closest('.gantt-bar') as HTMLElement;
     const containerEl = (event.currentTarget as HTMLElement).closest('.gantt-cell-bar') as HTMLElement;
-    this.resizeTaskId = tarefa.id;
-    this.resizeEdge = edge;
-    this.resizeStartX = event.clientX;
-    this.resizeInitialStartDay = tarefa.startDay;
-    this.resizeInitialDuration = tarefa.duration;
-    this.resizeContainerWidth = containerEl.clientWidth;
+    this.resizeTaskId.set(tarefa.id);
+    this.resizeEdge.set(edge);
     document.body.style.cursor = 'ew-resize';
     document.body.style.userSelect = 'none';
+    const startX = event.clientX;
+    const initialStartDay = tarefa.startDay;
+    const initialDuration = tarefa.duration;
+    const dayWidth = containerEl.clientWidth / this.totalDays;
+    let currentStart = initialStartDay;
+    let currentDuration = initialDuration;
+
+    this.ngZone.runOutsideAngular(() => {
+      const onMove = (e: MouseEvent): void => {
+        const deltaDays = Math.round((e.clientX - startX) / dayWidth);
+        if (edge === 'right') {
+          currentDuration = Math.max(1, Math.min(this.totalDays - currentStart, initialDuration + deltaDays));
+        } else {
+          currentStart = Math.max(0, Math.min(initialStartDay + initialDuration - 1, initialStartDay + deltaDays));
+          currentDuration = initialDuration - (currentStart - initialStartDay);
+        }
+        barEl.style.left = `${(currentStart / this.totalDays) * 100}%`;
+        barEl.style.width = `${(currentDuration / this.totalDays) * 100}%`;
+      };
+      const onUp = (): void => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        this.resizeTaskId.set(null);
+        this.resizeEdge.set(null);
+        if (currentStart !== initialStartDay || currentDuration !== initialDuration) {
+          this.commitTarefa(tarefa.id, { startDay: currentStart, duration: currentDuration });
+        }
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
   }
 
-  private updateDatesFromDays(tarefa: Tarefa): void {
+  /** Commit imutável no signal, recalculando as datas. */
+  private commitTarefa(id: number, patch: Partial<Pick<Tarefa, 'startDay' | 'duration'>>): void {
+    this.tarefas.update(list =>
+      list.map(t => {
+        if (t.id !== id) return t;
+        const atualizada = { ...t, ...patch };
+        const { dataInicio, dataFim } = this.calcDates(atualizada.startDay, atualizada.duration);
+        return { ...atualizada, dataInicio, dataFim };
+      })
+    );
+  }
+
+  private calcDates(startDay: number, duration: number): { dataInicio: string; dataFim: string } {
     const start = new Date(this.projectStart);
-    start.setDate(start.getDate() + tarefa.startDay);
+    start.setDate(start.getDate() + startDay);
     const end = new Date(start);
-    end.setDate(end.getDate() + tarefa.duration - 1);
-    tarefa.dataInicio = this.formatDate(start);
-    tarefa.dataFim = this.formatDate(end);
+    end.setDate(end.getDate() + duration - 1);
+    return { dataInicio: this.formatDate(start), dataFim: this.formatDate(end) };
   }
 
   private formatDate(d: Date): string {

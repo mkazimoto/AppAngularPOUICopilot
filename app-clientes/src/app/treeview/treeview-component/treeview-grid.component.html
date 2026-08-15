@@ -29,16 +29,16 @@
   </div>
 
   <!-- ── Virtual scroll body ───────────────────────────────── -->
-  <cdk-virtual-scroll-viewport [itemSize]="rowHeight" class="treeview-viewport" [style.height.px]="viewportHeight">
+  <cdk-virtual-scroll-viewport [itemSize]="rowHeight()" class="treeview-viewport" [style.height.px]="viewportHeight">
 
     <div
-      *cdkVirtualFor="let node of visibleNodes; trackBy: trackById"
+      *cdkVirtualFor="let node of visibleNodes(); trackBy: trackById"
       class="treeview-row"
       [style.grid-template-columns]="colTemplate()"
       [style.min-width.px]="totalWidth()"
       [class.treeview-row--editing]="isEditingNode(node.id) || isNewNode(node.id)"
       [class.treeview-row--selected]="(isSelectedNode(node.id) && !isNewNode(node.id))"
-      [style.height.px]="rowHeight"
+      [style.height.px]="rowHeight()"
       (click)="nodeSelect.emit(node)"
     >
       @for (col of columns(); track col.property) {
@@ -49,7 +49,7 @@
     </div>
 
     <!-- Empty state -->
-    @if (visibleNodes.length === 0) {
+    @if (visibleNodes().length === 0) {
       <div class="empty-row">
         <i class="an an-tree-structure empty-icon"></i>
         <p>Nenhum item. Clique em <strong>Adicionar Tarefa</strong> para começar.</p>

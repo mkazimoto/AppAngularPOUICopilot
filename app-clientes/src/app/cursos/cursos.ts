@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import {
@@ -48,19 +48,21 @@ export interface Curso {
   ],
   templateUrl: './cursos.html',
   styleUrls: ['./cursos.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Cursos {
   @ViewChild('modalVideo') modalVideo!: PoModalComponent;
 
-  cursoSelecionado: Curso | null = null;
-  categoriaAtiva = 'todos';
+  readonly cursoSelecionado = signal<Curso | null>(null);
+  readonly categoriaAtiva = signal('todos');
 
   constructor(private sanitizer: DomSanitizer) {}
 
-  get videoUrlSafe(): SafeResourceUrl | null {
-    if (!this.cursoSelecionado) return null;
-    return this.sanitizer.bypassSecurityTrustResourceUrl(this.cursoSelecionado.videoUrl);
-  }
+  readonly videoUrlSafe = computed<SafeResourceUrl | null>(() => {
+    const curso = this.cursoSelecionado();
+    if (!curso) return null;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(curso.videoUrl);
+  });
 
   readonly cursos: Curso[] = [
     {
@@ -172,29 +174,28 @@ export class Cursos {
     action: () => this.modalVideo.close(),
   };
 
-  get cursosFiltrados(): Curso[] {
-    if (this.categoriaAtiva === 'todos') return this.cursos;
-    return this.cursos.filter(c => c.categoria === this.categoriaAtiva);
-  }
+  readonly cursosFiltrados = computed<Curso[]>(() => {
+    const categoriaAtiva = this.categoriaAtiva();
+    if (categoriaAtiva === 'todos') return this.cursos;
+    return this.cursos.filter(c => c.categoria === categoriaAtiva);
+  });
 
-  get totalCursos(): number {
-    return this.cursos.length;
-  }
+  readonly totalCursos = computed(() => this.cursos.length);
 
-  get cursosEmAndamento(): number {
-    return this.cursos.filter(c => c.progresso > 0 && c.progresso < 100).length;
-  }
+  readonly cursosEmAndamento = computed(() =>
+    this.cursos.filter(c => c.progresso > 0 && c.progresso < 100).length
+  );
 
-  get cursosConcluidos(): number {
-    return this.cursos.filter(c => c.progresso === 100).length;
-  }
+  readonly cursosConcluidos = computed(() =>
+    this.cursos.filter(c => c.progresso === 100).length
+  );
 
   selecionarCategoria(categoria: string): void {
-    this.categoriaAtiva = categoria;
+    this.categoriaAtiva.set(categoria);
   }
 
   assistirCurso(curso: Curso): void {
-    this.cursoSelecionado = curso;
+    this.cursoSelecionado.set(curso);
     this.modalVideo.open();
   }
 

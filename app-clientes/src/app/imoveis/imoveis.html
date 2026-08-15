@@ -6,7 +6,7 @@
       <span class="an an-star"></span> Imóveis em Destaque
     </h2>
     <po-slide
-      [p-slides]="slidesDestaque"
+      [p-slides]="slidesDestaque()"
       [p-height]="420"
       [p-interval]="5000">
     </po-slide>
@@ -18,22 +18,22 @@
   <div class="imoveis-filtros">
     <po-button
       p-label="Todos"
-      [p-kind]="filtroAtivo === 'todos' ? 'primary' : 'secondary'"
+      [p-kind]="filtroAtivo() === 'todos' ? 'primary' : 'secondary'"
       (p-click)="setFiltro('todos')">
     </po-button>
     <po-button
       p-label="Venda"
-      [p-kind]="filtroAtivo === 'venda' ? 'primary' : 'secondary'"
+      [p-kind]="filtroAtivo() === 'venda' ? 'primary' : 'secondary'"
       (p-click)="setFiltro('venda')">
     </po-button>
     <po-button
       p-label="Aluguel"
-      [p-kind]="filtroAtivo === 'aluguel' ? 'primary' : 'secondary'"
+      [p-kind]="filtroAtivo() === 'aluguel' ? 'primary' : 'secondary'"
       (p-click)="setFiltro('aluguel')">
     </po-button>
     <po-button
       p-label="Destaque"
-      [p-kind]="filtroAtivo === 'destaque' ? 'primary' : 'secondary'"
+      [p-kind]="filtroAtivo() === 'destaque' ? 'primary' : 'secondary'"
       p-icon="an an-star"
       (p-click)="setFiltro('destaque')">
     </po-button>
@@ -41,7 +41,7 @@
 
   <!-- Grid de Imóveis -->
   <div class="po-row imoveis-grid">
-    @for (imovel of imoveisFiltrados; track imovel) {
+    @for (imovel of imoveisFiltrados(); track imovel.id) {
     <div class="po-sm-12 po-md-6 po-lg-4">
       <po-widget
         [p-title]="imovel.titulo"
@@ -115,17 +115,17 @@
   <!-- Modal de Detalhes -->
   <po-modal
     #modalImovel
-    [p-title]="imovelSelecionado?.titulo || ''"
+    [p-title]="imovelSelecionado()?.titulo || ''"
     p-size="xl"
     [p-primary-action]="acaoPrimaria"
     [p-secondary-action]="acaoSecundaria">
 
-    @if (imovelSelecionado) {
+    @if (imovelSelecionado(); as imovel) {
     <div class="imovel-modal-conteudo">
 
       <!-- Galeria principal no modal -->
       <po-slide
-        [p-slides]="getSlides(imovelSelecionado)"
+        [p-slides]="getSlides(imovel)"
         [p-height]="380"
         [p-interval]="0">
       </po-slide>
@@ -135,14 +135,14 @@
         <!-- Tags -->
         <div class="imovel-tags imovel-modal-tags">
           <po-tag
-            [p-value]="imovelSelecionado.tipoNegocio"
-            [p-type]="imovelSelecionado.tipoNegocioTag">
+            [p-value]="imovel.tipoNegocio"
+            [p-type]="imovel.tipoNegocioTag">
           </po-tag>
           <po-tag
-            [p-value]="imovelSelecionado.tipo"
+            [p-value]="imovel.tipo"
             [p-type]="PoTagType.Neutral">
           </po-tag>
-          @if (imovelSelecionado.destaque) {
+          @if (imovel.destaque) {
             <po-tag
               p-value="Destaque"
               [p-type]="PoTagType.Warning">
@@ -153,16 +153,16 @@
         <!-- Preço destaque -->
         <div class="imovel-modal-preco">
           <span class="po-font-title-bold imovel-preco-modal">
-            {{ formatarPreco(imovelSelecionado.preco, imovelSelecionado.tipoNegocio) }}
+            {{ formatarPreco(imovel.preco, imovel.tipoNegocio) }}
           </span>
-          @if (imovelSelecionado.condominio) {
+          @if (imovel.condominio) {
             <span class="po-font-text">
-              Condomínio: R$ {{ imovelSelecionado.condominio.toLocaleString('pt-BR') }}/mês
+              Condomínio: R$ {{ imovel.condominio.toLocaleString('pt-BR') }}/mês
             </span>
           }
-          @if (imovelSelecionado.iptu) {
+          @if (imovel.iptu) {
             <span class="po-font-text">
-              IPTU: R$ {{ imovelSelecionado.iptu.toLocaleString('pt-BR') }}/mês
+              IPTU: R$ {{ imovel.iptu.toLocaleString('pt-BR') }}/mês
             </span>
           }
         </div>
@@ -173,19 +173,19 @@
           <div class="po-sm-12 po-md-6">
             <po-info
               p-label="Endereço"
-              [p-value]="imovelSelecionado.endereco">
+              [p-value]="imovel.endereco">
             </po-info>
           </div>
           <div class="po-sm-12 po-md-3">
             <po-info
               p-label="Bairro"
-              [p-value]="imovelSelecionado.bairro">
+              [p-value]="imovel.bairro">
             </po-info>
           </div>
           <div class="po-sm-12 po-md-3">
             <po-info
               p-label="Cidade"
-              [p-value]="imovelSelecionado.cidade">
+              [p-value]="imovel.cidade">
             </po-info>
           </div>
         </div>
@@ -196,25 +196,25 @@
           <div class="po-sm-6 po-md-3">
             <po-info
               p-label="Quartos"
-              [p-value]="imovelSelecionado.quartos.toString()">
+              [p-value]="imovel.quartos.toString()">
             </po-info>
           </div>
           <div class="po-sm-6 po-md-3">
             <po-info
               p-label="Banheiros"
-              [p-value]="imovelSelecionado.banheiros.toString()">
+              [p-value]="imovel.banheiros.toString()">
             </po-info>
           </div>
           <div class="po-sm-6 po-md-3">
             <po-info
               p-label="Vagas"
-              [p-value]="imovelSelecionado.vagas.toString()">
+              [p-value]="imovel.vagas.toString()">
             </po-info>
           </div>
           <div class="po-sm-6 po-md-3">
             <po-info
               p-label="Área Total"
-              [p-value]="imovelSelecionado.areaTotal + ' m²'">
+              [p-value]="imovel.areaTotal + ' m²'">
             </po-info>
           </div>
         </div>
@@ -222,7 +222,7 @@
         <po-divider p-label="Descrição"></po-divider>
 
         <p class="po-font-text imovel-descricao">
-          {{ imovelSelecionado.descricao }}
+          {{ imovel.descricao }}
         </p>
 
       </div>

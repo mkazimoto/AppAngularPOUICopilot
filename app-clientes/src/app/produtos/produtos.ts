@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   PoBreadcrumb,
@@ -41,15 +41,19 @@ export interface Produto {
   ],
   templateUrl: './produtos.html',
   styleUrl: './produtos.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Produtos {
   @ViewChild('modalDetalhe') modalDetalhe!: PoModalComponent;
   @ViewChild('modalCarrinho') modalCarrinho!: PoModalComponent;
 
-  produtoSelecionado?: Produto;
-  filtroCategoria = '';
-  termoBusca = '';
-  carrinho: { produto: Produto; quantidade: number }[] = [];
+  readonly produtoSelecionado = signal<Produto | undefined>(undefined);
+  readonly filtroCategoria = signal('');
+  readonly termoBusca = signal('');
+  readonly carrinho = signal<{ produto: Produto; quantidade: number }[]>([]);
+
+  /** Array fixo para renderizar as estrelas sem alocar por CD. */
+  readonly ESTRELAS = [1, 2, 3, 4, 5];
 
   readonly breadcrumb: PoBreadcrumb = {
     items: [{ label: 'Home', link: '/clientes' }, { label: 'Produtos' }],
@@ -183,46 +187,49 @@ export class Produtos {
     },
   ];
 
-  get produtosFiltrados(): Produto[] {
+  readonly produtosFiltrados = computed<Produto[]>(() => {
+    const filtroCategoria = this.filtroCategoria();
+    const termoBusca = this.termoBusca().toLowerCase();
     return this.produtos.filter(p => {
-      const matchCategoria = !this.filtroCategoria || this.filtroCategoria === 'Todos' || p.categoria === this.filtroCategoria;
-      const matchBusca = !this.termoBusca || p.nome.toLowerCase().includes(this.termoBusca.toLowerCase());
+      const matchCategoria = !filtroCategoria || filtroCategoria === 'Todos' || p.categoria === filtroCategoria;
+      const matchBusca = !termoBusca || p.nome.toLowerCase().includes(termoBusca);
       return matchCategoria && matchBusca;
     });
-  }
+  });
 
-  get totalCarrinho(): number {
-    return this.carrinho.reduce((total, item) => total + item.quantidade, 0);
-  }
+  readonly totalCarrinho = computed(() =>
+    this.carrinho().reduce((total, item) => total + item.quantidade, 0)
+  );
 
-  get valorTotalCarrinho(): number {
-    return this.carrinho.reduce((total, item) => total + item.produto.preco * item.quantidade, 0);
-  }
+  readonly valorTotalCarrinho = computed(() =>
+    this.carrinho().reduce((total, item) => total + item.produto.preco * item.quantidade, 0)
+  );
 
-  get desconto(): number {
-    const precoOriginal = this.carrinho.reduce(
+  readonly desconto = computed(() => {
+    const precoOriginal = this.carrinho().reduce(
       (total, item) => total + (item.produto.precoOriginal ?? item.produto.preco) * item.quantidade,
       0
     );
-    return precoOriginal - this.valorTotalCarrinho;
-  }
+    return precoOriginal - this.valorTotalCarrinho();
+  });
 
-  get porcentagemDesconto(): number | null {
-    if (!this.produtoSelecionado?.precoOriginal) return null;
+  readonly porcentagemDesconto = computed<number | null>(() => {
+    const produto = this.produtoSelecionado();
+    if (!produto?.precoOriginal) return null;
     return Math.round(
-      ((this.produtoSelecionado.precoOriginal - this.produtoSelecionado.preco) /
-        this.produtoSelecionado.precoOriginal) *
+      ((produto.precoOriginal - produto.preco) / produto.precoOriginal) *
         100
     );
-  }
+  });
 
   readonly acaoPrimaria = { label: 'Ver Carrinho', action: () => this.abrirCarrinho() };
 
   readonly acaoModalDetalhe: PoModalAction = {
     label: 'Adicionar ao Carrinho',
     action: () => {
-      if (this.produtoSelecionado) {
-        this.adicionarAoCarrinho(this.produtoSelecionado);
+      const produto = this.produtoSelecionado();
+      if (produto) {
+        this.adicionarAoCarrinho(produto);
         this.modalDetalhe.close();
       }
     },
@@ -246,31 +253,32 @@ export class Produtos {
   constructor(private notificationService: PoNotificationService) {}
 
   filtrarCategoria(categoria: string): void {
-    this.filtroCategoria = categoria === 'Todos' ? '' : categoria;
+    this.filtroCategoria.set(categoria === 'Todos' ? '' : categoria);
   }
 
   buscar(termo: string): void {
-    this.termoBusca = termo;
+    this.termoBusca.set(termo);
   }
 
   abrirDetalhe(produto: Produto): void {
-    this.produtoSelecionado = produto;
+    this.produtoSelecionado.set(produto);
     this.modalDetalhe.open();
   }
 
   adicionarAoCarrinho(produto: Produto): void {
     if (!produto.disponivel) return;
-    const itemExistente = this.carrinho.find(i => i.produto.id === produto.id);
-    if (itemExistente) {
-      itemExistente.quantidade++;
-    } else {
-      this.carrinho.push({ produto, quantidade: 1 });
-    }
+    this.carrinho.update(items => {
+      const itemExistente = items.find(i => i.produto.id === produto.id);
+      if (itemExistente) {
+        return items.map(i => (i.produto.id === produto.id ? { ...i, quantidade: i.quantidade + 1 } : i));
+      }
+      return [...items, { produto, quantidade: 1 }];
+    });
     this.notificationService.success(`"${produto.nome}" adicionado ao carrinho!`);
   }
 
   removerDoCarrinho(produtoId: number): void {
-    this.carrinho = this.carrinho.filter(i => i.produto.id !== produtoId);
+    this.carrinho.update(items => items.filter(i => i.produto.id !== produtoId));
   }
 
   abrirCarrinho(): void {
@@ -279,16 +287,12 @@ export class Produtos {
 
   finalizarCompra(): void {
     this.notificationService.success('Pedido realizado com sucesso! Obrigado pela compra.');
-    this.carrinho = [];
+    this.carrinho.set([]);
     this.modalCarrinho.close();
   }
 
   formatarPreco(valor: number): string {
     return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  }
-
-  gerarEstrelas(n: number): number[] {
-    return Array(n).fill(0);
   }
 
   porcentagemDescontoItem(produto: Produto): number {

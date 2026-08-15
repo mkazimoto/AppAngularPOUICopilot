@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal, ViewChild } from '@angular/core';
 import {
     PoBreadcrumb,
     PoButtonModule,
@@ -45,14 +45,15 @@ export interface Carro {
   ],
   templateUrl: './carros.html',
   styleUrl: './carros.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Carros {
   @ViewChild('modalReserva') modalReserva!: PoModalComponent;
   @ViewChild('modalDetalhe') modalDetalhe!: PoModalComponent;
 
-  carroSelecionado?: Carro;
-  filtroCategoria = '';
-  termoBusca = '';
+  readonly carroSelecionado = signal<Carro | undefined>(undefined);
+  readonly filtroCategoria = signal('');
+  readonly termoBusca = signal('');
 
   readonly breadcrumb: PoBreadcrumb = {
     items: [{ label: 'Home', link: '/clientes' }, { label: 'Aluguel de Carros' }],
@@ -222,10 +223,11 @@ export class Carros {
     },
   ];
 
-  get carrosFiltrados(): Carro[] {
+  readonly carrosFiltrados = computed<Carro[]>(() => {
+    const filtroCategoria = this.filtroCategoria();
+    const busca = this.termoBusca().toLowerCase();
     return this.carros.filter(c => {
-      const matchCategoria = !this.filtroCategoria || c.categoria === this.filtroCategoria;
-      const busca = this.termoBusca.toLowerCase();
+      const matchCategoria = !filtroCategoria || c.categoria === filtroCategoria;
       const matchBusca =
         !busca ||
         c.modelo.toLowerCase().includes(busca) ||
@@ -233,29 +235,35 @@ export class Carros {
         c.categoria.toLowerCase().includes(busca);
       return matchCategoria && matchBusca;
     });
-  }
+  });
 
   filtrarCategoria(cat: string) {
-    this.filtroCategoria = cat === 'Todos' ? '' : cat;
+    this.filtroCategoria.set(cat === 'Todos' ? '' : cat);
   }
 
   buscar(termo: string) {
-    this.termoBusca = termo;
+    this.termoBusca.set(termo);
   }
 
   abrirDetalhe(carro: Carro) {
-    this.carroSelecionado = carro;
+    this.carroSelecionado.set(carro);
     this.modalDetalhe.open();
   }
 
+  tituloModalDetalhe(): string {
+    const carro = this.carroSelecionado();
+    return carro ? `${carro.marca} ${carro.modelo}` : 'Detalhes';
+  }
+
   abrirReserva(carro: Carro) {
-    this.carroSelecionado = carro;
+    this.carroSelecionado.set(carro);
     this.modalReserva.open();
   }
 
   confirmarReserva() {
     this.modalReserva.close();
-    this.notificationService.success(`Reserva do ${this.carroSelecionado?.marca} ${this.carroSelecionado?.modelo} confirmada!`);
+    const carro = this.carroSelecionado();
+    this.notificationService.success(`Reserva do ${carro?.marca} ${carro?.modelo} confirmada!`);
   }
 
   onImageError(event: Event) {
@@ -283,7 +291,8 @@ export class Carros {
     label: 'Reservar',
     action: () => {
       this.modalDetalhe.close();
-      if (this.carroSelecionado) this.abrirReserva(this.carroSelecionado);
+      const carro = this.carroSelecionado();
+      if (carro) this.abrirReserva(carro);
     },
   };
 

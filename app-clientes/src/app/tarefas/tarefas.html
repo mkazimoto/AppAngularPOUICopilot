@@ -7,7 +7,7 @@
   <po-container p-title="Grade de Tarefas">
     <po-table
       [p-columns]="colunas"
-      [p-items]="tarefas"
+      [p-items]="tarefas()"
       [p-sort]="true"
       [p-striped]="true"
       [p-hide-table-search]="false"
@@ -37,14 +37,14 @@
             }
           </div>
           <!-- Marcador "Hoje" no header -->
-          <div class="gantt-today-header" [style.left]="todayPct + '%'">
+          <div class="gantt-today-header" [style.left]="todayPct() + '%'">
             <span class="gantt-today-label">Hoje</span>
           </div>
         </div>
       </div>
 
       <!-- Linhas de tarefas -->
-      @for (t of tarefas; track t; let odd = $odd) {
+      @for (t of tarefas(); track t.id; let odd = $odd) {
       <div
         class="gantt-row"
         [class.gantt-row-alt]="odd"
@@ -52,12 +52,12 @@
         <div class="gantt-cell-name" [title]="t.titulo">{{ t.titulo }}</div>
         <div class="gantt-cell-bar">
           <!-- Linha de hoje -->
-          <div class="gantt-today-marker" [style.left]="todayPct + '%'"></div>
+          <div class="gantt-today-marker" [style.left]="todayPct() + '%'"></div>
           <!-- Barra da tarefa -->
           <div
             class="gantt-bar"
-            [class.gantt-bar-dragging]="dragTaskId === t.id"
-            [class.gantt-bar-resizing]="resizeTaskId === t.id"
+            [class.gantt-bar-dragging]="dragTaskId() === t.id"
+            [class.gantt-bar-resizing]="resizeTaskId() === t.id"
             [ngStyle]="getBarStyle(t)"
             [title]="t.titulo + ' — ' + t.dataInicio + ' a ' + t.dataFim + ' (' + t.progresso + '% concluído)'"
             (mousedown)="onBarMouseDown($event, t)"

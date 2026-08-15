@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   PoPageModule,
@@ -14,6 +14,7 @@ import { ClienteService } from './cliente.service';
   imports: [PoPageModule, PoTableModule, PoButtonModule, PoTagModule],
   templateUrl: './clientes.html',
   styleUrl: './clientes.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Clientes {
   constructor(
@@ -21,9 +22,7 @@ export class Clientes {
     private clienteService: ClienteService,
   ) {}
 
-  get clientes() {
-    return this.clienteService.clientes;
-  }
+  readonly clientes = computed(() => this.clienteService.clientes());
   colunas: PoTableColumn[] = [
     { property: 'codigo', label: 'Código', width: '8%' },
     { property: 'nome', label: 'Nome' },

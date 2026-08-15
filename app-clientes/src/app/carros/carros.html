@@ -14,7 +14,7 @@
             class="carros-busca-input"
             type="text"
             placeholder="Buscar por modelo ou marca..."
-            [value]="termoBusca"
+            [value]="termoBusca()"
             (input)="buscar($any($event.target).value)" />
         </div>
       </div>
@@ -24,7 +24,7 @@
           @for (cat of categorias; track cat) {
             <button
               class="carro-categoria-btn"
-              [class.carro-categoria-btn--ativo]="(filtroCategoria === '' && cat === 'Todos') || filtroCategoria === cat"
+              [class.carro-categoria-btn--ativo]="(filtroCategoria() === '' && cat === 'Todos') || filtroCategoria() === cat"
               (click)="filtrarCategoria(cat)">
               {{ cat }}
             </button>
@@ -39,13 +39,13 @@
   <div class="carros-resultado-info po-mb-3">
     <small>
       <span class="an an-car po-mr-1"></span>
-      {{ carrosFiltrados.length }} veículo(s) disponível(is)
+      {{ carrosFiltrados().length }} veículo(s) disponível(is)
     </small>
   </div>
 
   <!-- Grade de Carros -->
   <div class="po-row">
-    @for (carro of carrosFiltrados; track carro.id) {
+    @for (carro of carrosFiltrados(); track carro.id) {
       <div class="po-col-12 po-col-sm-6 po-col-md-4 po-col-lg-4 po-mb-3">
         <po-widget
           [p-no-shadow]="false"
@@ -142,7 +142,7 @@
       </div>
     }
 
-    @if (carrosFiltrados.length === 0) {
+    @if (carrosFiltrados().length === 0) {
       <div class="po-col-12">
         <div class="carros-vazio">
           <span class="an an-car carros-vazio-icone"></span>
@@ -162,61 +162,61 @@
 <!-- Modal: Detalhes do Carro -->
 <po-modal
   #modalDetalhe
-  [p-title]="carroSelecionado ? carroSelecionado.marca + ' ' + carroSelecionado.modelo : 'Detalhes'"
+  [p-title]="tituloModalDetalhe()"
   p-size="lg"
   [p-primary-action]="acaoReservarDetalhe"
   [p-secondary-action]="acaoFecharDetalhe">
 
-  @if (carroSelecionado) {
+  @if (carroSelecionado(); as carro) {
     <div class="modal-detalhe">
       <img
-        [src]="carroSelecionado.imagemUrl"
-        [alt]="carroSelecionado.marca + ' ' + carroSelecionado.modelo"
+        [src]="carro.imagemUrl"
+        [alt]="carro.marca + ' ' + carro.modelo"
         class="modal-carro-imagem"
         (error)="onImageError($event)" />
 
-      <p class="modal-descricao po-mt-2 po-mb-3">{{ carroSelecionado.descricao }}</p>
+      <p class="modal-descricao po-mt-2 po-mb-3">{{ carro.descricao }}</p>
 
       <div class="po-row modal-specs">
         <div class="po-col-6 po-col-md-3 modal-spec-item">
           <span class="an an-calendar modal-spec-icone"></span>
           <span class="modal-spec-label">Ano</span>
-          <span class="modal-spec-valor">{{ carroSelecionado.ano }}</span>
+          <span class="modal-spec-valor">{{ carro.ano }}</span>
         </div>
         <div class="po-col-6 po-col-md-3 modal-spec-item">
           <span class="an an-gauge modal-spec-icone"></span>
           <span class="modal-spec-label">Câmbio</span>
-          <span class="modal-spec-valor">{{ carroSelecionado.cambio }}</span>
+          <span class="modal-spec-valor">{{ carro.cambio }}</span>
         </div>
         <div class="po-col-6 po-col-md-3 modal-spec-item">
           <span class="an an-gas-pump modal-spec-icone"></span>
           <span class="modal-spec-label">Combustível</span>
-          <span class="modal-spec-valor">{{ carroSelecionado.combustivel }}</span>
+          <span class="modal-spec-valor">{{ carro.combustivel }}</span>
         </div>
         <div class="po-col-6 po-col-md-3 modal-spec-item">
           <span class="an an-users modal-spec-icone"></span>
           <span class="modal-spec-label">Lugares</span>
-          <span class="modal-spec-valor">{{ carroSelecionado.lugares }}</span>
+          <span class="modal-spec-valor">{{ carro.lugares }}</span>
         </div>
         <div class="po-col-6 po-col-md-3 modal-spec-item">
           <span class="an an-road modal-spec-icone"></span>
           <span class="modal-spec-label">Quilometragem</span>
-          <span class="modal-spec-valor">{{ carroSelecionado.km }}</span>
+          <span class="modal-spec-valor">{{ carro.km }}</span>
         </div>
         <div class="po-col-6 po-col-md-3 modal-spec-item">
           <span class="an an-tag modal-spec-icone"></span>
           <span class="modal-spec-label">Categoria</span>
-          <span class="modal-spec-valor">{{ carroSelecionado.categoria }}</span>
+          <span class="modal-spec-valor">{{ carro.categoria }}</span>
         </div>
         <div class="po-col-6 po-col-md-3 modal-spec-item">
           <span class="an an-star modal-spec-icone modal-spec-icone--star"></span>
           <span class="modal-spec-label">Avaliações</span>
-          <span class="modal-spec-valor">{{ carroSelecionado.avaliacoes }}</span>
+          <span class="modal-spec-valor">{{ carro.avaliacoes }}</span>
         </div>
         <div class="po-col-6 po-col-md-3 modal-spec-item modal-spec-item--preco">
           <span class="an an-money modal-spec-icone"></span>
           <span class="modal-spec-label">Diária</span>
-          <span class="modal-spec-valor modal-preco-valor">R$ {{ carroSelecionado.precoDiaria | number: '1.2-2' }}</span>
+          <span class="modal-spec-valor modal-preco-valor">R$ {{ carro.precoDiaria | number: '1.2-2' }}</span>
         </div>
       </div>
     </div>
@@ -232,21 +232,21 @@
   [p-primary-action]="acaoConfirmarReserva"
   [p-secondary-action]="acaoCancelarReserva">
 
-  @if (carroSelecionado) {
+  @if (carroSelecionado(); as carro) {
     <div class="modal-reserva">
       <div class="po-row po-align-items-center po-mb-3">
         <div class="po-col-4">
           <img
-            [src]="carroSelecionado.imagemUrl"
-            [alt]="carroSelecionado.modelo"
+            [src]="carro.imagemUrl"
+            [alt]="carro.modelo"
             class="modal-reserva-imagem"
             (error)="onImageError($event)" />
         </div>
         <div class="po-col-8">
-          <h3 class="po-mb-1">{{ carroSelecionado.marca }} {{ carroSelecionado.modelo }}</h3>
-          <p class="po-mb-1">{{ carroSelecionado.ano }} &bull; {{ carroSelecionado.categoria }}</p>
+          <h3 class="po-mb-1">{{ carro.marca }} {{ carro.modelo }}</h3>
+          <p class="po-mb-1">{{ carro.ano }} &bull; {{ carro.categoria }}</p>
           <div class="modal-reserva-preco">
-            <span>R$ {{ carroSelecionado.precoDiaria | number: '1.2-2' }}<small>/dia</small></span>
+            <span>R$ {{ carro.precoDiaria | number: '1.2-2' }}<small>/dia</small></span>
           </div>
         </div>
       </div>

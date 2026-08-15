@@ -21,7 +21,7 @@
     @for (filtro of filtros; track filtro.value) {
       <po-tag
         [p-label]="filtro.label"
-        [p-type]="filtroAtivo === filtro.value ? PoTagType.Info : PoTagType.Neutral"
+        [p-type]="filtroAtivo() === filtro.value ? PoTagType.Info : PoTagType.Neutral"
         (p-click)="filtrar(filtro.value)">
       </po-tag>
     }
@@ -30,7 +30,7 @@
   <!-- Feed de posts -->
   <po-divider p-label="Feed"></po-divider>
   <div class="po-row">
-    @for (post of postsFiltrados; track post.id) {
+    @for (post of postsFiltrados(); track post.id) {
       <div class="po-col-sm-12 po-col-md-6 po-col-lg-4">
         <po-widget>
 

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
     PoButtonModule,
@@ -70,12 +70,12 @@ interface Pagamento {
   ],
   templateUrl: './passagens.html',
   styleUrl: './passagens.css',
-  providers: [PoNotificationService],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Passagens {
   readonly PoTagType = PoTagType;
 
-  passoAtual = 1;
+  readonly passoAtual = signal(1);
 
   passos = [
     { label: 'Busca' },
@@ -94,7 +94,7 @@ export class Passagens {
     classe: 'economy',
   };
 
-  vooSelecionado: Voo | null = null;
+  readonly vooSelecionado = signal<Voo | null>(null);
 
   passageiro: Passageiro = {
     nome: '',
@@ -114,7 +114,7 @@ export class Passagens {
     parcelas: '1',
   };
 
-  codigoReserva = '';
+  readonly codigoReserva = signal('');
 
   aeroportos = [
     { value: 'GRU', label: 'São Paulo - Guarulhos (GRU)' },
@@ -261,41 +261,41 @@ export class Passagens {
   ];
 
   buscarVoos(): void {
-    this.passoAtual = 2;
+    this.passoAtual.set(2);
   }
 
   selecionarDestinoDestaque(codigo: string): void {
     this.busca.destino = codigo;
-    this.passoAtual = 2;
+    this.passoAtual.set(2);
   }
 
   selecionarVoo(voo: Voo): void {
-    this.vooSelecionado = voo;
-    this.passoAtual = 3;
+    this.vooSelecionado.set(voo);
+    this.passoAtual.set(3);
   }
 
   avancarParaPagamento(): void {
-    this.passoAtual = 4;
+    this.passoAtual.set(4);
   }
 
   confirmarPagamento(): void {
-    this.codigoReserva = 'BR' + Math.floor(Math.random() * 900000 + 100000).toString();
-    this.passoAtual = 5;
+    this.codigoReserva.set('BR' + Math.floor(Math.random() * 900000 + 100000).toString());
+    this.passoAtual.set(5);
   }
 
   voltarPasso(): void {
-    if (this.passoAtual > 1) {
-      this.passoAtual--;
+    if (this.passoAtual() > 1) {
+      this.passoAtual.update(passo => passo - 1);
     }
   }
 
   novaCompra(): void {
-    this.passoAtual = 1;
-    this.vooSelecionado = null;
+    this.passoAtual.set(1);
+    this.vooSelecionado.set(null);
     this.busca = { origem: '', destino: '', dataIda: '', dataVolta: '', passageiros: 1, classe: 'economy' };
     this.passageiro = { nome: '', sobrenome: '', cpf: '', email: '', telefone: '', dataNascimento: '' };
     this.pagamento = { metodo: 'credito', numeroCartao: '', nomeCartao: '', validade: '', cvv: '', parcelas: '1' };
-    this.codigoReserva = '';
+    this.codigoReserva.set('');
   }
 
   getAeroportoLabel(code: string): string {
@@ -311,6 +311,6 @@ export class Passagens {
   }
 
   getTotalPassagem(): number {
-    return (this.vooSelecionado?.preco ?? 0) * this.busca.passageiros;
+    return (this.vooSelecionado()?.preco ?? 0) * this.busca.passageiros;
   }
 }

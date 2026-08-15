@@ -8,7 +8,7 @@
       <div class="stat-card stat-total">
         <span class="stat-icon an an-graduation-cap"></span>
         <div class="stat-info">
-          <span class="stat-value">{{ totalCursos }}</span>
+          <span class="stat-value">{{ totalCursos() }}</span>
           <span class="stat-label">Total de Cursos</span>
         </div>
       </div>
@@ -17,7 +17,7 @@
       <div class="stat-card stat-andamento">
         <span class="stat-icon an an-play-circle"></span>
         <div class="stat-info">
-          <span class="stat-value">{{ cursosEmAndamento }}</span>
+          <span class="stat-value">{{ cursosEmAndamento() }}</span>
           <span class="stat-label">Em Andamento</span>
         </div>
       </div>
@@ -26,7 +26,7 @@
       <div class="stat-card stat-concluido">
         <span class="stat-icon an an-check-circle"></span>
         <div class="stat-info">
-          <span class="stat-value">{{ cursosConcluidos }}</span>
+          <span class="stat-value">{{ cursosConcluidos() }}</span>
           <span class="stat-label">Concluídos</span>
         </div>
       </div>
@@ -39,41 +39,41 @@
   <po-tabs class="po-mb-4">
     <po-tab
       p-label="Todos"
-      [p-active]="categoriaAtiva === 'todos'"
+      [p-active]="categoriaAtiva() === 'todos'"
       (p-click)="selecionarCategoria('todos')">
     </po-tab>
     <po-tab
       p-label="Front-end"
-      [p-active]="categoriaAtiva === 'frontend'"
+      [p-active]="categoriaAtiva() === 'frontend'"
       (p-click)="selecionarCategoria('frontend')">
     </po-tab>
     <po-tab
       p-label="Back-end"
-      [p-active]="categoriaAtiva === 'backend'"
+      [p-active]="categoriaAtiva() === 'backend'"
       (p-click)="selecionarCategoria('backend')">
     </po-tab>
     <po-tab
       p-label="Dados & IA"
-      [p-active]="categoriaAtiva === 'dados'"
+      [p-active]="categoriaAtiva() === 'dados'"
       (p-click)="selecionarCategoria('dados')">
     </po-tab>
     <po-tab
       p-label="Design"
-      [p-active]="categoriaAtiva === 'design'"
+      [p-active]="categoriaAtiva() === 'design'"
       (p-click)="selecionarCategoria('design')">
     </po-tab>
     <po-tab
       p-label="DevOps"
-      [p-active]="categoriaAtiva === 'devops'"
+      [p-active]="categoriaAtiva() === 'devops'"
       (p-click)="selecionarCategoria('devops')">
     </po-tab>
   </po-tabs>
 
   <!-- Grid de Cursos -->
-  <po-divider [p-label]="categoriaAtiva === 'todos' ? 'Todos os Cursos' : 'Cursos Filtrados'"></po-divider>
+  <po-divider [p-label]="categoriaAtiva() === 'todos' ? 'Todos os Cursos' : 'Cursos Filtrados'"></po-divider>
 
   <div class="po-row">
-    @for (curso of cursosFiltrados; track curso.id) {
+    @for (curso of cursosFiltrados(); track curso.id) {
       <div class="po-md-4 po-sm-12 po-mb-3">
         <po-widget
           [p-title]="curso.titulo"
@@ -147,7 +147,7 @@
     }
   </div>
 
-  @if (cursosFiltrados.length === 0) {
+  @if (cursosFiltrados().length === 0) {
     <div class="sem-cursos">
       <span class="an an-graduation-cap sem-cursos-icon"></span>
       <p>Nenhum curso encontrado para esta categoria.</p>
@@ -159,14 +159,14 @@
 <!-- Modal de Vídeo -->
 <po-modal
   #modalVideo
-  [p-title]="cursoSelecionado?.titulo || ''"
+  [p-title]="cursoSelecionado()?.titulo || ''"
   p-size="xl"
   [p-primary-action]="acaoAssistir">
 
-  @if (cursoSelecionado) {
+  @if (cursoSelecionado(); as curso) {
     <div class="modal-video-container">
       <iframe
-        [src]="videoUrlSafe"
+        [src]="videoUrlSafe()"
         class="modal-video-iframe"
         frameborder="0"
         allowfullscreen
@@ -179,25 +179,25 @@
 
       <div class="po-row">
         <div class="po-md-8 po-sm-12">
-          <p class="curso-descricao">{{ cursoSelecionado.descricao }}</p>
+          <p class="curso-descricao">{{ curso.descricao }}</p>
         </div>
         <div class="po-md-4 po-sm-12">
           <div class="curso-detalhes">
             <div class="detalhe-item">
               <span class="an an-user po-mr-2"></span>
-              <strong>Instrutor:</strong> {{ cursoSelecionado.instrutor }}
+              <strong>Instrutor:</strong> {{ curso.instrutor }}
             </div>
             <div class="detalhe-item po-mt-1">
               <span class="an an-clock po-mr-2"></span>
-              <strong>Duração:</strong> {{ cursoSelecionado.duracao }}
+              <strong>Duração:</strong> {{ curso.duracao }}
             </div>
             <div class="detalhe-item po-mt-1">
               <span class="an an-film po-mr-2"></span>
-              <strong>Aulas:</strong> {{ cursoSelecionado.aulas }}
+              <strong>Aulas:</strong> {{ curso.aulas }}
             </div>
             <div class="detalhe-item po-mt-1">
               <span class="an an-users po-mr-2"></span>
-              <strong>Alunos:</strong> {{ formatarAlunos(cursoSelecionado.alunos) }}
+              <strong>Alunos:</strong> {{ formatarAlunos(curso.alunos) }}
             </div>
           </div>
         </div>
@@ -205,8 +205,8 @@
 
       <div class="po-mt-2">
         <po-progress
-          [p-value]="cursoSelecionado.progresso"
-          [p-text]="getProgressoLabel(cursoSelecionado.progresso)">
+          [p-value]="curso.progresso"
+          [p-text]="getProgressoLabel(curso.progresso)">
         </po-progress>
       </div>
     </div>

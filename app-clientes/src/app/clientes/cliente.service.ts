@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
 export interface Cliente {
   codigo: number;
@@ -11,7 +11,7 @@ export interface Cliente {
 
 @Injectable({ providedIn: 'root' })
 export class ClienteService {
-  clientes: Cliente[] = [
+  readonly clientes = signal<Cliente[]>([
     {
       codigo: 1,
       nome: 'Ana Paula Silva',
@@ -52,27 +52,28 @@ export class ClienteService {
       cidade: 'Porto Alegre',
       status: 'ativo',
     },
-  ];
+  ]);
 
   getById(codigo: number): Cliente | undefined {
-    return this.clientes.find(c => c.codigo === codigo);
+    return this.clientes().find(c => c.codigo === codigo);
   }
 
   update(updated: Cliente): void {
-    const idx = this.clientes.findIndex(c => c.codigo === updated.codigo);
-    if (idx !== -1) {
-      this.clientes[idx] = { ...updated };
-    }
+    this.clientes.update(list =>
+      list.map(c => (c.codigo === updated.codigo ? { ...updated } : c))
+    );
   }
 
   add(cliente: Omit<Cliente, 'codigo'>): void {
-    const nextCodigo = this.clientes.length > 0
-      ? Math.max(...this.clientes.map(c => c.codigo)) + 1
-      : 1;
-    this.clientes.push({ ...cliente, codigo: nextCodigo });
+    this.clientes.update(list => {
+      const nextCodigo = list.length > 0
+        ? Math.max(...list.map(c => c.codigo)) + 1
+        : 1;
+      return [...list, { ...cliente, codigo: nextCodigo }];
+    });
   }
 
   remove(codigo: number): void {
-    this.clientes = this.clientes.filter(c => c.codigo !== codigo);
+    this.clientes.update(list => list.filter(c => c.codigo !== codigo));
   }
 }
