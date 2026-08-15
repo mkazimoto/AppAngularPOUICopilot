@@ -165,6 +165,8 @@ export class AgendaViewerComponent implements OnInit {
   private readonly dragOverSlot = signal<{ dia: string; hora: string } | null>(null);
   readonly resizingId = signal<number | null>(null);
   private readonly resizeType = signal<'start' | 'end' | null>(null);
+  /** Prévia do item em redimensionamento (aplicada ao modelo só no fim do gesto). */
+  private readonly resizePreview = signal<AgendaItem | null>(null);
 
   // Estado do redimensionamento (apenas durante o gesto)
   private resizeStartY = 0;
@@ -215,6 +217,26 @@ export class AgendaViewerComponent implements OnInit {
   readonly labelMes = computed(() => {
     const m = this.monthStart().getMonth() + 1;
     return `${MESES[m - 1]} de ${this.monthStart().getFullYear()}`;
+  });
+
+  /** Agendamentos agrupados por dia (Map<dia, itens>) — evita filtros no template. */
+  readonly agendaPorDia = computed(() => {
+    const map = new Map<string, AgendaItem[]>();
+    for (const a of this.pAgendamentos()) {
+      const list = map.get(a.dia);
+      if (list) list.push(a);
+      else map.set(a.dia, [a]);
+    }
+    return map;
+  });
+
+  /** Slots ocupados (Set<'dia|hora'>) — usado nas células da semana. */
+  readonly ocupadoPorSlot = computed(() => {
+    const set = new Set<string>();
+    for (const a of this.pAgendamentos()) {
+      set.add(a.dia + '|' + a.horaInicio);
+    }
+    return set;
   });
 
   readonly confirmAction: PoModalAction = { label: 'Salvar', action: () => this.salvar() };
@@ -447,12 +469,10 @@ export class AgendaViewerComponent implements OnInit {
 
   // ── Consultas da grade ──────────────────────────────────────────────────
 
-  getAgendamentosDia(dia: string): AgendaItem[] {
-    return this.pAgendamentos().filter(a => a.dia === dia);
-  }
-
-  getAgendamentosNasCelula(dia: string, hora: string): boolean {
-    return this.pAgendamentos().some(a => a.dia === dia && a.horaInicio === hora);
+  /** Item efetivo exibido no bloco (usa a prévia durante o redimensionamento). */
+  agendaExibida(ag: AgendaItem): AgendaItem {
+    const p = this.resizePreview();
+    return p && p.id === ag.id ? p : ag;
   }
 
   calcTop(horaInicio: string): number {
@@ -554,33 +574,39 @@ export class AgendaViewerComponent implements OnInit {
     const resizeType = this.resizeType();
     if (resizingId === null || resizeType === null) return;
 
+    const current = this.pAgendamentos().find(a => a.id === resizingId);
+    if (!current) return;
+
     const deltaY = event.clientY - this.resizeStartY;
     const snappedMin = Math.round(deltaY / SLOT_HEIGHT) * 30;
-    this.pAgendamentos.update(list =>
-      list.map(a => {
-        if (a.id !== resizingId) return a;
-        if (resizeType === 'end') {
-          const newFimMin = Math.max(
-            this.timeToMinutes(this.resizeOrigInicio) + 30,
-            Math.min(this.timeToMinutes(this.resizeOrigFim) + snappedMin, this.pHoraFim() * 60),
-          );
-          return { ...a, horaFim: this.minutesToTime(newFimMin) };
-        }
-        const newInicioMin = Math.max(
-          this.pHoraInicio() * 60,
-          Math.min(this.timeToMinutes(this.resizeOrigInicio) + snappedMin, this.timeToMinutes(this.resizeOrigFim) - 30),
-        );
-        return { ...a, horaInicio: this.minutesToTime(newInicioMin) };
-      }),
-    );
+
+    let horaInicio = current.horaInicio;
+    let horaFim = current.horaFim;
+    if (resizeType === 'end') {
+      const newFimMin = Math.max(
+        this.timeToMinutes(this.resizeOrigInicio) + 30,
+        Math.min(this.timeToMinutes(this.resizeOrigFim) + snappedMin, this.pHoraFim() * 60),
+      );
+      horaFim = this.minutesToTime(newFimMin);
+    } else {
+      const newInicioMin = Math.max(
+        this.pHoraInicio() * 60,
+        Math.min(this.timeToMinutes(this.resizeOrigInicio) + snappedMin, this.timeToMinutes(this.resizeOrigFim) - 30),
+      );
+      horaInicio = this.minutesToTime(newInicioMin);
+    }
+    // Só a prévia é atualizada por mousemove; o modelo é commitado no fim do gesto.
+    this.resizePreview.set({ ...current, horaInicio, horaFim });
   }
 
   onResizeEnd(): void {
     const resizingId = this.resizingId();
+    const preview = this.resizePreview();
+    this.resizePreview.set(null);
     if (resizingId !== null) {
-      const item = this.pAgendamentos().find(a => a.id === resizingId);
-      if (item) {
-        this.pRedimensionar.emit(item);
+      if (preview) {
+        this.pAgendamentos.update(list => list.map(a => (a.id === resizingId ? preview : a)));
+        this.pRedimensionar.emit(preview);
       }
       this.notification.success('Agendamento redimensionado!');
     }

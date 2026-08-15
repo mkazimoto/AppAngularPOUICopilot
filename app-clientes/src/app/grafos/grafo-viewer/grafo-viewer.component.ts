@@ -53,6 +53,10 @@ interface RoutedEdge {
   d: string;
   lx: number;
   ly: number;
+  /** Camada do nó de origem (cor/marker resolvidos no layout). */
+  layer: number;
+  color: string;
+  marker: string;
 }
 
 interface BuiltGraph {
@@ -140,8 +144,6 @@ export class GrafoViewerComponent implements OnDestroy {
   readonly canvasW = computed(() => this.built().width);
   readonly canvasH = computed(() => this.built().height);
 
-  readonly nodeById = computed(() => new Map(this.nodes().map((n) => [n.id, n])));
-
   readonly adjacency = computed(() => {
     const m = new Map<string, Set<string>>();
     const ensure = (id: string) => {
@@ -154,6 +156,18 @@ export class GrafoViewerComponent implements OnDestroy {
       m.get(e.to)!.add(e.from);
     }
     return m;
+  });
+
+  /** Nós a esmaecer durante o hover (derivado de hovered() + adjacency()). */
+  readonly dimSet = computed(() => {
+    const h = this.hovered();
+    if (h === null) return null;
+    const neighbors = this.adjacency().get(h);
+    const set = new Set<string>();
+    for (const n of this.nodes()) {
+      if (n.id !== h && !neighbors?.has(n.id)) set.add(n.id);
+    }
+    return set;
   });
 
   readonly statNodes = computed(() => this.nodes().length);
@@ -179,22 +193,6 @@ export class GrafoViewerComponent implements OnDestroy {
 
   layerColor(li: number): string {
     return this.LAYER_COLORS[li % this.LAYER_COLORS.length];
-  }
-
-  edgeStroke(e: RoutedEdge): string {
-    const f = this.nodeById().get(e.from);
-    return f ? this.layerColor(f.layer) : '#94a3b8';
-  }
-
-  edgeMarker(e: RoutedEdge): string {
-    const f = this.nodeById().get(e.from);
-    const li = f ? f.layer : 0;
-    return `url(#gf-arrow-${li % this.LAYER_COLORS.length})`;
-  }
-
-  isNodeDim(id: string): boolean {
-    const h = this.hovered();
-    return h !== null && h !== id && !this.adjacency().get(h)?.has(id);
   }
 
   isEdgeActive(e: RoutedEdge): boolean {
@@ -299,7 +297,7 @@ export class GrafoViewerComponent implements OnDestroy {
     parts.push('</defs>');
     for (const e of this.edges()) {
       parts.push(
-        `<path d="${e.d}" fill="none" stroke="${this.edgeStroke(e)}" stroke-width="2" marker-end="${this.edgeMarker(e)}"/>`
+        `<path d="${e.d}" fill="none" stroke="${e.color}" stroke-width="2" marker-end="${e.marker}"/>`
       );
       if (e.label) {
         parts.push(
@@ -397,7 +395,17 @@ export class GrafoViewerComponent implements OnDestroy {
       const f = map.get(e.from)!;
       const t = map.get(e.to)!;
       const r = this.route(f, t, plNodes);
-      return { from: e.from, to: e.to, label: e.label, d: r.d, lx: r.lx, ly: r.ly };
+      return {
+        from: e.from,
+        to: e.to,
+        label: e.label,
+        d: r.d,
+        lx: r.lx,
+        ly: r.ly,
+        layer: f.layer,
+        color: this.LAYER_COLORS[f.layer % this.LAYER_COLORS.length],
+        marker: `url(#gf-arrow-${f.layer % this.LAYER_COLORS.length})`,
+      };
     });
 
     // 7) Tamanho do canvas

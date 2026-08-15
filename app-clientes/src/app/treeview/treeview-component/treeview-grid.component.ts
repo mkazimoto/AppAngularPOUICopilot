@@ -2,6 +2,7 @@ import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrollin
 import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   EventEmitter,
@@ -16,6 +17,8 @@ import {
   TemplateRef,
   ViewChild,
   afterNextRender,
+  computed,
+  signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
@@ -62,6 +65,7 @@ export interface TreeviewColumn extends PoTableColumn {
   ],
   templateUrl: './treeview-grid.component.html',
   styleUrl: './treeview-grid.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
 
@@ -80,7 +84,7 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
   readonly labelPosition: PoSwitchLabelPosition = PoSwitchLabelPosition.Right;
 
   viewportHeight = 600;
-  columns: TreeviewColumn[] = [];
+  readonly columns = signal<TreeviewColumn[]>([]);
 
   @ViewChild('treeviewGrid')           treeviewGridRef!:    ElementRef<HTMLElement>;
   @ViewChild('treeviewHeaderOuter')    treeviewHeaderOuterRef!: ElementRef<HTMLElement>;
@@ -103,7 +107,7 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
   }
 
   ngOnInit(): void {
-    this.columns = this.loadColumns();
+    this.columns.set(this.loadColumns());
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -136,10 +140,9 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
   // ── Templates ────────────────────────────────────────────────
 
   private applyTemplates(): void {
-    this.columns = this.columns.map(col => ({
-      ...col,
-      template: this.colTemplates[col.property] ?? col.template,
-    }));
+    this.columns.update(cols =>
+      cols.map(col => ({ ...col, template: this.colTemplates[col.property] ?? col.template })),
+    );
   }
 
   // ── Column persistence ───────────────────────────────────────
@@ -165,19 +168,19 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
   }
 
   saveColumns(): void {
-    const payload = this.columns.map(c => ({ property: c.property, visible: c.visible, widthPx: c.widthPx }));
+    const payload = this.columns().map(c => ({ property: c.property, visible: c.visible, widthPx: c.widthPx }));
     localStorage.setItem(this.columnsStorageKey, JSON.stringify(payload));
   }
 
-  // ── Column layout ────────────────────────────────────────────
+  // ── Column layout (computeds: recalculados só quando `columns` muda) ───
 
-  get colTemplate(): string {
-    return this.columns.filter(c => c.visible !== false).map(c => c.widthPx + 'px').join(' ');
-  }
+  readonly colTemplate = computed(() =>
+    this.columns().filter(c => c.visible !== false).map(c => c.widthPx + 'px').join(' '),
+  );
 
-  get totalWidth(): number {
-    return this.columns.filter(c => c.visible !== false).reduce((sum, c) => sum + c.widthPx, 0);
-  }
+  readonly totalWidth = computed(() =>
+    this.columns().filter(c => c.visible !== false).reduce((sum, c) => sum + c.widthPx, 0),
+  );
 
   // ── Column manager ───────────────────────────────────────────
 
@@ -186,42 +189,42 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
   }
 
   restoreColumns(): void {
-    this.columns = this.defaultColumns.map(c => ({ ...c }));
+    this.columns.set(this.defaultColumns.map(c => ({ ...c })));
     this.applyTemplates();
     this.saveColumns();
   }
 
   moveColumn(property: string, direction: 'up' | 'down'): void {
-    const movable = this.columns.filter(c => !c.fixed);
+    const movable = this.columns().filter(c => !c.fixed);
     const idx = movable.findIndex(c => c.property === property);
     const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
     if (targetIdx < 0 || targetIdx >= movable.length) return;
-    const colIdx  = this.columns.indexOf(movable[idx]);
-    const swapIdx = this.columns.indexOf(movable[targetIdx]);
-    const cols = [...this.columns];
+    const colIdx  = this.columns().indexOf(movable[idx]);
+    const swapIdx = this.columns().indexOf(movable[targetIdx]);
+    const cols = [...this.columns()];
     [cols[colIdx], cols[swapIdx]] = [cols[swapIdx], cols[colIdx]];
-    this.columns = cols;
+    this.columns.set(cols);
     this.saveColumns();
   }
 
   isFirstMovable(property: string): boolean {
-    const movable = this.columns.filter(c => !c.fixed);
+    const movable = this.columns().filter(c => !c.fixed);
     return movable.length > 0 && movable[0].property === property;
   }
 
   isLastMovable(property: string): boolean {
-    const movable = this.columns.filter(c => !c.fixed);
+    const movable = this.columns().filter(c => !c.fixed);
     return movable.length > 0 && movable[movable.length - 1].property === property;
   }
 
   // ── Column resize ────────────────────────────────────────────
 
   resizeStart(event: MouseEvent, property: string): void {
-    const idx = this.columns.findIndex(c => c.property === property);
+    const idx = this.columns().findIndex(c => c.property === property);
     if (idx < 0) return;
     this._resizingCol      = idx;
     this._resizeStartX     = event.clientX;
-    this._resizeStartWidth = this.columns[idx].widthPx;
+    this._resizeStartWidth = this.columns()[idx].widthPx;
     event.preventDefault();
   }
 
@@ -229,7 +232,10 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
   onMouseMove(event: MouseEvent): void {
     if (this._resizingCol < 0) return;
     const delta = event.clientX - this._resizeStartX;
-    this.columns[this._resizingCol].widthPx = Math.max(60, this._resizeStartWidth + delta);
+    const width = Math.max(60, this._resizeStartWidth + delta);
+    this.columns.update(cols =>
+      cols.map((c, i) => (i === this._resizingCol && c.widthPx !== width ? { ...c, widthPx: width } : c)),
+    );
   }
 
   @HostListener('document:mouseup')

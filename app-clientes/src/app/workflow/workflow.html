@@ -15,20 +15,20 @@
       (p-click)="centerStartNode()">
     </po-button>
     <div class="wf-zoom-controls">
-      <button class="zoom-btn" title="Reduzir zoom" [disabled]="zoomLevel <= ZOOM_MIN" (click)="zoomOut()">−</button>
-      <span class="zoom-label" (click)="resetZoom()" title="Resetar zoom">{{ zoomPercent }}%</span>
-      <button class="zoom-btn" title="Aumentar zoom" [disabled]="zoomLevel >= ZOOM_MAX" (click)="zoomIn()">+</button>
+      <button class="zoom-btn" title="Reduzir zoom" [disabled]="zoomLevel() <= ZOOM_MIN" (click)="zoomOut()">−</button>
+      <span class="zoom-label" (click)="resetZoom()" title="Resetar zoom">{{ zoomPercent() }}%</span>
+      <button class="zoom-btn" title="Aumentar zoom" [disabled]="zoomLevel() >= ZOOM_MAX" (click)="zoomIn()">+</button>
     </div>
     <span class="wf-hint">Clique em <strong>+</strong> em qualquer nó para adicionar o próximo passo.</span>
   </div>
 
   <!-- ── Connecting banner ── -->
-  @if (connectingFromId) {
+  @if (connectingFromId()) {
     <div class="wf-connect-banner" (click)="$event.stopPropagation()">
       <span>
         ⟶ Clique em um nó existente para conectar
-        @if (connectingBranch) {
-          — ramo <strong>{{ connectingBranch }}</strong>
+        @if (connectingBranch()) {
+          — ramo <strong>{{ connectingBranch() }}</strong>
         }
       </span>
       <button class="cancel-connect-btn" (click)="cancelConnect()">&#x2715; Cancelar</button>
@@ -38,8 +38,8 @@
   <!-- ── Canvas ── -->
   <div class="wf-scroll" #scrollContainer (click)="closeMenus()">
     <div class="wf-canvas-outer"
-         [style.width.px]="CANVAS_W * zoomLevel"
-         [style.height.px]="CANVAS_H * zoomLevel">
+         [style.width.px]="CANVAS_W * zoomLevel()"
+         [style.height.px]="CANVAS_H * zoomLevel()">
     <div class="wf-canvas"
          [style.width.px]="CANVAS_W"
          [style.height.px]="CANVAS_H"
@@ -55,22 +55,23 @@
           </marker>
         </defs>
 
-        @for (conn of connections; track trackConn($index, conn)) {
+        @for (conn of connections(); track trackConn($index, conn)) {
+        @let rt = routes().get(connKey(conn));
         <g>
           <path
-            [attr.d]="connectionPath(conn)"
+            [attr.d]="rt?.path ?? ''"
             class="wf-conn-line"
             marker-end="url(#wf-arrow)"/>
           <!-- Branch label badge -->
           @if (conn.branch) {
             <rect
-                  [attr.x]="connectionLabelX(conn) - 18"
-                  [attr.y]="connectionLabelY(conn) - 10"
+                  [attr.x]="(rt?.lx ?? 0) - 18"
+                  [attr.y]="(rt?.ly ?? 0) - 10"
                   width="38" height="20" rx="10"
                   [class]="'conn-badge conn-badge-' + (conn.branch === 'Sim' ? 'sim' : 'nao')"/>
             <text
-                  [attr.x]="connectionLabelX(conn)"
-                  [attr.y]="connectionLabelY(conn) + 5"
+                  [attr.x]="rt?.lx ?? 0"
+                  [attr.y]="(rt?.ly ?? 0) + 5"
                   class="wf-conn-label"
                   [class.label-sim]="conn.branch === 'Sim'"
                   [class.label-nao]="conn.branch === 'Não'">
@@ -80,12 +81,12 @@
         </g>        }      </svg>
 
       <!-- ── Nodes ── -->
-      @for (node of nodes; track trackNode($index, node)) {
+      @for (node of nodes(); track trackNode($index, node)) {
       <div
            class="wf-node"
            [class]="'wf-' + node.type"
            [class.connect-target]="isConnectableTarget(node)"
-           [class.dragging]="draggingNodeId === node.id"
+           [class.dragging]="draggingNodeId() === node.id"
            [style.left.px]="node.x"
            [style.top.px]="node.y"
            (mousedown)="onNodeMouseDown($event, node)"
@@ -279,13 +280,14 @@
     p-size="sm"
     [p-primary-action]="primaryAction"
     [p-secondary-action]="secondaryAction">
-    @if (selectedNode) {
+    @if (selectedNode()) {
       <div class="edit-form">
         <po-input
           name="wfLabel"
           p-name="wfLabel"
           p-label="Rótulo do nó"
-          [(ngModel)]="editingLabel"
+          [ngModel]="editingLabel()"
+          (ngModelChange)="editingLabel.set($event)"
           p-placeholder="Ex: Validar dados"
           p-max-length="60">
         </po-input>

@@ -140,14 +140,36 @@ export class OrganogramaViewerComponent {
     this.editingNodeId() ? 'Editar Cargo' : 'Adicionar Cargo',
   );
 
+  /** Filhos agrupados por pai (Map<parentId, nós>) — evita O(N²) no template. */
+  readonly childrenByParent = computed(() => {
+    const map = new Map<string, OrgNode[]>();
+    for (const n of this.pNodes()) {
+      const key = n.parentId ?? '';
+      const list = map.get(key);
+      if (list) list.push(n);
+      else map.set(key, [n]);
+    }
+    return map;
+  });
+
+  /** Cor por departamento (Map<value, color>) — evita `.find()` no template. */
+  readonly deptColorMap = computed(() => {
+    const map = new Map<string, string>();
+    for (const d of this.departments()) map.set(d.value, d.color);
+    return map;
+  });
+
+  /** Índice de nós por id. */
+  readonly nodeById = computed(() => new Map(this.pNodes().map((n) => [n.id, n])));
+
   // ── Helpers públicos de template ────────────────────────────────────────
 
   getChildren(nodeId: string): OrgNode[] {
-    return this.pNodes().filter((n) => n.parentId === nodeId);
+    return this.childrenByParent().get(nodeId) ?? [];
   }
 
   getNode(id: string): OrgNode | undefined {
-    return this.pNodes().find((n) => n.id === id);
+    return this.nodeById().get(id);
   }
 
   getInitials(name: string): string {
@@ -160,7 +182,7 @@ export class OrganogramaViewerComponent {
   }
 
   deptColor(dept: string): string {
-    return this.departments().find((d) => d.value === dept)?.color ?? '#94a3b8';
+    return this.deptColorMap().get(dept) ?? '#94a3b8';
   }
 
   nodePos(nodeId: string): { x: number; y: number } {

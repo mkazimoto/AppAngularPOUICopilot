@@ -7,7 +7,7 @@
       <div class="kanban-column-header">
         <span class="kanban-column-title">{{ column.title }}</span>
         <po-badge
-          [p-value]="getColumnCount(column.id)"
+          [p-value]="contagemPorColuna().get(column.id) ?? 0"
           [p-status]="column.badgeStatus"
           p-size="medium">
         </po-badge>
@@ -20,7 +20,7 @@
         (dragover)="onDragOver($event, column.id)"
         (dragleave)="onDragLeave(column.id)"
         (drop)="onDrop(column.id)">
-        @for (task of getTasksByColumn(column.id); track task.id) {
+        @for (task of tarefasPorColuna().get(column.id) ?? []; track task.id) {
           <div
             class="kanban-card"
             [attr.draggable]="pEditable()"
@@ -85,7 +85,7 @@
         }
 
         <!-- Estado vazio -->
-        @if (getTasksByColumn(column.id).length === 0) {
+        @if ((tarefasPorColuna().get(column.id) ?? []).length === 0) {
           <div class="kanban-empty">
             <span class="an an-tray kanban-empty-icon"></span>
             <span>Nenhuma tarefa</span>

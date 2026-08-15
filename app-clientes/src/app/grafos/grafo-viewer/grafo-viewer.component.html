@@ -73,11 +73,11 @@
           <g>
             <path
               [attr.d]="e.d"
-              [attr.marker-end]="edgeMarker(e)"
+              [attr.marker-end]="e.marker"
               class="gv-conn"
               [class.gv-conn-hot]="isEdgeActive(e) && hovered() !== null"
               [class.gv-conn-dim]="!isEdgeActive(e)"
-              [style.stroke]="edgeStroke(e)" />
+              [style.stroke]="e.color" />
             @if (e.label) {
               <text
                 [attr.x]="e.lx"
@@ -93,7 +93,7 @@
       @for (n of nodes(); track trackNode($index, n)) {
       <div class="gv-node"
            [class.gv-node-hot]="hovered() === n.id"
-           [class.gv-node-dim]="isNodeDim(n.id)"
+           [class.gv-node-dim]="dimSet()?.has(n.id) ?? false"
            [style.left.px]="n.x"
            [style.top.px]="n.y"
            [style.border-left-color]="layerColor(n.layer)"

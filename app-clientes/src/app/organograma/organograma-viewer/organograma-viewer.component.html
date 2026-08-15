@@ -51,7 +51,7 @@
     <!-- SVG layer: bezier connections -->
     <svg class="og-svg" [attr.width]="canvasW()" [attr.height]="canvasH()">
       @for (node of pNodes(); track trackNode($index, node)) {
-        @for (child of getChildren(node.id); track child) {
+        @for (child of childrenByParent().get(node.id) ?? []; track child.id) {
           <path
             [attr.d]="connectionPath(node.id, child.id)"
             class="og-conn" />

@@ -5,6 +5,7 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
+  NgZone,
   inject,
   OnDestroy,
   OnInit,
@@ -269,8 +270,11 @@ export class IfcViewer implements OnInit, OnDestroy {
 
   private readonly onViewerMouseMove = (e: MouseEvent) => {
     if (this.hoverRafId !== null) return;
+    // Limita raycasts redundantes durante o hover (máx. ~25/s em vez de 60/s).
+    if (performance.now() - this.lastHoverProcessTime < this.HOVER_MIN_INTERVAL) return;
     this.hoverRafId = requestAnimationFrame(() => {
       this.hoverRafId = null;
+      this.lastHoverProcessTime = performance.now();
       this.processHover(e);
     });
   };
@@ -288,6 +292,8 @@ export class IfcViewer implements OnInit, OnDestroy {
   };
 
   private hoverProcessing = false;
+  private lastHoverProcessTime = 0;
+  private readonly HOVER_MIN_INTERVAL = 40; // ms entre raycasts de hover
 
   private async processHover(e: MouseEvent): Promise<void> {
     if (!this.currentLoadedModel || !this.world || !this.viewerCanvas) return;
@@ -769,17 +775,22 @@ export class IfcViewer implements OnInit, OnDestroy {
     this.objectTypeFilters.set(filters);
   }
 
+  private readonly ngZone = inject(NgZone);
+
   constructor(private readonly notificationService: PoNotificationService) {}
 
-  async ngOnInit(): Promise<void> {
+  ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
-      document.addEventListener('mousemove', this.onMouseMove);
-      document.addEventListener('mouseup', this.onMouseUp);
-      document.addEventListener('touchmove', this.onTouchMove, { passive: false });
-      document.addEventListener('touchend', this.onTouchEnd);
+      // Gestos dos painéis (drag/resize) fora do zone.js: evita CD global por mousemove.
+      this.ngZone.runOutsideAngular(() => {
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+        document.addEventListener('touchmove', this.onTouchMove, { passive: false });
+        document.addEventListener('touchend', this.onTouchEnd);
+      });
     }
-    await this.initViewer();
-    await this.loadFromUrl('ifc/OTC-Conference Center.frag', 'OTC-Conference Center.frag');
+    // Carga do modelo agora é sob demanda (pageActions / "Abrir arquivo IFC") —
+    // o download/parse do .frag não é mais feito ao abrir a rota.
   }
 
   ngOnDestroy(): void {

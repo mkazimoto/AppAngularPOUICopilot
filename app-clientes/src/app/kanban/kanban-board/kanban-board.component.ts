@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ViewChild,
+  computed,
   input,
   model,
   output,
@@ -124,6 +125,28 @@ export class KanbanBoardComponent {
 
   readonly PoTagType = PoTagType;
 
+  // ── Derivações (uma passada por mudança de dados, sem filtros no template) ─
+
+  /** Tarefas agrupadas por coluna (Map<columnId, tarefas>). */
+  readonly tarefasPorColuna = computed(() => {
+    const map = new Map<string, KanbanTask[]>();
+    for (const t of this.pTarefas()) {
+      const list = map.get(t.column);
+      if (list) list.push(t);
+      else map.set(t.column, [t]);
+    }
+    return map;
+  });
+
+  /** Contagem de tarefas por coluna. */
+  readonly contagemPorColuna = computed(() => {
+    const map = new Map<string, number>();
+    for (const [col, tasks] of this.tarefasPorColuna()) {
+      map.set(col, tasks.length);
+    }
+    return map;
+  });
+
   // ── Ações das modais ────────────────────────────────────────────────────
 
   readonly modalCloseAction: PoModalAction = {
@@ -137,14 +160,6 @@ export class KanbanBoardComponent {
   };
 
   // ── Consultas do template ───────────────────────────────────────────────
-
-  getTasksByColumn(columnId: string): KanbanTask[] {
-    return this.pTarefas().filter(t => t.column === columnId);
-  }
-
-  getColumnCount(columnId: string): number {
-    return this.pTarefas().filter(t => t.column === columnId).length;
-  }
 
   getColumnLabel(columnId: string): string {
     return this.pColumns().find(c => c.id === columnId)?.title ?? columnId;
@@ -223,7 +238,7 @@ export class KanbanBoardComponent {
   >();
 
   cardActions(task: KanbanTask): PoDropdownAction[] {
-    const key = this.actionsCacheKey();
+    const key = this.actionsCacheKey(task);
     const entry = this.actionsCache.get(task.id);
     if (entry && entry.key === key) {
       return entry.actions;
@@ -233,9 +248,11 @@ export class KanbanBoardComponent {
     return actions;
   }
 
-  private actionsCacheKey(): string {
+  private actionsCacheKey(task: KanbanTask): string {
     const columnIds = this.pColumns().map(c => c.id).join('>');
-    return `${this.pEditable()}|${columnIds}`;
+    // `task.column` entra na chave: após mover a tarefa, as ações "Mover para
+    // «prev/next»" mudam e o cache não pode devolver as ações antigas (stale).
+    return `${this.pEditable()}|${columnIds}|${task.column}`;
   }
 
   private buildCardActions(task: KanbanTask): PoDropdownAction[] {
@@ -271,6 +288,7 @@ export class KanbanBoardComponent {
 
   deleteTask(task: KanbanTask): void {
     this.pTarefas.update(tasks => tasks.filter(t => t.id !== task.id));
+    this.actionsCache.delete(task.id);
     this.pExcluir.emit(task);
   }
 
@@ -317,6 +335,7 @@ export class KanbanBoardComponent {
       }),
     );
     if (movida) {
+      this.actionsCache.delete(taskId);
       this.pMover.emit(movida);
     }
   }
