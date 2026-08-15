@@ -24,7 +24,7 @@ export class Clientes {
   get clientes() {
     return this.clienteService.clientes;
   }
-  colunas: Array<PoTableColumn> = [
+  colunas: PoTableColumn[] = [
     { property: 'codigo', label: 'Código', width: '8%' },
     { property: 'nome', label: 'Nome' },
     { property: 'email', label: 'E-mail' },

@@ -1760,7 +1760,7 @@ export class IfcViewer implements OnInit, OnDestroy {
     const quantities: Record<string, any>[] = pset['Quantities'] ?? [];
     for (const q of quantities) {
       const qName = q['Name']?.value ?? q['Name'] ?? '?';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const qEntry = (['LengthValue','AreaValue','VolumeValue','WeightValue','CountValue','TimeValue'] as const)
         .map(k => ({ k, v: (q as any)[k]?.value ?? (q as any)[k] }))
         .find(e => e.v !== undefined && e.v !== null);

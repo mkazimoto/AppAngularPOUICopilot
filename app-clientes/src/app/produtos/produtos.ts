@@ -49,7 +49,7 @@ export class Produtos {
   produtoSelecionado?: Produto;
   filtroCategoria = '';
   termoBusca = '';
-  carrinho: Array<{ produto: Produto; quantidade: number }> = [];
+  carrinho: { produto: Produto; quantidade: number }[] = [];
 
   readonly breadcrumb: PoBreadcrumb = {
     items: [{ label: 'Home', link: '/clientes' }, { label: 'Produtos' }],

@@ -148,7 +148,7 @@ export class TreeviewGridComponent implements OnInit, AfterViewInit, OnChanges, 
     try {
       const saved = localStorage.getItem(this.columnsStorageKey);
       if (!saved) return this.defaultColumns.map(c => ({ ...c }));
-      const parsed: Array<{ property: string; visible: boolean; widthPx: number }> = JSON.parse(saved);
+      const parsed: { property: string; visible: boolean; widthPx: number }[] = JSON.parse(saved);
       const ordered: TreeviewColumn[] = parsed
         .map(s => {
           const def = this.defaultColumns.find(d => d.property === s.property);
